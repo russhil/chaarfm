@@ -140,16 +140,27 @@ def init_db():
         conn.commit()
 
 def get_available_collections() -> List[str]:
-    """Get list of available vector collections from vecs schema."""
+    """Get list of available vector collections from vecs schema and public vectors_*."""
     try:
         with engine.connect() as conn:
             # Query information_schema for tables in 'vecs' schema
-            result = conn.execute(text("""
+            vecs_tables = conn.execute(text("""
                 SELECT table_name 
                 FROM information_schema.tables 
                 WHERE table_schema = 'vecs'
             """)).fetchall()
-            return [row[0] for row in result]
+            
+            # Query for public tables starting with 'vectors_' or 'music_' that might be collections
+            public_tables = conn.execute(text("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND (table_name LIKE 'vectors_%' OR table_name LIKE 'music_%')
+            """)).fetchall()
+            
+            collections = [row[0] for row in vecs_tables] + [row[0] for row in public_tables]
+            return list(set(collections)) # Deduplicate if needed
+            
     except Exception as e:
         print(f"Error fetching collections: {e}")
         return ["music_averaged"] # Fallback

@@ -206,9 +206,20 @@ class UserRecommender:
                 # But we should still be careful.
                 # Since we trust get_available_collections(), we just proceed.
                 
-                query = text(f'SELECT id, vec, metadata FROM vecs."{col_name}"')
-                with user_db.engine.connect() as conn:
-                    result = conn.execute(query).fetchall()
+                # Try 'vecs' schema first, then 'public'
+                try:
+                    query = text(f'SELECT id, vec, metadata FROM vecs."{col_name}"')
+                    with user_db.engine.connect() as conn:
+                        result = conn.execute(query).fetchall()
+                except Exception as e_vecs:
+                    # print(f"Not in vecs schema: {e_vecs}, trying public...")
+                    try:
+                        query = text(f'SELECT id, vec, metadata FROM public."{col_name}"')
+                        with user_db.engine.connect() as conn:
+                            result = conn.execute(query).fetchall()
+                    except Exception as e_public:
+                        print(f"Failed to load {col_name} from both vecs and public: {e_public}")
+                        continue
                     
                 for row in result:
                     vec = row.vec

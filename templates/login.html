@@ -68,6 +68,7 @@
             flex: 1;
             height: 1px;
             background: var(--surface-border);
+            background: var(--surface-border);
         }
 
         .divider span {
@@ -120,7 +121,7 @@
             <div class="form-group">
                 <label class="form-label" for="vectormap">DATASET</label>
                 <select id="vectormap" class="input-field" style="appearance: none; cursor: pointer;">
-                    <option value="music_averaged" selected>SUPABASE_VECTORS_V1</option>
+                    <option value="music_averaged" selected>LOADING DATASETS...</option>
                 </select>
             </div>
 
@@ -205,6 +206,49 @@
         });
         document.getElementById('username').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') document.getElementById('password').focus();
+        });
+
+        function setCollectionCookie() {
+            const val = document.getElementById('vectormap').value;
+            document.cookie = "preferred_collection=" + val + "; path=/; max-age=3600";
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/collections');
+                if (res.ok) {
+                    const data = await res.json();
+                    const select = document.getElementById('vectormap');
+                    select.innerHTML = ''; // Clear default
+                    
+                    // Add Merged Option First
+                    if (data.has_merged) {
+                        const opt = document.createElement('option');
+                        opt.value = 'merged';
+                        opt.textContent = 'MERGED (ALL COLLECTIONS)';
+                        opt.style.fontWeight = 'bold';
+                        select.appendChild(opt);
+                    }
+                    
+                    // Handle list of strings
+                    data.collections.forEach(col => {
+                        const opt = document.createElement('option');
+                        opt.value = col;
+                        opt.textContent = col.toUpperCase().replace(/_/g, ' ');
+                        select.appendChild(opt);
+                    });
+                } else {
+                    throw new Error("API Error");
+                }
+            } catch (e) {
+                console.error("Failed to fetch collections", e);
+                const select = document.getElementById('vectormap');
+                // If fetch fails, revert to default safe option but show error
+                select.innerHTML = '<option value="music_averaged">SUPABASE_VECTORS_V1 (FALLBACK)</option>';
+                const errorDiv = document.getElementById('error-message');
+                errorDiv.textContent = "COULD NOT LOAD DATASETS";
+                errorDiv.style.display = 'block';
+            }
         });
     </script>
 </body>
