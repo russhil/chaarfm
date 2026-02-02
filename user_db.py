@@ -13,7 +13,7 @@ import numpy as np
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 
-load_dotenv(override=True)
+load_dotenv()
 
 # Supabase Connection
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -23,13 +23,20 @@ if not DATABASE_URL:
     DATABASE_URL = "sqlite:///users_backup.db" 
 
 # Create Engine
-# Add connection timeout to fail fast if DB is unreachable (prevents hanging during startup)
-engine = create_engine(
-    DATABASE_URL, 
-    pool_size=10, 
-    max_overflow=20,
-    connect_args={'connect_timeout': 10}
-)
+# Intelligent pooling config
+connect_args = {"connect_timeout": 10}
+pool_config = {
+    "pool_size": 10,
+    "max_overflow": 20
+}
+
+# Check for NullPool need
+from sqlalchemy import pool
+if DATABASE_URL and ":6543" in DATABASE_URL:
+    print("Detected Transaction Pooler (6543). Disabling client-side pooling.")
+    pool_config = {"poolclass": pool.NullPool}
+
+engine = create_engine(DATABASE_URL, **pool_config, connect_args=connect_args)
 
 def hash_password(password: str) -> str:
     """Simple password hashing."""
@@ -37,18 +44,10 @@ def hash_password(password: str) -> str:
 
 def init_db():
     """Initialize database schema in Supabase if not exists."""
-    # Mask password for logging
-    if DATABASE_URL and "@" in DATABASE_URL:
-        masked_url = DATABASE_URL.split("@")[-1]
-    else:
-        masked_url = "UNKNOWN"
-        
-    print(f"Initializing User DB at {masked_url}")
-    
-    try:
-        with engine.connect() as conn:
-            conn.execute(text('''
-                CREATE TABLE IF NOT EXISTS users (
+    print(f"Initializing User DB at {DATABASE_URL.split('@')[-1]}")
+    with engine.connect() as conn:
+        conn.execute(text('''
+            CREATE TABLE IF NOT EXISTS users (
                 id TEXT PRIMARY KEY,
                 password_hash TEXT,
                 created_at TEXT,
@@ -127,9 +126,6 @@ def init_db():
             print("Created user: guest")
         
         conn.commit()
-    except Exception as e:
-        print(f"Error initializing DB: {e}")
-        raise e
 
 def get_admin_stats() -> Dict:
     """Get aggregated statistics for the admin dashboard."""
