@@ -261,8 +261,8 @@ class UserRecommender:
                         except: pass
                     elif isinstance(vec, np.ndarray): vec = vec.tolist()
                     
-                    self.track_map[row.id] = {
-                        "id": row.id,
+                    self.track_map[str(row.id)] = {
+                        "id": str(row.id),
                         "filename": filename,
                         "duration": duration,
                         "vector": vec,
