@@ -207,6 +207,7 @@ class UserRecommender:
                 # Since we trust get_available_collections(), we just proceed.
                 
                 # Try 'vecs' schema first, then 'public'
+                standard_schema = True
                 try:
                     query = text(f'SELECT id, vec, metadata FROM vecs."{col_name}"')
                     with user_db.engine.connect() as conn:
@@ -218,26 +219,52 @@ class UserRecommender:
                         with user_db.engine.connect() as conn:
                             result = conn.execute(query).fetchall()
                     except Exception as e_public:
-                        print(f"Failed to load {col_name} from both vecs and public: {e_public}")
-                        continue
+                        # Try alternative schema (embedding, artist, title, s3_url)
+                        try:
+                            query = text(f'SELECT id, embedding, artist, title, s3_url FROM public."{col_name}"')
+                            with user_db.engine.connect() as conn:
+                                result = conn.execute(query).fetchall()
+                            standard_schema = False
+                        except Exception as e_alt:
+                            print(f"Failed to load {col_name} from both vecs and public (std & alt): {e_alt}")
+                            continue
                     
                 for row in result:
-                    vec = row.vec
+                    if standard_schema:
+                        vec = row.vec
+                        meta = row.metadata
+                        if isinstance(meta, str):
+                             try: meta = json.loads(meta)
+                             except: meta = {}
+                        if not isinstance(meta, dict): meta = {}
+                        
+                        filename = meta.get("filename", "Unknown")
+                        duration = meta.get("duration", 0)
+                    else:
+                        # Alternative Schema
+                        vec = row.embedding
+                        # Construct metadata from columns
+                        # filename usually combines artist - title, or just title
+                        if row.artist and row.title:
+                            filename = f"{row.artist} - {row.title}"
+                        elif row.title:
+                            filename = row.title
+                        else:
+                            filename = f"Track {row.id}"
+                            
+                        # Extract duration? Not available in alt schema, default to 0 (will be 200s default later)
+                        duration = 0
+                        
+                    # Vector parsing (common)
                     if isinstance(vec, str):
                         try: vec = json.loads(vec)
                         except: pass
                     elif isinstance(vec, np.ndarray): vec = vec.tolist()
                     
-                    meta = row.metadata
-                    if isinstance(meta, str):
-                         try: meta = json.loads(meta)
-                         except: meta = {}
-                    if not isinstance(meta, dict): meta = {}
-                    
                     self.track_map[row.id] = {
                         "id": row.id,
-                        "filename": meta.get("filename", "Unknown"),
-                        "duration": meta.get("duration", 0),
+                        "filename": filename,
+                        "duration": duration,
                         "vector": vec,
                         "source_collection": col_name # Track where it came from
                     }
