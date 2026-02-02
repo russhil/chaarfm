@@ -101,6 +101,12 @@
         <div id="error-message" class="error-message"></div>
 
         <div id="login-form">
+            <button class="btn btn-primary" onclick="window.location.href='/api/auth/google'" style="width: 100%; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <i class="fab fa-google"></i> SIGN IN WITH GOOGLE
+            </button>
+
+            <div class="divider"><span>ADMIN ACCESS</span></div>
+
             <div class="form-group">
                 <label class="form-label" for="username">IDENTITY</label>
                 <input type="text" id="username" class="input-field" placeholder="USERNAME" autocomplete="username">
@@ -118,18 +124,8 @@
                 </select>
             </div>
 
-            <button class="btn btn-primary" onclick="login()" style="width: 100%;">
+            <button class="btn btn-ghost" onclick="login()" style="width: 100%; border: 1px solid var(--surface-border);">
                 AUTHENTICATE
-            </button>
-
-            <button class="btn btn-ghost" onclick="window.location.href='/api/auth/google'" style="width: 100%; border: 1px solid var(--surface-border); margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                <i class="fab fa-google"></i> SIGN IN WITH GOOGLE
-            </button>
-
-            <div class="divider"><span>OR</span></div>
-
-            <button class="btn btn-ghost" onclick="guestLogin()" style="width: 100%; border: 1px solid var(--surface-border);">
-                GUEST ACCESS
             </button>
         </div>
 
