@@ -87,7 +87,7 @@ def run_gui_input():
     
     db_url = simpledialog.askstring(
         "Supabase Connection", 
-        "Enter your Supabase PostgreSQL Connection String:\n(e.g., postgresql://postgres.xxxx:password@aws-1-us-east-1.pooler.supabase.com:6543/postgres)",
+        "Enter your Supabase PostgreSQL Connection String:\n(e.g., postgresql://postgres.xxxx:password@aws-0-us-east-1.pooler.supabase.com:6543/postgres)",
         initialvalue=default_db
     )
 

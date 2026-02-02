@@ -1,8 +1,5 @@
 FROM python:3.10-slim
 
-# Ensure output is not buffered
-ENV PYTHONUNBUFFERED=1
-
 # Set working directory
 WORKDIR /app
 
@@ -24,7 +21,7 @@ COPY . .
 # Expose the port (defaults to 5001, but cloud overrides via PORT env var)
 EXPOSE 5001
 
-# Command to run the application using uvicorn directly
-# This avoids issues with python signal handling and is production standard
-# Shell form allows variable expansion for PORT
-CMD ["sh", "-c", "uvicorn server_user:app --host 0.0.0.0 --port ${PORT:-5001}"]
+# Command to run the application
+# We use shell form to allow variable expansion if needed, but array form is safer.
+# Using python directly as uvicorn is imported in main block of server_user.py
+CMD ["python", "server_user.py"]
