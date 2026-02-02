@@ -23,7 +23,13 @@ if not DATABASE_URL:
     DATABASE_URL = "sqlite:///users_backup.db" 
 
 # Create Engine
-engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20)
+# Add connection timeout to fail fast if DB is unreachable (prevents hanging during startup)
+engine = create_engine(
+    DATABASE_URL, 
+    pool_size=10, 
+    max_overflow=20,
+    connect_args={'connect_timeout': 10}
+)
 
 def hash_password(password: str) -> str:
     """Simple password hashing."""

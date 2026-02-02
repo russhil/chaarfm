@@ -1,5 +1,8 @@
 FROM python:3.10-slim
 
+# Ensure output is not buffered
+ENV PYTHONUNBUFFERED=1
+
 # Set working directory
 WORKDIR /app
 
