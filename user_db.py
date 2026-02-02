@@ -55,7 +55,8 @@ def init_db():
                 is_guest INTEGER DEFAULT 0,
                 email TEXT,
                 google_id TEXT,
-                picture TEXT
+                picture TEXT,
+                name TEXT
             )
         '''))
         
@@ -315,24 +316,28 @@ def get_or_create_google_user(user_info: Dict) -> Dict:
         
         if row:
             # Update info if needed
-            if not row['google_id']:
+            if not row['google_id'] or row.get('name') != name:
                 conn.execute(text("""
-                    UPDATE users SET google_id = :gid, picture = :pic 
+                    UPDATE users SET google_id = :gid, picture = :pic, name = :name 
                     WHERE id = :uid
-                """), {"gid": google_id, "pic": picture, "uid": row['id']})
+                """), {"gid": google_id, "pic": picture, "name": name, "uid": row['id']})
                 conn.commit()
+                
+                # Refetch to get updated data
+                row = conn.execute(text("SELECT * FROM users WHERE id = :uid"), {"uid": row['id']}).mappings().fetchone()
             return dict(row)
         else:
             # Create new user
             now = datetime.now().isoformat()
             conn.execute(text("""
-                INSERT INTO users (id, email, google_id, picture, created_at, is_guest)
-                VALUES (:uid, :email, :gid, :pic, :date, 0)
+                INSERT INTO users (id, email, google_id, picture, name, created_at, is_guest)
+                VALUES (:uid, :email, :gid, :pic, :name, :date, 0)
             """), {
                 "uid": user_id,
                 "email": email,
                 "gid": google_id,
                 "pic": picture,
+                "name": name,
                 "date": now
             })
             conn.commit()
@@ -341,6 +346,7 @@ def get_or_create_google_user(user_info: Dict) -> Dict:
                 "email": email,
                 "google_id": google_id,
                 "picture": picture,
+                "name": name,
                 "created_at": now,
                 "is_guest": False
             }

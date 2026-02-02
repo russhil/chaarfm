@@ -277,7 +277,11 @@ async def auth_google_callback(request: Request):
         # Option 1: Set cookie (secure)
         # Option 2: Redirect with query param (simple)
         
-        response = RedirectResponse(url=f"/player?session_id={session_id}")
+        # Extract first name
+        first_name = db_user.get('name', '').split(' ')[0] if db_user.get('name') else 'User'
+        encoded_name = urllib.parse.quote(first_name)
+        
+        response = RedirectResponse(url=f"/player?session_id={session_id}&name={encoded_name}")
         return response
         
     except Exception as e:

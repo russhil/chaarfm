@@ -139,12 +139,17 @@
         // Check URL params first (from OAuth redirect)
         const urlParams = new URLSearchParams(window.location.search);
         const urlSessionId = urlParams.get('session_id');
+        const urlName = urlParams.get('name');
 
         if (urlSessionId) {
             // New session from OAuth - save it
             localStorage.setItem('chaar_session', urlSessionId);
-            // Ideally we should fetch profile to get name, but for now just clear old name
-            localStorage.setItem('chaar_user', 'User'); 
+            // Save name if provided
+            if (urlName) {
+                localStorage.setItem('chaar_user', urlName);
+            } else {
+                localStorage.setItem('chaar_user', 'User'); 
+            }
             localStorage.setItem('chaar_is_guest', 'false');
             
             // Clean URL
