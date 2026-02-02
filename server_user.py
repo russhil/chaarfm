@@ -238,7 +238,8 @@ async def login_google(request: Request):
     if "onrender.com" in str(redirect_uri) and str(redirect_uri).startswith("http://"):
         redirect_uri = str(redirect_uri).replace("http://", "https://")
         
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    # FORCE PROMPT to ensure we get a fresh token if needed
+    return await oauth.google.authorize_redirect(request, redirect_uri, prompt="select_account")
 
 @app.get("/api/auth/google/callback")
 async def auth_google_callback(request: Request):
@@ -262,6 +263,13 @@ async def auth_google_callback(request: Request):
         collection = "music_averaged" 
         
         session_id = create_session(db_user['id'], collection_name=collection)
+        
+        # Optimize: Pre-generate queue in background or async if possible?
+        # create_session already calls get_next_batch which is slow.
+        # We could offload the batch generation to a background task and return immediately?
+        # But player page needs the queue to start playing.
+        # The slowness is likely in UserRecommender.__init__ loading history/clusters.
+        # We can optimize UserRecommender.__init__ to be lazier.
         
         # Return HTML that closes popup or redirects
         # Since we likely redirect the main window, we can just redirect to player

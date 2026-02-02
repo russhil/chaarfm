@@ -89,8 +89,13 @@ class UserRecommender:
         self.history = []
         
         # Clustering & Bandit
-        self.cluster_manager = ClusterManager(self.track_map, n_clusters=50) # Increased to 50 for depth
-        self.cluster_manager.fit()
+        # Optimization: Don't fit KMeans on every session start.
+        # Cache the centroids/clusters globally or in DB.
+        # For now, reduce n_clusters or n_init to speed up startup.
+        # Or even better, just load centroids from DB if available.
+        
+        self.cluster_manager = ClusterManager(self.track_map, n_clusters=20) # Reduced from 50 to 20 for speed
+        self.cluster_manager.fit() # This is the slow part (KMeans on 2500 vectors)
         self.cluster_scores = {}
         self.current_cluster_id = None
         
