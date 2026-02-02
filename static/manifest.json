@@ -1,7 +1,7 @@
 {
     "name": "chaar.fm",
     "short_name": "chaar.fm",
-    "start_url": "/",
+    "start_url": "/login",
     "display": "standalone",
     "background_color": "#000000",
     "theme_color": "#000000",

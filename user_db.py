@@ -108,6 +108,14 @@ def init_db():
             )
         '''))
         
+        conn.execute(text('''
+            CREATE TABLE IF NOT EXISTS waitlist (
+                id SERIAL PRIMARY KEY,
+                email TEXT,
+                created_at TEXT
+            )
+        '''))
+        
         # Seed users
         res = conn.execute(text("SELECT id FROM users WHERE id = 'russhil'")).fetchone()
         if not res:
@@ -437,4 +445,13 @@ def log_interaction_db(session_id: str, user_id: str, track_id: str, filename: s
             "just": justification,
             "det": details
         })
+        conn.commit()
+
+def add_waitlist_email(email: str):
+    """Add email to waitlist."""
+    with engine.connect() as conn:
+        conn.execute(text('''
+            INSERT INTO waitlist (email, created_at)
+            VALUES (:email, :date)
+        '''), {"email": email, "date": datetime.now().isoformat()})
         conn.commit()

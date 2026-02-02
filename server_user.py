@@ -178,6 +178,9 @@ class FeedbackRequest(BaseModel):
 class SelectRequest(BaseModel):
     id: str
 
+class WaitlistRequest(BaseModel):
+    email: str
+
 # Routes
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
@@ -446,6 +449,17 @@ async def logout(session_id: str = Query(...)):
         del sessions[session_id]
         print(f"Session {session_id[:8]}... ended")
     return {"status": "ok"}
+
+@app.post("/api/waitlist")
+async def waitlist(data: WaitlistRequest):
+    """Add email to waitlist."""
+    try:
+        user_db.add_waitlist_email(data.email)
+        return {"status": "ok", "message": "Added to waitlist"}
+    except Exception as e:
+        print(f"Waitlist error: {e}")
+        # Return ok even if duplicate/error to not leak info
+        return {"status": "ok", "message": "Added to waitlist"}
 
 # --- Admin Routes ---
 
