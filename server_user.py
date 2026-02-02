@@ -58,6 +58,22 @@ def log_interaction(session_id, user_id, track_id, filename, action, duration=0,
 
 app = FastAPI(title="chaar.fm")
 
+# Session Middleware for Auth
+# In production, set a strong SECRET_KEY in env
+app.add_middleware(SessionMiddleware, secret_key=os.environ.get("SECRET_KEY", "dev_secret_key"))
+
+# OAuth Config
+oauth = OAuth()
+oauth.register(
+    name='google',
+    client_id=os.environ.get('GOOGLE_CLIENT_ID'),
+    client_secret=os.environ.get('GOOGLE_CLIENT_SECRET'),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
+)
+
 @app.on_event("startup")
 async def startup_event():
     print("🚀 Application starting up...")
@@ -210,6 +226,55 @@ async def login_page(request: Request):
 async def player(request: Request):
     """Serve player page (requires valid session)."""
     return templates.TemplateResponse("player.html", {"request": request})
+
+@app.get("/api/auth/google")
+async def login_google(request: Request):
+    """Redirect to Google for Auth."""
+    # Determine redirect URI based on current request host
+    # This handles both local and production URLs automatically
+    redirect_uri = request.url_for('auth_google_callback')
+    
+    # If behind a proxy (like Render), ensure https scheme
+    if "onrender.com" in str(redirect_uri) and str(redirect_uri).startswith("http://"):
+        redirect_uri = str(redirect_uri).replace("http://", "https://")
+        
+    return await oauth.google.authorize_redirect(request, redirect_uri)
+
+@app.get("/api/auth/google/callback")
+async def auth_google_callback(request: Request):
+    """Handle Google Auth Callback."""
+    try:
+        token = await oauth.google.authorize_access_token(request)
+        user_info = token.get('userinfo')
+        
+        if not user_info:
+            # Sometimes userinfo is inside the id_token claim
+            # But authlib usually handles this. Let's try to fetch if missing.
+            # user_info = await oauth.google.userinfo(token=token)
+            pass
+            
+        # Get or Create User in DB
+        db_user = user_db.get_or_create_google_user(user_info)
+        
+        # Create Session
+        # We can map query param ?vectormap=... if we passed it state, but for now default.
+        # Ideally, we should check if user has a preferred collection in profile.
+        collection = "music_averaged" 
+        
+        session_id = create_session(db_user['id'], collection_name=collection)
+        
+        # Return HTML that closes popup or redirects
+        # Since we likely redirect the main window, we can just redirect to player
+        # But we need to pass session_id to frontend.
+        # Option 1: Set cookie (secure)
+        # Option 2: Redirect with query param (simple)
+        
+        response = RedirectResponse(url=f"/player?session_id={session_id}")
+        return response
+        
+    except Exception as e:
+        print(f"OAuth Error: {e}")
+        return RedirectResponse(url="/login?error=oauth_failed")
 
 @app.post("/api/login")
 async def login(data: LoginRequest, response: Response):
