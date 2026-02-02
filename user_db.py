@@ -52,7 +52,10 @@ def init_db():
                 password_hash TEXT,
                 created_at TEXT,
                 total_sessions INTEGER DEFAULT 0,
-                is_guest INTEGER DEFAULT 0
+                is_guest INTEGER DEFAULT 0,
+                email TEXT,
+                google_id TEXT,
+                picture TEXT
             )
         '''))
         
@@ -291,6 +294,56 @@ def verify_user(user_id: str, password: str) -> Optional[Dict]:
         if row and row['password_hash'] == hash_password(password):
             return dict(row)
     return None
+
+def get_or_create_google_user(user_info: Dict) -> Dict:
+    """Get existing user by google_id or create new one."""
+    email = user_info.get("email")
+    google_id = user_info.get("sub")
+    picture = user_info.get("picture")
+    name = user_info.get("name")
+    
+    # Use email as the primary ID for now, or fallback to google_id if no email
+    # Ideally we'd use a UUID and link them, but to keep compat with existing "russhil" string IDs:
+    user_id = email if email else f"google_{google_id}"
+    
+    with engine.connect() as conn:
+        # Check if user exists by ID (email) OR by google_id
+        row = conn.execute(text("""
+            SELECT * FROM users 
+            WHERE id = :uid OR google_id = :gid
+        """), {"uid": user_id, "gid": google_id}).mappings().fetchone()
+        
+        if row:
+            # Update info if needed
+            if not row['google_id']:
+                conn.execute(text("""
+                    UPDATE users SET google_id = :gid, picture = :pic 
+                    WHERE id = :uid
+                """), {"gid": google_id, "pic": picture, "uid": row['id']})
+                conn.commit()
+            return dict(row)
+        else:
+            # Create new user
+            now = datetime.now().isoformat()
+            conn.execute(text("""
+                INSERT INTO users (id, email, google_id, picture, created_at, is_guest)
+                VALUES (:uid, :email, :gid, :pic, :date, 0)
+            """), {
+                "uid": user_id,
+                "email": email,
+                "gid": google_id,
+                "pic": picture,
+                "date": now
+            })
+            conn.commit()
+            return {
+                "id": user_id,
+                "email": email,
+                "google_id": google_id,
+                "picture": picture,
+                "created_at": now,
+                "is_guest": False
+            }
 
 def get_user_profile(user_id: str, collection_name: str = "music_averaged") -> Dict:
     if user_id == 'guest': return {"user_id": "guest", "is_guest": True, "clusters": {}}

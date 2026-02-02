@@ -17,8 +17,12 @@ import datetime
 import requests
 import json
 
+from starlette.middleware.sessions import SessionMiddleware
+from authlib.integrations.starlette_client import OAuth
+
 # Initialize database
 import user_db
+user_db.init_db()
 
 from user_recommender import UserRecommender
 
