@@ -136,12 +136,27 @@
 
     <script>
         // Session management
+        // Check URL params first (from OAuth redirect)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlSessionId = urlParams.get('session_id');
+
+        if (urlSessionId) {
+            // New session from OAuth - save it
+            localStorage.setItem('chaar_session', urlSessionId);
+            // Ideally we should fetch profile to get name, but for now just clear old name
+            localStorage.setItem('chaar_user', 'User'); 
+            localStorage.setItem('chaar_is_guest', 'false');
+            
+            // Clean URL
+            window.history.replaceState({}, document.title, "/player");
+        }
+
         const sessionId = localStorage.getItem('chaar_session');
-        const userName = localStorage.getItem('chaar_user');
+        const userName = localStorage.getItem('chaar_user') || 'User';
         const isGuest = localStorage.getItem('chaar_is_guest') === 'true';
 
         if (!sessionId) {
-            window.location.href = '/';
+            window.location.href = '/login'; // Redirect to login, not landing
         }
 
         document.getElementById('user-badge').textContent = isGuest ? 'GUEST_MODE' : userName.toUpperCase();
