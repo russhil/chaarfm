@@ -44,7 +44,7 @@ def save_config(config: Dict):
 
 def load_env_vars():
     """Load .env file."""
-    dotenv.load_dotenv(ENV_FILE)
+    dotenv.load_dotenv(ENV_FILE, override=True)
 
 def save_env_vars(vars_dict: Dict[str, str]):
     """Update .env file with new variables."""
