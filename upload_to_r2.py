@@ -7,8 +7,11 @@ from botocore.exceptions import NoCredentialsError
 from botocore.config import Config
 from concurrent.futures import ThreadPoolExecutor
 from tqdm import tqdm
+from dotenv import load_dotenv
 
 import config_manager
+
+load_dotenv()
 
 # Configuration
 EXTENSIONS = {'.mp3', '.wav', '.flac', '.m4a', '.ogg'}

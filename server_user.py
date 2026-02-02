@@ -19,7 +19,7 @@ import json
 
 # Initialize database
 import user_db
-user_db.init_db()
+# user_db.init_db() - Moved to startup event
 
 from user_recommender import UserRecommender
 
@@ -54,6 +54,18 @@ def log_interaction(session_id, user_id, track_id, filename, action, duration=0,
         print(f"CSV Logging error: {e}")
 
 app = FastAPI(title="chaar.fm")
+
+@app.on_event("startup")
+async def startup_event():
+    print("🚀 Application starting up...")
+    try:
+        user_db.init_db()
+        print("✅ Database initialized successfully")
+    except Exception as e:
+        print(f"❌ Database initialization failed: {e}")
+        # We might want to exit here if DB is critical, but logging it explicitly helps debugging.
+        # In production, this will still likely cause the app to be unhealthy, which is correct.
+
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")

@@ -31,10 +31,18 @@ def hash_password(password: str) -> str:
 
 def init_db():
     """Initialize database schema in Supabase if not exists."""
-    print(f"Initializing User DB at {DATABASE_URL.split('@')[-1]}")
-    with engine.connect() as conn:
-        conn.execute(text('''
-            CREATE TABLE IF NOT EXISTS users (
+    # Mask password for logging
+    if DATABASE_URL and "@" in DATABASE_URL:
+        masked_url = DATABASE_URL.split("@")[-1]
+    else:
+        masked_url = "UNKNOWN"
+        
+    print(f"Initializing User DB at {masked_url}")
+    
+    try:
+        with engine.connect() as conn:
+            conn.execute(text('''
+                CREATE TABLE IF NOT EXISTS users (
                 id TEXT PRIMARY KEY,
                 password_hash TEXT,
                 created_at TEXT,
@@ -113,6 +121,9 @@ def init_db():
             print("Created user: guest")
         
         conn.commit()
+    except Exception as e:
+        print(f"Error initializing DB: {e}")
+        raise e
 
 def get_admin_stats() -> Dict:
     """Get aggregated statistics for the admin dashboard."""
