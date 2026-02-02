@@ -97,6 +97,7 @@ MUSIC_ROOT = os.environ.get("MUSIC_ROOT", "/Users/russhil/Desktop/aand pav/songs
 # In cloud, we assume all collections might be in subfolders or same folder
 COLLECTION_MUSIC_ROOTS = {
     "music_averaged": MUSIC_ROOT,
+    "merged": MUSIC_ROOT, # All collections aggregated
     # Add other collections relative to root if needed
     # "music_russhil": os.path.join(MUSIC_ROOT, "russhil"),
 }
@@ -227,6 +228,19 @@ async def player(request: Request):
     """Serve player page (requires valid session)."""
     return templates.TemplateResponse("player.html", {"request": request})
 
+@app.get("/api/collections")
+async def get_collections():
+    """Get list of available collections."""
+    cols = user_db.get_available_collections()
+    # Ensure music_averaged and merged are present
+    if "music_averaged" not in cols: cols.append("music_averaged")
+    
+    # Sort for UI consistency
+    cols.sort()
+    
+    # Add "merged" option if not present in DB (it's a virtual collection)
+    return {"collections": cols, "has_merged": True}
+
 @app.get("/api/auth/google")
 async def login_google(request: Request):
     """Redirect to Google for Auth."""
@@ -292,8 +306,13 @@ async def auth_google_callback(request: Request):
 async def login(data: LoginRequest, response: Response):
     """Authenticate user and create session."""
     username = data.username.lower().strip()
-    allowed = set(COLLECTION_MUSIC_ROOTS.keys())
-    collection = data.vectormap if data.vectormap in allowed else "music_averaged"
+    
+    # Dynamic validation
+    db_cols = set(user_db.get_available_collections())
+    db_cols.add("merged")
+    db_cols.add("music_averaged")
+    
+    collection = data.vectormap if data.vectormap in db_cols else "music_averaged"
     
     if username == "guest":
         session_id = create_session("guest", collection_name=collection)

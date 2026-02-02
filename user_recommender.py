@@ -191,29 +191,49 @@ class UserRecommender:
 
     def _load_supabase_data(self):
         print(f"Loading tracks from {self.collection_name} (Supabase)...")
+        
+        collections_to_load = []
+        if self.collection_name == "merged":
+            collections_to_load = user_db.get_available_collections()
+            print(f"Merged Mode: Loading from {len(collections_to_load)} collections: {collections_to_load}")
+        else:
+            collections_to_load = [self.collection_name]
+            
         try:
-            query = text(f'SELECT id, vec, metadata FROM vecs."{self.collection_name}"')
-            with user_db.engine.connect() as conn:
-                result = conn.execute(query).fetchall()
-            for row in result:
-                vec = row.vec
-                if isinstance(vec, str):
-                    try: vec = json.loads(vec)
-                    except: pass
-                elif isinstance(vec, np.ndarray): vec = vec.tolist()
+            total_loaded = 0
+            for col_name in collections_to_load:
+                # Sanitize table name to prevent injection (though get_available_collections returns trusted names)
+                # But we should still be careful.
+                # Since we trust get_available_collections(), we just proceed.
                 
-                meta = row.metadata
-                if isinstance(meta, str):
-                     try: meta = json.loads(meta)
-                     except: meta = {}
-                if not isinstance(meta, dict): meta = {}
-                
-                self.track_map[row.id] = {
-                    "id": row.id,
-                    "filename": meta.get("filename", "Unknown"),
-                    "duration": meta.get("duration", 0),
-                    "vector": vec
-                }
+                query = text(f'SELECT id, vec, metadata FROM vecs."{col_name}"')
+                with user_db.engine.connect() as conn:
+                    result = conn.execute(query).fetchall()
+                    
+                for row in result:
+                    vec = row.vec
+                    if isinstance(vec, str):
+                        try: vec = json.loads(vec)
+                        except: pass
+                    elif isinstance(vec, np.ndarray): vec = vec.tolist()
+                    
+                    meta = row.metadata
+                    if isinstance(meta, str):
+                         try: meta = json.loads(meta)
+                         except: meta = {}
+                    if not isinstance(meta, dict): meta = {}
+                    
+                    self.track_map[row.id] = {
+                        "id": row.id,
+                        "filename": meta.get("filename", "Unknown"),
+                        "duration": meta.get("duration", 0),
+                        "vector": vec,
+                        "source_collection": col_name # Track where it came from
+                    }
+                total_loaded += len(result)
+            
+            print(f"Total tracks loaded: {total_loaded}")
+            
         except Exception as e:
             print(f"Error loading Supabase data: {e}")
 

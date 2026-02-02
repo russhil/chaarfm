@@ -139,6 +139,21 @@ def init_db():
         
         conn.commit()
 
+def get_available_collections() -> List[str]:
+    """Get list of available vector collections from vecs schema."""
+    try:
+        with engine.connect() as conn:
+            # Query information_schema for tables in 'vecs' schema
+            result = conn.execute(text("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'vecs'
+            """)).fetchall()
+            return [row[0] for row in result]
+    except Exception as e:
+        print(f"Error fetching collections: {e}")
+        return ["music_averaged"] # Fallback
+
 def get_admin_stats() -> Dict:
     """Get aggregated statistics for the admin dashboard."""
     stats = {
