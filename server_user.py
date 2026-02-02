@@ -606,7 +606,7 @@ async def admin_stats(session_id: str = Query(...)):
 
 @app.get("/api/admin/logs")
 async def admin_logs(session_id: str = Query(...), limit: int = 100):
-    """Get recent logs for real-time view from Supabase."""
+    """Get recent logs for real-time view from Render."""
     session = get_session(session_id)
     if not session or session["user_id"] != "russhil":
         raise HTTPException(status_code=403, detail="Admin access only")
@@ -620,7 +620,7 @@ async def admin_chat(data: AdminChatRequest):
     # 1. Gather Context
     logs = []
     
-    # Fetch from Supabase based on context
+    # Fetch from Render based on context
     target_user = data.user_id if data.context == "user" else None
     db_logs = user_db.get_logs(limit=100, user_id=target_user)
     

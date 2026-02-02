@@ -244,7 +244,7 @@
                 console.error("Failed to fetch collections", e);
                 const select = document.getElementById('vectormap');
                 // If fetch fails, revert to default safe option but show error
-                select.innerHTML = '<option value="music_averaged">SUPABASE_VECTORS_V1 (FALLBACK)</option>';
+                select.innerHTML = '<option value="music_averaged">DEFAULT VECTORS (FALLBACK)</option>';
                 const errorDiv = document.getElementById('error-message');
                 errorDiv.textContent = "COULD NOT LOAD DATASETS";
                 errorDiv.style.display = 'block';

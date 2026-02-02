@@ -74,7 +74,7 @@ class UserRecommender:
         
         # Data Loading
         self.track_map = {}
-        self._load_supabase_data()
+        self._load_vector_data()
         
         # Session State
         self.streak = 0
@@ -189,8 +189,8 @@ class UserRecommender:
         except Exception as e:
             print(f"Could not load user history (First run?): {e}")
 
-    def _load_supabase_data(self):
-        print(f"Loading tracks from {self.collection_name} (Supabase)...")
+    def _load_vector_data(self):
+        print(f"Loading tracks from {self.collection_name} (Render)...")
         
         collections_to_load = []
         if self.collection_name == "merged":
@@ -273,7 +273,7 @@ class UserRecommender:
             print(f"Total tracks loaded: {total_loaded}")
             
         except Exception as e:
-            print(f"Error loading Supabase data: {e}")
+            print(f"Error loading Render data: {e}")
 
     def _compute_outliers(self):
         """Identify outlier tracks that shouldn't be used for probing."""

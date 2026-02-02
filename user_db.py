@@ -1,5 +1,5 @@
 """
-User Database - Supabase (Postgres) storage for user profiles and taste data.
+User Database - Render (Postgres) storage for user profiles and taste data.
 
 Philosophy: Every decision must be data-justified. No random unless zero data.
 """
@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Supabase Connection
+# Render Connection
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     # Fallback/Error
@@ -30,11 +30,11 @@ pool_config = {
     "max_overflow": 20
 }
 
-# Check for NullPool need
-from sqlalchemy import pool
-if DATABASE_URL and ":6543" in DATABASE_URL:
-    print("Detected Transaction Pooler (6543). Disabling client-side pooling.")
-    pool_config = {"poolclass": pool.NullPool}
+# Check for NullPool need (Legacy Supabase 6543 port check removed as we are on Render)
+# from sqlalchemy import pool
+# if DATABASE_URL and ":6543" in DATABASE_URL:
+#    print("Detected Transaction Pooler (6543). Disabling client-side pooling.")
+#    pool_config = {"poolclass": pool.NullPool}
 
 engine = create_engine(DATABASE_URL, **pool_config, connect_args=connect_args)
 
@@ -43,7 +43,7 @@ def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
 def init_db():
-    """Initialize database schema in Supabase if not exists."""
+    """Initialize database schema in Render if not exists."""
     print(f"Initializing User DB at {DATABASE_URL.split('@')[-1]}")
     with engine.connect() as conn:
         conn.execute(text('''
