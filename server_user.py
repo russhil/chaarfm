@@ -102,6 +102,14 @@ COLLECTION_MUSIC_ROOTS = {
     # "music_russhil": os.path.join(MUSIC_ROOT, "russhil"),
 }
 
+# R2 Cloud Storage Prefixes
+# Maps collection name (table name) to R2 folder prefix
+# If not listed, assumes root of bucket
+COLLECTION_R2_PREFIXES = {
+    "vectors_russhil": "russhil",
+    "music_russhil": "russhil",
+}
+
 # Session management (in-memory for simplicity)
 # In production, use Redis or JWT
 sessions = {}  # session_id -> {"user_id": str, "recommender": UserRecommender, "queue": [], "music_root": str}
@@ -349,13 +357,16 @@ async def next_track(session_id: str = Query(...)):
     # Pre-sign URL or encode
     encoded_name = urllib.parse.quote(track['filename'])
     
+    # Include track_id in URL to help stream endpoint identify source collection
+    stream_url = f"/stream/{encoded_name}?track_id={track['id']}"
+    
     # Calculate queue remaining for UI
     queue_remaining = len(session["queue"])
     
     return {
         "id": track['id'],
         "title": track['filename'],
-        "url": f"/stream/{encoded_name}",
+        "url": stream_url,
         "justification": track.get('justification', "Algorithm selection"),
         "queue_remaining": queue_remaining
     }
@@ -436,10 +447,12 @@ async def select_track(data: SelectRequest, session_id: str = Query(...)):
         ensure_queue(session)
         
         encoded_name = urllib.parse.quote(track['filename'])
+        stream_url = f"/stream/{encoded_name}?track_id={track['id']}"
+        
         return {
             "id": track['id'],
             "title": track['filename'],
-            "url": f"/stream/{encoded_name}",
+            "url": stream_url,
             "justification": "User selected manually"
         }
     raise HTTPException(status_code=404, detail="Track not found")
