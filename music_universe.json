@@ -1,0 +1,1405 @@
+{
+  "user": "russhil",
+  "stats": {
+    "familiar_artists_count": 101,
+    "familiar_tracks_count": 100,
+    "top_genres": []
+  },
+  "music_universe": {
+    "artists": {
+      "Bruno Mars": {
+        "playcount": 22,
+        "periods": [
+          "7day",
+          "1month",
+          "3month"
+        ]
+      },
+      "Vasu Raina": {
+        "playcount": 93,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month"
+        ]
+      },
+      "EsDeeKid": {
+        "playcount": 24,
+        "periods": [
+          "7day",
+          "1month",
+          "3month"
+        ]
+      },
+      "Seedhe Maut": {
+        "playcount": 1835,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Arpit Bala": {
+        "playcount": 199,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Chaar Diwaari": {
+        "playcount": 525,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Frappe Ash": {
+        "playcount": 210,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "AP Dhillon": {
+        "playcount": 521,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "YashRaj": {
+        "playcount": 239,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "\u00a5$": {
+        "playcount": 11,
+        "periods": [
+          "7day",
+          "1month"
+        ]
+      },
+      "Ali Zafar": {
+        "playcount": 7,
+        "periods": [
+          "7day",
+          "1month"
+        ]
+      },
+      "Bhaskar": {
+        "playcount": 134,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Hardbone Boy": {
+        "playcount": 179,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Karma": {
+        "playcount": 82,
+        "periods": [
+          "7day",
+          "6month",
+          "12month"
+        ]
+      },
+      "Ritviz": {
+        "playcount": 152,
+        "periods": [
+          "7day",
+          "overall"
+        ]
+      },
+      "Ash King": {
+        "playcount": 2,
+        "periods": [
+          "7day"
+        ]
+      },
+      "Atif Aslam": {
+        "playcount": 262,
+        "periods": [
+          "7day",
+          "overall"
+        ]
+      },
+      "Baggh-e SMG": {
+        "playcount": 63,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month"
+        ]
+      },
+      "Dhanji": {
+        "playcount": 813,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Gorillaz": {
+        "playcount": 2,
+        "periods": [
+          "7day"
+        ]
+      },
+      "Gunda": {
+        "playcount": 126,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month"
+        ]
+      },
+      "J. Cole": {
+        "playcount": 12,
+        "periods": [
+          "7day",
+          "1month"
+        ]
+      },
+      "Jack Harlow": {
+        "playcount": 2,
+        "periods": [
+          "7day"
+        ]
+      },
+      "Karan Aujla": {
+        "playcount": 817,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Kr$na": {
+        "playcount": 443,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Lata Mangeshkar": {
+        "playcount": 2,
+        "periods": [
+          "7day"
+        ]
+      },
+      "Mark Ronson": {
+        "playcount": 2,
+        "periods": [
+          "7day"
+        ]
+      },
+      "Nanku": {
+        "playcount": 543,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Navaan Sandhu": {
+        "playcount": 2,
+        "periods": [
+          "7day"
+        ]
+      },
+      "Rawal": {
+        "playcount": 981,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Shreyas": {
+        "playcount": 160,
+        "periods": [
+          "7day",
+          "12month",
+          "overall"
+        ]
+      },
+      "The Pursuetist House": {
+        "playcount": 61,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month"
+        ]
+      },
+      "Tsumyoki": {
+        "playcount": 191,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "A.R. Rahman": {
+        "playcount": 272,
+        "periods": [
+          "7day",
+          "overall"
+        ]
+      },
+      "Bhadrankar": {
+        "playcount": 1,
+        "periods": [
+          "7day"
+        ]
+      },
+      "Bharg": {
+        "playcount": 212,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Billy Joel": {
+        "playcount": 23,
+        "periods": [
+          "7day",
+          "3month"
+        ]
+      },
+      "Coldplay": {
+        "playcount": 290,
+        "periods": [
+          "7day",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Corinne Bailey Rae": {
+        "playcount": 1,
+        "periods": [
+          "7day"
+        ]
+      },
+      "Divine": {
+        "playcount": 289,
+        "periods": [
+          "7day",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Don Toliver": {
+        "playcount": 7,
+        "periods": [
+          "7day",
+          "1month"
+        ]
+      },
+      "Drake": {
+        "playcount": 15,
+        "periods": [
+          "7day",
+          "1month"
+        ]
+      },
+      "Farhan Khan": {
+        "playcount": 126,
+        "periods": [
+          "7day",
+          "1month",
+          "12month"
+        ]
+      },
+      "Fred again..": {
+        "playcount": 1,
+        "periods": [
+          "7day"
+        ]
+      },
+      "Future": {
+        "playcount": 1,
+        "periods": [
+          "7day"
+        ]
+      },
+      "Gym Class Heroes": {
+        "playcount": 1,
+        "periods": [
+          "7day"
+        ]
+      },
+      "Jagjit Singh": {
+        "playcount": 1,
+        "periods": [
+          "7day"
+        ]
+      },
+      "Kanye West": {
+        "playcount": 196,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Karuan": {
+        "playcount": 301,
+        "periods": [
+          "7day",
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Kendrick Lamar": {
+        "playcount": 230,
+        "periods": [
+          "7day",
+          "12month",
+          "overall"
+        ]
+      },
+      "Sabat Batin": {
+        "playcount": 50,
+        "periods": [
+          "1month",
+          "3month",
+          "6month"
+        ]
+      },
+      "Raftaar": {
+        "playcount": 117,
+        "periods": [
+          "1month",
+          "3month",
+          "12month"
+        ]
+      },
+      "SHASHXNK": {
+        "playcount": 54,
+        "periods": [
+          "1month",
+          "3month",
+          "6month"
+        ]
+      },
+      "Frank Ocean": {
+        "playcount": 348,
+        "periods": [
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Shubh": {
+        "playcount": 211,
+        "periods": [
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Guru Randhawa": {
+        "playcount": 81,
+        "periods": [
+          "1month",
+          "3month",
+          "6month"
+        ]
+      },
+      "jaiyash": {
+        "playcount": 16,
+        "periods": [
+          "1month"
+        ]
+      },
+      "LIFAFA": {
+        "playcount": 254,
+        "periods": [
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "A$AP Rocky": {
+        "playcount": 12,
+        "periods": [
+          "1month"
+        ]
+      },
+      "Saar Punch": {
+        "playcount": 229,
+        "periods": [
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Diljit Dosanjh": {
+        "playcount": 199,
+        "periods": [
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "The Siege": {
+        "playcount": 928,
+        "periods": [
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Yo Yo Honey Singh": {
+        "playcount": 181,
+        "periods": [
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Jxggi": {
+        "playcount": 65,
+        "periods": [
+          "1month",
+          "6month"
+        ]
+      },
+      "Sharry Mann": {
+        "playcount": 47,
+        "periods": [
+          "1month",
+          "3month",
+          "6month"
+        ]
+      },
+      "Vichaar": {
+        "playcount": 46,
+        "periods": [
+          "1month",
+          "3month",
+          "6month"
+        ]
+      },
+      "Dizlaw": {
+        "playcount": 21,
+        "periods": [
+          "1month",
+          "3month"
+        ]
+      },
+      "George Ezra": {
+        "playcount": 8,
+        "periods": [
+          "1month"
+        ]
+      },
+      "BAGI MUNDA": {
+        "playcount": 222,
+        "periods": [
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Janisht Joshi": {
+        "playcount": 7,
+        "periods": [
+          "1month"
+        ]
+      },
+      "OG Lucifer": {
+        "playcount": 203,
+        "periods": [
+          "1month",
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Pritam": {
+        "playcount": 791,
+        "periods": [
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Jind Universe": {
+        "playcount": 28,
+        "periods": [
+          "3month"
+        ]
+      },
+      "wolf.cryman": {
+        "playcount": 231,
+        "periods": [
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Sachin-Jigar": {
+        "playcount": 195,
+        "periods": [
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Amit Trivedi": {
+        "playcount": 142,
+        "periods": [
+          "3month",
+          "6month",
+          "overall"
+        ]
+      },
+      "Talwiinder": {
+        "playcount": 50,
+        "periods": [
+          "3month",
+          "6month"
+        ]
+      },
+      "Vishal-Shekhar": {
+        "playcount": 293,
+        "periods": [
+          "3month",
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Jassie Gill": {
+        "playcount": 23,
+        "periods": [
+          "3month"
+        ]
+      },
+      "Sufr": {
+        "playcount": 21,
+        "periods": [
+          "3month"
+        ]
+      },
+      "Dox": {
+        "playcount": 66,
+        "periods": [
+          "6month"
+        ]
+      },
+      "Sidhu Moose Wala": {
+        "playcount": 83,
+        "periods": [
+          "6month",
+          "12month"
+        ]
+      },
+      "Wajid": {
+        "playcount": 55,
+        "periods": [
+          "6month"
+        ]
+      },
+      "MC Amrit": {
+        "playcount": 215,
+        "periods": [
+          "6month",
+          "12month",
+          "overall"
+        ]
+      },
+      "Vanshsback": {
+        "playcount": 51,
+        "periods": [
+          "6month"
+        ]
+      },
+      "Farak": {
+        "playcount": 50,
+        "periods": [
+          "6month"
+        ]
+      },
+      "Bali": {
+        "playcount": 260,
+        "periods": [
+          "12month",
+          "overall"
+        ]
+      },
+      "Tyler, The Creator": {
+        "playcount": 173,
+        "periods": [
+          "12month",
+          "overall"
+        ]
+      },
+      "King": {
+        "playcount": 216,
+        "periods": [
+          "12month",
+          "overall"
+        ]
+      },
+      "Kali Uchis": {
+        "playcount": 100,
+        "periods": [
+          "12month"
+        ]
+      },
+      "Steve Lacy": {
+        "playcount": 220,
+        "periods": [
+          "12month",
+          "overall"
+        ]
+      },
+      "KSHMR": {
+        "playcount": 91,
+        "periods": [
+          "12month"
+        ]
+      },
+      "Panther": {
+        "playcount": 90,
+        "periods": [
+          "12month"
+        ]
+      },
+      "Tame Impala": {
+        "playcount": 134,
+        "periods": [
+          "12month",
+          "overall"
+        ]
+      },
+      "Darzi": {
+        "playcount": 84,
+        "periods": [
+          "12month"
+        ]
+      },
+      "The Weeknd": {
+        "playcount": 259,
+        "periods": [
+          "overall"
+        ]
+      },
+      "Shankar-Ehsaan-Loy": {
+        "playcount": 176,
+        "periods": [
+          "overall"
+        ]
+      },
+      "The Neighbourhood": {
+        "playcount": 166,
+        "periods": [
+          "overall"
+        ]
+      },
+      "Arctic Monkeys": {
+        "playcount": 164,
+        "periods": [
+          "overall"
+        ]
+      },
+      "Anjan Dutt": {
+        "playcount": 139,
+        "periods": [
+          "overall"
+        ]
+      },
+      "Mohit Chauhan": {
+        "playcount": 130,
+        "periods": [
+          "overall"
+        ]
+      }
+    },
+    "tracks": {
+      "The Siege - Kabhi Na Mili": {
+        "artist": "The Siege",
+        "title": "Kabhi Na Mili",
+        "playcount": 150
+      },
+      "Chaar Diwaari - Jhaag": {
+        "artist": "Chaar Diwaari",
+        "title": "Jhaag",
+        "playcount": 120
+      },
+      "Rawal - Magan": {
+        "artist": "Rawal",
+        "title": "Magan",
+        "playcount": 119
+      },
+      "Seedhe Maut - Raat ki Rani": {
+        "artist": "Seedhe Maut",
+        "title": "Raat ki Rani",
+        "playcount": 107
+      },
+      "AP Dhillon - True Stories": {
+        "artist": "AP Dhillon",
+        "title": "True Stories",
+        "playcount": 104
+      },
+      "Dhanji - Guru": {
+        "artist": "Dhanji",
+        "title": "Guru",
+        "playcount": 103
+      },
+      "Seedhe Maut - Naksha": {
+        "artist": "Seedhe Maut",
+        "title": "Naksha",
+        "playcount": 99
+      },
+      "The Siege - Zindagi Question Paper": {
+        "artist": "The Siege",
+        "title": "Zindagi Question Paper",
+        "playcount": 99
+      },
+      "Rawal - Chahiye Sab": {
+        "artist": "Rawal",
+        "title": "Chahiye Sab",
+        "playcount": 98
+      },
+      "Chaar Diwaari - Farebi": {
+        "artist": "Chaar Diwaari",
+        "title": "Farebi",
+        "playcount": 95
+      },
+      "The Siege - Rent is Due": {
+        "artist": "The Siege",
+        "title": "Rent is Due",
+        "playcount": 95
+      },
+      "Bali - Shameless": {
+        "artist": "Bali",
+        "title": "Shameless",
+        "playcount": 93
+      },
+      "Dhanji - Mausambi Drip": {
+        "artist": "Dhanji",
+        "title": "Mausambi Drip",
+        "playcount": 88
+      },
+      "Seedhe Maut - TT": {
+        "artist": "Seedhe Maut",
+        "title": "TT",
+        "playcount": 88
+      },
+      "Kr$na - Hola Amigo": {
+        "artist": "Kr$na",
+        "title": "Hola Amigo",
+        "playcount": 86
+      },
+      "Nanku - Yezdi": {
+        "artist": "Nanku",
+        "title": "Yezdi",
+        "playcount": 85
+      },
+      "The Siege - Really Brown": {
+        "artist": "The Siege",
+        "title": "Really Brown",
+        "playcount": 85
+      },
+      "Seedhe Maut - Luka Chippi": {
+        "artist": "Seedhe Maut",
+        "title": "Luka Chippi",
+        "playcount": 84
+      },
+      "wolf.cryman - Ik Kudi": {
+        "artist": "wolf.cryman",
+        "title": "Ik Kudi",
+        "playcount": 84
+      },
+      "Kr$na - Sensitive": {
+        "artist": "Kr$na",
+        "title": "Sensitive",
+        "playcount": 82
+      },
+      "Steve Lacy - Bad Habit": {
+        "artist": "Steve Lacy",
+        "title": "Bad Habit",
+        "playcount": 82
+      },
+      "Bharg - Roshni": {
+        "artist": "Bharg",
+        "title": "Roshni",
+        "playcount": 81
+      },
+      "Seedhe Maut - SHUTDOWN": {
+        "artist": "Seedhe Maut",
+        "title": "SHUTDOWN",
+        "playcount": 80
+      },
+      "MC Amrit - Adidas": {
+        "artist": "MC Amrit",
+        "title": "Adidas",
+        "playcount": 79
+      },
+      "Arctic Monkeys - I Wanna Be Yours": {
+        "artist": "Arctic Monkeys",
+        "title": "I Wanna Be Yours",
+        "playcount": 78
+      },
+      "Dhanji - Peep the Tareeka - Remix": {
+        "artist": "Dhanji",
+        "title": "Peep the Tareeka - Remix",
+        "playcount": 77
+      },
+      "Panther - Galat Karam": {
+        "artist": "Panther",
+        "title": "Galat Karam",
+        "playcount": 75
+      },
+      "Karun - Mrignaini": {
+        "artist": "Karun",
+        "title": "Mrignaini",
+        "playcount": 74
+      },
+      "The Siege - CBSC": {
+        "artist": "The Siege",
+        "title": "CBSC",
+        "playcount": 71
+      },
+      "OG Lucifer - Suhana Din": {
+        "artist": "OG Lucifer",
+        "title": "Suhana Din",
+        "playcount": 70
+      },
+      "Seedhe Maut - Rahat": {
+        "artist": "Seedhe Maut",
+        "title": "Rahat",
+        "playcount": 70
+      },
+      "Karan Aujla - Wavy": {
+        "artist": "Karan Aujla",
+        "title": "Wavy",
+        "playcount": 68
+      },
+      "Rawal - Bombay Sapphire": {
+        "artist": "Rawal",
+        "title": "Bombay Sapphire",
+        "playcount": 68
+      },
+      "Saar Punch - Maykhana": {
+        "artist": "Saar Punch",
+        "title": "Maykhana",
+        "playcount": 68
+      },
+      "Karan Aujla - Boyfriend": {
+        "artist": "Karan Aujla",
+        "title": "Boyfriend",
+        "playcount": 67
+      },
+      "MC Amrit - NAKHRE": {
+        "artist": "MC Amrit",
+        "title": "NAKHRE",
+        "playcount": 67
+      },
+      "Rawal - Moohfatt": {
+        "artist": "Rawal",
+        "title": "Moohfatt",
+        "playcount": 67
+      },
+      "Dhanji - 4424": {
+        "artist": "Dhanji",
+        "title": "4424",
+        "playcount": 66
+      },
+      "Rawal - Bhundfaad": {
+        "artist": "Rawal",
+        "title": "Bhundfaad",
+        "playcount": 66
+      },
+      "Farhan Khan - Cigarette": {
+        "artist": "Farhan Khan",
+        "title": "Cigarette",
+        "playcount": 65
+      },
+      "King - KODAK": {
+        "artist": "King",
+        "title": "KODAK",
+        "playcount": 65
+      },
+      "Seedhe Maut - Madira": {
+        "artist": "Seedhe Maut",
+        "title": "Madira",
+        "playcount": 64
+      },
+      "Dox - Superstar": {
+        "artist": "Dox",
+        "title": "Superstar",
+        "playcount": 63
+      },
+      "Rawal - Meri Zindagi": {
+        "artist": "Rawal",
+        "title": "Meri Zindagi",
+        "playcount": 63
+      },
+      "Saar Punch - Kaloli": {
+        "artist": "Saar Punch",
+        "title": "Kaloli",
+        "playcount": 63
+      },
+      "Seedhe Maut - MP3": {
+        "artist": "Seedhe Maut",
+        "title": "MP3",
+        "playcount": 62
+      },
+      "Tsumyoki - WANT IT ALL": {
+        "artist": "Tsumyoki",
+        "title": "WANT IT ALL",
+        "playcount": 62
+      },
+      "Bhaskar - Dalli": {
+        "artist": "Bhaskar",
+        "title": "Dalli",
+        "playcount": 60
+      },
+      "Karan Aujla - For A Reason": {
+        "artist": "Karan Aujla",
+        "title": "For A Reason",
+        "playcount": 60
+      },
+      "Seedhe Maut - Bure Din": {
+        "artist": "Seedhe Maut",
+        "title": "Bure Din",
+        "playcount": 60
+      },
+      "The Siege - Deeware": {
+        "artist": "The Siege",
+        "title": "Deeware",
+        "playcount": 59
+      },
+      "Nanku - Kaafizyada": {
+        "artist": "Nanku",
+        "title": "Kaafizyada",
+        "playcount": 58
+      },
+      "Chaar Diwaari - Thehra": {
+        "artist": "Chaar Diwaari",
+        "title": "Thehra",
+        "playcount": 57
+      },
+      "Tsumyoki - Ek Do Ek": {
+        "artist": "Tsumyoki",
+        "title": "Ek Do Ek",
+        "playcount": 57
+      },
+      "Raftaar - BAAWE": {
+        "artist": "Raftaar",
+        "title": "BAAWE",
+        "playcount": 56
+      },
+      "Seedhe Maut - Tour Shit!": {
+        "artist": "Seedhe Maut",
+        "title": "Tour Shit!",
+        "playcount": 56
+      },
+      "The Siege - 3 Cheez": {
+        "artist": "The Siege",
+        "title": "3 Cheez",
+        "playcount": 56
+      },
+      "The Siege - Mujhko Jeene Do": {
+        "artist": "The Siege",
+        "title": "Mujhko Jeene Do",
+        "playcount": 56
+      },
+      "Divine - Triple OG": {
+        "artist": "Divine",
+        "title": "Triple OG",
+        "playcount": 55
+      },
+      "Jxggi - What We Do": {
+        "artist": "Jxggi",
+        "title": "What We Do",
+        "playcount": 55
+      },
+      "Karan Aujla - Softly": {
+        "artist": "Karan Aujla",
+        "title": "Softly",
+        "playcount": 55
+      },
+      "Karun - Heeriye": {
+        "artist": "Karun",
+        "title": "Heeriye",
+        "playcount": 55
+      },
+      "Hardbone Boy - Nadi": {
+        "artist": "Hardbone Boy",
+        "title": "Nadi",
+        "playcount": 53
+      },
+      "Lord Huron - The Night We Met": {
+        "artist": "Lord Huron",
+        "title": "The Night We Met",
+        "playcount": 53
+      },
+      "Lucky Ali - Safarnama": {
+        "artist": "Lucky Ali",
+        "title": "Safarnama",
+        "playcount": 53
+      },
+      "Pritam - Ye Tune Kya Kiya": {
+        "artist": "Pritam",
+        "title": "Ye Tune Kya Kiya",
+        "playcount": 53
+      },
+      "Seedhe Maut - Cha Chi": {
+        "artist": "Seedhe Maut",
+        "title": "Cha Chi",
+        "playcount": 53
+      },
+      "AP Dhillon - Thodi Si Daaru": {
+        "artist": "AP Dhillon",
+        "title": "Thodi Si Daaru",
+        "playcount": 52
+      },
+      "Chaar Diwaari - LOVESEXDHOKA!!!": {
+        "artist": "Chaar Diwaari",
+        "title": "LOVESEXDHOKA!!!",
+        "playcount": 52
+      },
+      "Divine - Kaam 25 - Sacred Games": {
+        "artist": "Divine",
+        "title": "Kaam 25 - Sacred Games",
+        "playcount": 52
+      },
+      "Guru Randhawa - Sirra": {
+        "artist": "Guru Randhawa",
+        "title": "Sirra",
+        "playcount": 52
+      },
+      "Rawal - Tabla Faad!": {
+        "artist": "Rawal",
+        "title": "Tabla Faad!",
+        "playcount": 52
+      },
+      "Dhanji - JAYANTI": {
+        "artist": "Dhanji",
+        "title": "JAYANTI",
+        "playcount": 51
+      },
+      "Frappe Ash - Ishqa Da Jahaan": {
+        "artist": "Frappe Ash",
+        "title": "Ishqa Da Jahaan",
+        "playcount": 51
+      },
+      "Seedhe Maut - Pancake": {
+        "artist": "Seedhe Maut",
+        "title": "Pancake",
+        "playcount": 51
+      },
+      "BAGI MUNDA - HOOD FAME": {
+        "artist": "BAGI MUNDA",
+        "title": "HOOD FAME",
+        "playcount": 50
+      },
+      "OG Lucifer - Violence": {
+        "artist": "OG Lucifer",
+        "title": "Violence",
+        "playcount": 50
+      },
+      "Pritam - Tum Se Hi": {
+        "artist": "Pritam",
+        "title": "Tum Se Hi",
+        "playcount": 50
+      },
+      "Rawal - Baat Bangayi": {
+        "artist": "Rawal",
+        "title": "Baat Bangayi",
+        "playcount": 50
+      },
+      "Chaar Diwaari - Banda Kaam Ka": {
+        "artist": "Chaar Diwaari",
+        "title": "Banda Kaam Ka",
+        "playcount": 49
+      },
+      "KSHMR - Bhussi": {
+        "artist": "KSHMR",
+        "title": "Bhussi",
+        "playcount": 49
+      },
+      "Rashid Ali - Kabhi Kabhi Aditi": {
+        "artist": "Rashid Ali",
+        "title": "Kabhi Kabhi Aditi",
+        "playcount": 49
+      },
+      "BAGI MUNDA - Deewana": {
+        "artist": "BAGI MUNDA",
+        "title": "Deewana",
+        "playcount": 48
+      },
+      "Karan Aujla - MF Gabhru!": {
+        "artist": "Karan Aujla",
+        "title": "MF Gabhru!",
+        "playcount": 48
+      },
+      "Ritviz - Chalo Chalein": {
+        "artist": "Ritviz",
+        "title": "Chalo Chalein",
+        "playcount": 48
+      },
+      "Saar Punch - Sabar Rakh": {
+        "artist": "Saar Punch",
+        "title": "Sabar Rakh",
+        "playcount": 48
+      },
+      "Seedhe Maut - Maar Kaat": {
+        "artist": "Seedhe Maut",
+        "title": "Maar Kaat",
+        "playcount": 48
+      },
+      "SHASHXNK - Haseena": {
+        "artist": "SHASHXNK",
+        "title": "Haseena",
+        "playcount": 48
+      },
+      "The Local train - Choo Lo": {
+        "artist": "The Local train",
+        "title": "Choo Lo",
+        "playcount": 48
+      },
+      "Karan Aujla - I Really Do...": {
+        "artist": "Karan Aujla",
+        "title": "I Really Do...",
+        "playcount": 47
+      },
+      "King - F*CK WHAT THEY SAY": {
+        "artist": "King",
+        "title": "F*CK WHAT THEY SAY",
+        "playcount": 47
+      },
+      "LIFAFA - Nikamma": {
+        "artist": "LIFAFA",
+        "title": "Nikamma",
+        "playcount": 47
+      },
+      "Steve Lacy - Dark Red": {
+        "artist": "Steve Lacy",
+        "title": "Dark Red",
+        "playcount": 47
+      },
+      "The Siege - 5 BAJE": {
+        "artist": "The Siege",
+        "title": "5 BAJE",
+        "playcount": 46
+      },
+      "YashRaj - IDENTITY THEFT.": {
+        "artist": "YashRaj",
+        "title": "IDENTITY THEFT.",
+        "playcount": 46
+      },
+      "BAGI MUNDA - Memphis Munde": {
+        "artist": "BAGI MUNDA",
+        "title": "Memphis Munde",
+        "playcount": 45
+      },
+      "Dhanji - KEH DO KI YE JHOOT HAI": {
+        "artist": "Dhanji",
+        "title": "KEH DO KI YE JHOOT HAI",
+        "playcount": 45
+      },
+      "OG Lucifer - Terey papa": {
+        "artist": "OG Lucifer",
+        "title": "Terey papa",
+        "playcount": 45
+      },
+      "The Siege - Ek Din": {
+        "artist": "The Siege",
+        "title": "Ek Din",
+        "playcount": 45
+      },
+      "AP Dhillon - Dil Nu": {
+        "artist": "AP Dhillon",
+        "title": "Dil Nu",
+        "playcount": 44
+      }
+    },
+    "genres": {}
+  },
+  "extended_pool": {
+    "artists": [
+      {
+        "name": "Fotty Seven",
+        "similar_to": "Seedhe Maut",
+        "match_score": 0.581602
+      },
+      {
+        "name": "Talha Anjum",
+        "similar_to": "Seedhe Maut",
+        "match_score": 0.538711
+      },
+      {
+        "name": "Mc Stan",
+        "similar_to": "Seedhe Maut",
+        "match_score": 0.516255
+      },
+      {
+        "name": "Ikka",
+        "similar_to": "Rawal",
+        "match_score": 0.49019
+      },
+      {
+        "name": "prabh deep",
+        "similar_to": "Rawal",
+        "match_score": 0.484234
+      },
+      {
+        "name": "Prateek Kuhad",
+        "similar_to": "The Siege",
+        "match_score": 0.337457
+      },
+      {
+        "name": "Sammad, Quest, 3bhk",
+        "similar_to": "The Siege",
+        "match_score": 0.231619
+      },
+      {
+        "name": "Dream Note",
+        "similar_to": "The Siege",
+        "match_score": 0.194327
+      },
+      {
+        "name": "Khayek",
+        "similar_to": "The Siege",
+        "match_score": 0.165144
+      },
+      {
+        "name": "The Siege, Kalbaisakhi",
+        "similar_to": "The Siege",
+        "match_score": 0.137072
+      },
+      {
+        "name": "Amrinder Gill",
+        "similar_to": "Karan Aujla",
+        "match_score": 0.510975
+      },
+      {
+        "name": "Parmish Verma",
+        "similar_to": "Karan Aujla",
+        "match_score": 0.426708
+      },
+      {
+        "name": "Garry Sandhu",
+        "similar_to": "Karan Aujla",
+        "match_score": 0.411422
+      },
+      {
+        "name": "Jazzy B",
+        "similar_to": "Karan Aujla",
+        "match_score": 0.403124
+      },
+      {
+        "name": "Imran Khan",
+        "similar_to": "Karan Aujla",
+        "match_score": 0.370797
+      },
+      {
+        "name": "Bilal Saeed",
+        "similar_to": "Karan Aujla",
+        "match_score": 0.342233
+      }
+    ],
+    "source": "algorithm"
+  }
+}

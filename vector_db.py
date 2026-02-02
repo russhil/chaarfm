@@ -2,266 +2,188 @@
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
 import uuid
-
 import numpy as np
 
-COLLECTION_NAME = "music_collection"
+# In this updated flow, we are moving AWAY from Qdrant local/docker to Postgres (pgvector).
+# However, the rest of the app (server.py, recommender.py) still uses `vector_db.py` interface.
+# We need to ADAPT `vector_db.py` to talk to Postgres (Render) instead of Qdrant.
+# OR we update the server to talk to Postgres directly.
+# The `vector_db.py` seems to be the interface. Let's rewrite it to wrap Postgres pgvector.
+
+import os
+import psycopg2
+import numpy as np
+from psycopg2.extras import execute_values
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# We need to know which table to query.
+# The server usually queries a specific user's collection or a combined one.
+# For now, let's default to 'vectors_russhil' or 'vectors_combined' if we want to support multiple.
+# Let's make it configurable or dynamic.
+# The current app structure is a bit tailored to single-user Qdrant collection.
+# We'll map "COLLECTION_NAME" to a Postgres table.
+
+DEFAULT_TABLE = "vectors_russhil" # Defaulting to the user we just migrated/processed
 VECTOR_SIZE = 200
 
+def get_db_connection():
+    return psycopg2.connect(os.getenv("DATABASE_URL"))
+
 def get_client():
-    # Connect to Qdrant server (Docker)
-    # Fails if server is not running, which helps debug Docker issues
-    try:
-        return QdrantClient(host="localhost", port=6333)
-    except:
-        print("Could not connect to Qdrant on localhost:6333. Falling back to local file.")
-        return QdrantClient(path="./qdrant_data")
-
-def init_collection(client):
-    collections = client.get_collections()
-    exists = any(c.name == COLLECTION_NAME for c in collections.collections)
-    
-    if not exists:
-        print(f"Creating collection {COLLECTION_NAME}...")
-        client.create_collection(
-            collection_name=COLLECTION_NAME,
-            vectors_config=models.VectorParams(
-                size=VECTOR_SIZE,
-                distance=models.Distance.COSINE
-            )
-        )
-        print("Collection created.")
-    else:
-        print(f"Collection {COLLECTION_NAME} already exists.")
-
-def upload_track(client, filename, embedding):
-    """Uploads a single track's embedding to Qdrant."""
-    point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, filename))
-    
-    client.upsert(
-        collection_name=COLLECTION_NAME,
-        points=[
-            models.PointStruct(
-                id=point_id,
-                vector=embedding.tolist(),
-                payload={"filename": filename}
-            )
-        ]
-    )
-
-def upload_batch(client, items):
-    """
-    Uploads a batch of items to Qdrant.
-    Items can be:
-    1. (filename, embedding) -> Legacy/Full track
-    2. (id, vector, payload) -> Explicit full point control
-    """
-    points = []
-    
-    for item in items:
-        if len(item) == 2:
-            # Legacy: (filename, embedding)
-            filename, embedding = item
-            point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, filename))
-            points.append(models.PointStruct(
-                id=point_id,
-                vector=embedding.tolist(),
-                payload={"filename": filename, "type": "full"}
-            ))
-        elif len(item) == 3:
-            # New: (id, vector, payload)
-            pid, vector, payload = item
-            points.append(models.PointStruct(
-                id=pid,
-                vector=vector.tolist(),
-                payload=payload
-            ))
-
-    client.upsert(collection_name=COLLECTION_NAME, points=points)
-
-def get_collection_info(client):
-    try:
-        return client.get_collection(COLLECTION_NAME)
-    except:
-        return None
+    """Returns a dummy client or connection object."""
+    return "postgres_client"
 
 def get_random_tracks(client, limit=1, avoid_ids=None):
     """
-    Retrieves random tracks by generating a random vector and searching for nearest neighbors.
-    This provides a good approximation of random sampling in the vector space.
+    Retrieves random tracks using Postgres.
     """
-    # Generate a random vector of the same dimension
-    random_vector = np.random.rand(VECTOR_SIZE).tolist()
+    conn = get_db_connection()
+    cur = conn.cursor()
     
-    # Filter to exclude played songs (avoid_ids)
-    query_filter = None
+    avoid_clause = ""
+    params = [limit]
+    
     if avoid_ids:
-        query_filter = models.Filter(
-            must_not=[
-                models.FieldCondition(
-                    key="id",
-                    match=models.MatchAny(any=list(avoid_ids))
-                )
-            ]
-        )
-
-    # Use query_points which is more universally available on older/local clients
-    # search() helper might be missing on some versions
+        # Postgres IDs are Integers in our new schema, but Qdrant used UUID strings.
+        # We need to handle this.
+        # The new pipeline stores SERIAL IDs (int).
+        # If the app passes integer IDs, we are good.
+        # If avoid_ids contains strings, we might need to filter differently or ignore.
+        
+        # Let's check if avoid_ids are ints
+        valid_ids = [str(i) for i in avoid_ids if isinstance(i, int) or (isinstance(i, str) and i.isdigit())]
+        if valid_ids:
+            avoid_clause = f"AND id NOT IN ({','.join(valid_ids)})"
+    
+    query = f"""
+        SELECT id, artist, title, s3_url, embedding 
+        FROM {DEFAULT_TABLE}
+        WHERE 1=1 {avoid_clause}
+        ORDER BY RANDOM()
+        LIMIT %s
+    """
+    
     try:
-        results = client.query_points(
-            collection_name=COLLECTION_NAME,
-            query=random_vector,
-            query_filter=query_filter,
-            limit=limit,
-            with_vectors=True,
-            with_payload=True
-        ).points
+        cur.execute(query, params)
+        rows = cur.fetchall()
+        
+        results = []
+        for row in rows:
+            results.append({
+                "id": row[0],
+                "filename": f"{row[1]} - {row[2]}", # Construct filename from artist/title for compatibility
+                "s3_url": row[3],
+                "vector": np.array(row[4]).tolist() if row[4] else []
+            })
+        return results
     except Exception as e:
-        print(f"Random Track Search fallback error: {e}")
-        # Extreme fallback: Scroll
+        print(f"Random fetch failed: {e}")
         return []
+    finally:
+        cur.close()
+        conn.close()
 
-    return [
-        {
-            "id": point.id,
-            "filename": point.payload["filename"],
-            "score": point.score,
-            "vector": point.vector
-        }
-        for point in results
-    ]
-
-def get_track_by_id(client, point_id):
-    points = client.retrieve(
-        collection_name=COLLECTION_NAME,
-        ids=[point_id],
-        with_vectors=True 
-    )
-    if points:
-        p = points[0]
-        return {
-            "id": p.id,
-            "filename": p.payload["filename"],
-            "vector": p.vector
-        }
-    return None
+def get_track_by_id(client, track_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        query = f"SELECT id, artist, title, s3_url, embedding FROM {DEFAULT_TABLE} WHERE id = %s"
+        cur.execute(query, (track_id,))
+        row = cur.fetchone()
+        if row:
+            return {
+                "id": row[0],
+                "filename": f"{row[1]} - {row[2]}",
+                "s3_url": row[3],
+                "vector": np.array(row[4]).tolist()
+            }
+        return None
+    except Exception as e:
+        print(f"Get track failed: {e}")
+        return None
+    finally:
+        cur.close()
+        conn.close()
 
 def recommend_tracks(client, positive_vectors, negative_vectors=None, avoid_ids=None, limit=1):
     """
-    Uses Qdrant's recommendation API to find tracks similar to positive_vectors
-    and dissimilar to negative_vectors.
+    Uses pgvector Cosine Distance (<=>) for recommendation.
+    Postgres vector operator for cosine distance is <=>
+    We want NEAREST (smallest distance).
     """
-    if negative_vectors is None:
-        negative_vectors = []
+    if not positive_vectors:
+        return get_random_tracks(client, limit, avoid_ids)
+        
+    target_vector = positive_vectors[0] # Simplification: use first positive
+    if isinstance(target_vector, list) and len(target_vector) > 0 and isinstance(target_vector[0], list):
+         target_vector = target_vector[0]
+         
+    # Convert list to string format for pgvector '[1,2,3]'
+    vec_str = str(target_vector)
     
-    # Filter to exclude played songs (avoid_ids)
-    query_filter = None
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    avoid_clause = ""
     if avoid_ids:
-        query_filter = models.Filter(
-            must_not=[
-                models.FieldCondition(
-                    key="id",
-                    match=models.MatchAny(any=list(avoid_ids)) # Ensure list
-                )
-            ]
-        )
-    # If we have a single positive vector and no negatives, this is a Search query (Nearest Neighbor)
-    if not negative_vectors and len(positive_vectors) == 1 and isinstance(positive_vectors[0], list):
-        # Normalize just in case? Qdrant handles it usually.
-        try:
-            results = client.query_points(
-                collection_name=COLLECTION_NAME,
-                query=positive_vectors[0],
-                query_filter=query_filter,
-                limit=limit,
-                with_payload=True,
-                with_vectors=True
-            ).points
-            # Normalize output
-            return [
-                {
-                    "id": point.id,
-                    "filename": point.payload["filename"],
-                    "score": point.score,
-                    "vector": point.vector
-                }
-                for point in results
-            ]
-        except Exception as e:
-            print(f"Search failed: {e}")
-            # Fall through to try other methods if needed, or return empty
-            pass
+        valid_ids = [str(i) for i in avoid_ids if isinstance(i, int) or (isinstance(i, str) and i.isdigit())]
+        if valid_ids:
+            avoid_clause = f"AND id NOT IN ({','.join(valid_ids)})"
 
-    # For complex queries (Negatives or Multiple Positives), use Recommend
+    # Order by cosine distance
+    query = f"""
+        SELECT id, artist, title, s3_url, embedding, (embedding <=> %s::vector) as dist
+        FROM {DEFAULT_TABLE}
+        WHERE 1=1 {avoid_clause}
+        ORDER BY dist ASC
+        LIMIT %s
+    """
+    
     try:
-        # Check if client has recommend method
-        if hasattr(client, 'recommend'):
-             results = client.recommend(
-                collection_name=COLLECTION_NAME,
-                positive=positive_vectors,
-                negative=negative_vectors,
-                query_filter=query_filter,
-                limit=limit,
-                with_vectors=True,
-                with_payload=True
-            )
-        else:
-            # Fallback for clients without recommend (e.g. very old or weird local mode)
-            # We try query_points with explicit raw vector if it was a basic search, 
-            # but here we have negatives.
-            # We will just fallback to search on the first positive vector to avoid crashing.
-            print("Warning: client.recommend not found. Falling back to search (ignoring negatives).")
-            target = positive_vectors[0] if positive_vectors else np.random.rand(VECTOR_SIZE).tolist()
-            if isinstance(target, list) and len(target) > 0 and isinstance(target[0], list):
-                 target = target[0] # Handle list of lists
-                 
-            results = client.query_points(
-                collection_name=COLLECTION_NAME,
-                query=target,
-                query_filter=query_filter,
-                limit=limit,
-                with_payload=True,
-                with_vectors=True
-            ).points
-            
-        return [
-            {
-                "id": point.id,
-                "filename": point.payload["filename"],
-                "score": point.score,
-                "vector": point.vector
-            }
-            for point in results
-        ]
+        cur.execute(query, (vec_str, limit))
+        rows = cur.fetchall()
+        
+        results = []
+        for row in rows:
+            results.append({
+                "id": row[0],
+                "filename": f"{row[1]} - {row[2]}",
+                "s3_url": row[3],
+                "vector": np.array(row[4]).tolist(),
+                "score": 1 - row[5] # Convert distance to similarity score roughly
+            })
+        return results
     except Exception as e:
-        print(f"Recommendation failed: {e}")
+        print(f"Recommend failed: {e}")
         return []
+    finally:
+        cur.close()
+        conn.close()
 
 def get_all_vectors(client):
-    """Retrieves all vectors and metadata from the collection."""
-    all_points = []
-    offset = None
-    
-    while True:
-        points, offset = client.scroll(
-            collection_name=COLLECTION_NAME,
-            scroll_filter=None,
-            limit=100,
-            with_vectors=True,
-            with_payload=True,
-            offset=offset
-        )
-        all_points.extend(points)
-        if offset is None:
-            break
-            
-    return [
-        {
-            "id": p.id,
-            "filename": p.payload["filename"],
-            "vector": p.vector
-        }
-        for p in all_points
-    ]
-
-
+    """Retrieves all vectors for clustering."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        query = f"SELECT id, artist, title, s3_url, embedding FROM {DEFAULT_TABLE}"
+        cur.execute(query)
+        rows = cur.fetchall()
+        
+        results = []
+        for row in rows:
+            if row[4] is None: continue
+            results.append({
+                "id": row[0],
+                "filename": f"{row[1]} - {row[2]}",
+                "s3_url": row[3],
+                "vector": np.array(row[4]).tolist()
+            })
+        return results
+    except Exception as e:
+        print(f"Get all failed: {e}")
+        return []
+    finally:
+        cur.close()
+        conn.close()

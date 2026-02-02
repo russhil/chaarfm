@@ -1,0 +1,13 @@
+yt-dlp
+tensorflow
+tf-keras
+mutagen
+boto3
+psycopg2-binary
+pylast
+python-dotenv
+numpy
+librosa
+certifi
+httpx
+requests

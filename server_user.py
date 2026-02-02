@@ -475,7 +475,7 @@ async def get_profile(session_id: str = Query(...)):
     }
 
 @app.get("/stream/{filename}")
-async def stream(filename: str, session_id: str = Query(None)):
+async def stream(filename: str, session_id: str = Query(None), track_id: str = Query(None)):
     """Stream an audio file. Supports R2 redirect or local file."""
     decoded_name = urllib.parse.unquote(filename)
     
@@ -484,12 +484,13 @@ async def stream(filename: str, session_id: str = Query(None)):
     # This is critical for cloud hosting to avoid large volume mounts.
     r2_url = os.environ.get("R2_PUBLIC_URL")
     if r2_url:
-        # Assume flat structure in bucket as per upload_to_r2.py
-        # Clean filename just in case
+        # Force root path as per user request
         clean_name = urllib.parse.quote(decoded_name)
-        # Remove leading slash if present in URL
         base_url = r2_url.rstrip("/")
         final_url = f"{base_url}/{clean_name}"
+            
+        print(f"Redirecting to R2: {final_url}")
+        
         # Return 302 Found redirect
         from fastapi.responses import RedirectResponse
         return RedirectResponse(url=final_url)

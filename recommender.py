@@ -309,6 +309,7 @@ class RecommenderSession:
                     candidates = [{
                         "id": tinfo['id'],
                         "filename": tinfo['filename'],
+                        "s3_url": tinfo.get('s3_url'), # PASS S3 URL
                         "vector": tinfo['vector'],
                         "score": 0 
                     }]
@@ -379,6 +380,7 @@ class RecommenderSession:
             return {
                 "id": selected_track['id'],
                 "filename": selected_track['filename'],
+                "s3_url": selected_track.get('s3_url') # Ensure this is passed
             }
         return None
 
@@ -561,4 +563,3 @@ class RecommenderSession:
             "finished": finished,
             "vector": vector 
         })
-

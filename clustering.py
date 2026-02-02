@@ -24,6 +24,7 @@ class ClusterManager:
 
         print(f"Clustering {len(tracks)} tracks into {self.n_clusters} clusters...")
         
+        # We ensure track_map includes all info returned by get_all_vectors (including s3_url)
         self.track_map = {t['id']: t for t in tracks}
         vectors = [t['vector'] for t in tracks]
         ids = [t['id'] for t in tracks]
