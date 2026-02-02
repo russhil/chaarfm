@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chaar.fm - Admin</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            display: block;
+            overflow-y: auto;
+            padding: 40px;
+            align-items: flex-start;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .stat-card h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--secondary);
+            margin-bottom: 12px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-meta {
+            font-size: 0.85rem;
+            color: var(--secondary);
+        }
+
+        /* Tables */
+        .data-panel {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            color: var(--secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--surface-border);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Logs */
+        .log-terminal {
+            background: #000;
+            border: 1px solid var(--surface-border);
+            border-radius: 8px;
+            padding: 16px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #a0a0a0;
+        }
+
+        .log-entry {
+            margin-bottom: 6px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .log-ts { color: #555; }
+        .log-action { color: var(--accent); font-weight: bold; width: 80px; }
+        .log-detail { color: #ddd; }
+
+        /* Chat */
+        .chat-layout {
+            display: flex;
+            gap: 24px;
+            height: 600px;
+        }
+
+        .chat-sidebar {
+            width: 250px;
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 8px;
+            overflow-y: auto;
+        }
+
+        .user-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--surface-border);
+            font-size: 0.9rem;
+            transition: background 0.1s;
+        }
+
+        .user-item:hover, .user-item.active {
+            background: var(--bg-color);
+            color: var(--accent);
+        }
+
+        .chat-main {
+            flex: 1;
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-history {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .message.ai {
+            background: var(--bg-color);
+            border: 1px solid var(--surface-border);
+            margin-right: auto;
+        }
+
+        .message.user {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: #fff;
+            margin-left: auto;
+        }
+
+        .chat-input-box {
+            padding: 16px;
+            border-top: 1px solid var(--surface-border);
+            background: var(--bg-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <header>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <a href="/player" class="btn btn-ghost" style="border: 1px solid var(--surface-border);"><i class="fas fa-arrow-left"></i> RETURN</a>
+                <h2>SYSTEM_ADMIN</h2>
+            </div>
+            <div class="text-label">AUTHORIZED: RUSSHIL</div>
+        </header>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <h3>Total Plays</h3>
+                <div class="stat-value" id="total-plays">-</div>
+                <div class="stat-meta">Global Metric</div>
+            </div>
+            <div class="stat-card">
+                <h3>Avg Session</h3>
+                <div class="stat-value" id="avg-listen">-</div>
+                <div class="stat-meta">Target > 30s</div>
+            </div>
+            <div class="stat-card">
+                <h3>Skip Rate</h3>
+                <div class="stat-value" id="skip-rate">-</div>
+                <div class="stat-meta">Target < 20%</div>
+            </div>
+        </div>
+
+        <div class="data-panel">
+            <h3 style="margin-bottom: 20px;">USER PERFORMANCE</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>USER</th>
+                        <th>PLAYS</th>
+                        <th>AVG TIME</th>
+                        <th>SKIP %</th>
+                        <th>STATUS</th>
+                    </tr>
+                </thead>
+                <tbody id="user-table"></tbody>
+            </table>
+        </div>
+
+        <div class="data-panel">
+            <h3 style="margin-bottom: 20px;">REAL-TIME LOGS</h3>
+            <div id="log-viewer" class="log-terminal">
+                <div>Waiting for data stream...</div>
+            </div>
+        </div>
+
+        <div class="data-panel">
+            <h3 style="margin-bottom: 20px;">AI ANALYST (GEMINI 2.0)</h3>
+            <div class="chat-layout">
+                <div class="chat-sidebar" id="chat-user-list">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="chat-main">
+                    <div class="chat-history" id="chat-messages">
+                        <div class="message ai">System ready. Select a user context to begin analysis.</div>
+                    </div>
+                    <div class="chat-input-box">
+                        <input type="password" id="api-key" class="input-field" placeholder="API KEY (REQUIRED)" style="margin-bottom: 12px; font-family: monospace;">
+                        <div style="display: flex; gap: 12px;">
+                            <input type="text" id="chat-input" class="input-field" placeholder="Query data...">
+                            <button class="btn btn-primary" onclick="sendMessage()">EXECUTE</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentChatTarget = null;
+        let currentContext = 'user'; 
+        
+        async function loadStats() {
+            try {
+                const sessionId = localStorage.getItem('chaar_session');
+                const res = await fetch(`/api/admin/stats?session_id=${sessionId || ''}`);
+                const data = await res.json();
+
+                document.getElementById('total-plays').innerText = data.global.total_plays;
+                document.getElementById('avg-listen').innerText = data.global.avg_listen_time.toFixed(1) + 's';
+                document.getElementById('skip-rate').innerText = (data.global.skip_rate * 100).toFixed(1) + '%';
+
+                const tbody = document.getElementById('user-table');
+                tbody.innerHTML = '';
+                
+                const userList = document.getElementById('chat-user-list');
+                userList.innerHTML = `
+                    <div class="user-item" onclick="selectContext('global', this)">
+                        <strong>GLOBAL_CONTEXT</strong>
+                    </div>
+                `;
+
+                for (const [user, stats] of Object.entries(data.users)) {
+                    const tr = document.createElement('tr');
+                    const status = stats.avg_listen_time > 30 && stats.skip_rate < 0.2 ? 
+                        '<span style="color:var(--success)">OPTIMAL</span>' : 
+                        '<span style="color:var(--error)">DRIFTING</span>';
+
+                    tr.innerHTML = `
+                        <td>${user}</td>
+                        <td>${stats.total_plays}</td>
+                        <td>${stats.avg_listen_time.toFixed(0)}s</td>
+                        <td>${(stats.skip_rate * 100).toFixed(0)}%</td>
+                        <td>${status}</td>
+                    `;
+                    tbody.appendChild(tr);
+
+                    const div = document.createElement('div');
+                    div.className = 'user-item';
+                    div.innerText = user.toUpperCase();
+                    div.onclick = () => selectContext('user', div, user);
+                    userList.appendChild(div);
+                }
+            } catch (e) {
+                console.error("Stats error", e);
+            }
+        }
+
+        async function loadLogs() {
+            try {
+                const sessionId = localStorage.getItem('chaar_session');
+                const res = await fetch(`/api/admin/logs?session_id=${sessionId || ''}&limit=50`);
+                if (!res.ok) return;
+                const logs = await res.json();
+                
+                const container = document.getElementById('log-viewer');
+                if (logs.length === 0) return;
+                
+                let html = '';
+                for (const log of logs) {
+                    const ts = log.timestamp ? log.timestamp.split('T')[1].split('.')[0] : '';
+                    html += `<div class="log-entry">
+                        <span class="log-ts">${ts}</span>
+                        <span class="log-action">${log.action.toUpperCase()}</span>
+                        <span class="log-detail">${log.user_id} :: ${log.filename}</span>
+                    </div>`;
+                }
+                container.innerHTML = html;
+            } catch (e) {}
+        }
+
+        function selectContext(ctx, element, user = null) {
+            currentContext = ctx;
+            currentChatTarget = user;
+            document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            
+            const chat = document.getElementById('chat-messages');
+            chat.innerHTML = `<div class="message ai">Context switched to: <strong>${user || 'GLOBAL'}</strong>. Awaiting query.</div>`;
+        }
+
+        async function sendMessage() {
+            if (currentContext === 'user' && !currentChatTarget) {
+                alert("SELECT TARGET");
+                return;
+            }
+
+            const input = document.getElementById('chat-input');
+            const apiKey = document.getElementById('api-key').value;
+            const message = input.value.trim();
+
+            if (!message || !apiKey) return;
+
+            const chat = document.getElementById('chat-messages');
+            chat.innerHTML += `<div class="message user">${message}</div>`;
+            input.value = '';
+            chat.scrollTop = chat.scrollHeight;
+
+            chat.innerHTML += `<div id="loading" class="message ai">PROCESSING...</div>`;
+
+            try {
+                const res = await fetch('/api/admin/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: currentChatTarget || "global",
+                        context: currentContext,
+                        message: message,
+                        api_key: apiKey
+                    })
+                });
+
+                const data = await res.json();
+                document.getElementById('loading').remove();
+                chat.innerHTML += `<div class="message ai">${data.reply.replace(/\n/g, '<br>')}</div>`;
+                chat.scrollTop = chat.scrollHeight;
+
+            } catch (e) {
+                document.getElementById('loading').innerText = "ERROR: " + e.message;
+            }
+        }
+
+        loadStats();
+        setInterval(loadLogs, 2000);
+        loadLogs();
+    </script>
+</body>
+</html>

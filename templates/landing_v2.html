@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Chaarfm - The Feed That Learns Your Vibe</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- LANDING V2 OVERRIDES & SPECIFIC STYLES --- */
+        
+        :root {
+            /* Palette adjustments for V2 */
+            --bg-dark: #05000a; /* Deep purple-black */
+            --bg-gradient-start: #1a0b2e;
+            --bg-gradient-end: #000000;
+            --glass-bg: rgba(5, 0, 10, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --brand-gradient: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            --brand-gradient-hover: linear-gradient(135deg, #9333ea 0%, #db2777 100%);
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa; /* Neutral-400/500 equivalent */
+        }
+
+        body {
+            display: block; /* Override style.css flex layout */
+            height: auto;
+            min-height: 100vh;
+            overflow-y: auto;
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 50% 0%, #2d1b4e 0%, #05000a 60%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif; /* Explicitly setting Inter as primary */
+            overflow-x: hidden;
+        }
+
+        /* Override global grid background for this page if needed, 
+           or let it blend with the new background-color */
+        body::before {
+            opacity: 0.05; /* Make the global grid very subtle */
+        }
+
+        /* --- UTILITIES --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        .text-gradient {
+            background: var(--brand-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-cta {
+            background: var(--brand-gradient);
+            color: white;
+            border: none;
+            height: 56px;
+            padding: 0 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
+        }
+
+        .btn-cta-secondary {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            height: 48px;
+            padding: 0 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-cta-secondary:hover {
+            border-color: #a855f7;
+            background: rgba(168, 85, 247, 0.1);
+        }
+
+        /* --- SECTION 1: STICKY HEADER --- */
+        .sticky-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 72px;
+            z-index: 1000;
+            transition: background 0.3s ease, backdrop-filter 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .sticky-header.scrolled {
+            background: rgba(5, 0, 10, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .brand-wordmark {
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -0.04em;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .nav-items {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            text-decoration: underline;
+            text-decoration-color: var(--accent);
+            text-underline-offset: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-link { display: none; }
+        }
+
+        /* --- SECTION 2: HERO --- */
+        .hero-section {
+            min-height: 90vh;
+            padding-top: 120px; /* Header offset */
+            display: flex;
+            align-items: center;
+            overflow: hidden; /* For animations */
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-headline {
+            font-size: 3.5rem;
+            line-height: 1.1;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px;
+        }
+
+        .hero-sub {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            max-width: 540px;
+        }
+
+        .hero-microcopy {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .social-proof-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        /* Phone Mockup Animation */
+        .phone-mockup-wrapper {
+            position: relative;
+            width: 320px;
+            height: 640px;
+            margin: 0 auto;
+            perspective: 1000px;
+        }
+
+        .phone-frame {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 8px solid #1a1a1a;
+            border-radius: 40px;
+            background: #000;
+            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.6);
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .phone-notch {
+            position: absolute;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 120px; height: 24px;
+            background: #1a1a1a;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            z-index: 10;
+        }
+
+        .app-screen {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #0f0f0f;
+        }
+
+        /* Song Card Animation */
+        .song-card-anim {
+            position: absolute;
+            bottom: 80px; left: 20px; right: 20px;
+            height: 380px;
+            background: #1f1f1f;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform-origin: bottom center;
+        }
+
+        .art-placeholder {
+            flex: 1;
+            background: linear-gradient(45deg, #333, #444);
+            position: relative;
+        }
+        
+        .art-gradient-1 { background: linear-gradient(135deg, #4f46e5, #ec4899); }
+        .art-gradient-2 { background: linear-gradient(135deg, #059669, #3b82f6); }
+        .art-gradient-3 { background: linear-gradient(135deg, #d97706, #dc2626); }
+
+        .song-info-anim {
+            padding: 16px;
+            background: rgba(30,30,30,0.9);
+        }
+
+        .anim-line { height: 12px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 8px; }
+        .anim-line.short { width: 60%; }
+
+        /* Animation Sequence Keyframes */
+        @keyframes swipeRight {
+            0% { transform: translateX(0) rotate(0); opacity: 1; }
+            100% { transform: translateX(400px) rotate(15deg); opacity: 0; }
+        }
+        @keyframes swipeLeft {
+            0% { transform: translateX(0) rotate(0); opacity: 1; }
+            100% { transform: translateX(-400px) rotate(-15deg); opacity: 0; }
+        }
+        @keyframes slideUp {
+            0% { transform: translateY(100px) scale(0.9); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        #card-1 { animation: cardSequence1 8s infinite cubic-bezier(0.4, 0, 0.2, 1); }
+        #card-2 { animation: cardSequence2 8s infinite cubic-bezier(0.4, 0, 0.2, 1); }
+        #card-3 { animation: cardSequence3 8s infinite cubic-bezier(0.4, 0, 0.2, 1); }
+
+        @keyframes cardSequence1 {
+            0% { transform: translateX(0) scale(1); opacity: 1; z-index: 3; }
+            15% { transform: translateX(400px) rotate(15deg); opacity: 0; z-index: 3; } /* Swipe Right */
+            15.01% { transform: translateY(100px); opacity: 0; z-index: 1; } /* Reset */
+            85% { transform: translateY(100px); opacity: 0; z-index: 1; }
+            100% { transform: translateY(0) scale(1); opacity: 1; z-index: 3; } /* Back to start */
+        }
+
+        @keyframes cardSequence2 {
+            0% { transform: translateY(20px) scale(0.95); opacity: 0.5; z-index: 2; }
+            15% { transform: translateY(0) scale(1); opacity: 1; z-index: 3; } /* Move up */
+            50% { transform: translateX(-400px) rotate(-15deg); opacity: 0; z-index: 3; } /* Swipe Left */
+            50.01% { transform: translateY(100px); opacity: 0; z-index: 1; }
+            100% { transform: translateY(20px) scale(0.95); opacity: 0.5; z-index: 2; }
+        }
+
+        @keyframes cardSequence3 {
+            0% { transform: translateY(40px) scale(0.9); opacity: 0; z-index: 1; }
+            15% { transform: translateY(20px) scale(0.95); opacity: 0.5; z-index: 2; }
+            50% { transform: translateY(0) scale(1); opacity: 1; z-index: 3; } /* Move up */
+            85% { transform: translateX(0) scale(1); opacity: 1; z-index: 3; } /* Static hold */
+            100% { transform: translateY(40px) scale(0.9); opacity: 0; z-index: 1; }
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            #card-1, #card-2, #card-3 { animation: none !important; }
+            #card-1 { opacity: 1; transform: none; z-index: 3; }
+            #card-2, #card-3 { opacity: 0; }
+        }
+
+
+        /* --- SECTION 3: HOW IT WORKS --- */
+        .hiw-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            position: relative;
+        }
+        
+        .hiw-grid::before {
+            content: '';
+            position: absolute;
+            top: 40px; left: 10%; right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+            border-top: 2px dashed rgba(255,255,255,0.1);
+            z-index: 0;
+        }
+
+        .hiw-step {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            background: var(--bg-dark); /* Mask line */
+            padding: 20px;
+        }
+
+        .step-icon {
+            width: 80px; height: 80px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 2rem;
+            color: #a855f7;
+            box-shadow: 0 0 40px rgba(168, 85, 247, 0.1);
+        }
+
+        .step-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
+        .step-desc { color: var(--text-muted); line-height: 1.5; }
+
+        /* --- SECTION 4: VIBE QUEST --- */
+        .vibe-explainer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .step-list {
+            counter-reset: vibe-counter;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin: 32px 0;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 16px;
+        }
+
+        .step-item::before {
+            counter-increment: vibe-counter;
+            content: counter(vibe-counter);
+            width: 32px; height: 32px;
+            background: var(--glass-border);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            color: #fff;
+        }
+
+        .transparency-box {
+            border-left: 3px solid #a855f7;
+            background: rgba(168, 85, 247, 0.05);
+            padding: 16px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-bottom: 32px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .mockup-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .mockup-mini {
+            background: #1a1a1a;
+            border-radius: 12px;
+            aspect-ratio: 9/16;
+            border: 2px solid var(--glass-border);
+            opacity: 0.8;
+            transition: transform 0.3s;
+        }
+        
+        .mockup-mini:hover { transform: translateY(-5px); opacity: 1; border-color: #a855f7; }
+
+        /* --- SECTION 5: COMPARISON --- */
+        .comparison-wrapper {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .comp-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        .comp-header {
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--glass-border);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .comp-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            padding: 24px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .comp-row:last-child { border-bottom: none; }
+
+        .comp-col-left { color: var(--text-muted); padding-right: 24px; }
+        .comp-col-right { 
+            color: #fff; 
+            font-weight: 600; 
+            padding-left: 24px; 
+            border-left: 1px solid rgba(255,255,255,0.03);
+            position: relative;
+        }
+        
+        .comp-col-right::before {
+            content: '✓';
+            color: #ec4899;
+            margin-right: 8px;
+        }
+
+        /* --- SECTION 6: ARTISTS --- */
+        .artist-callout {
+            max-width: 680px;
+            margin: 0 auto;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(168,85,247,0.05) 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 48px;
+        }
+
+        .artist-checkbox-viz {
+            margin-top: 32px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .artist-arrow {
+            position: absolute;
+            right: -120px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a855f7;
+            font-family: 'Nothing You Could Do', cursive; /* Fallback if not loaded */
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- SECTION 7: WAITLIST FORM --- */
+        .waitlist-section {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, #1a0b2e 100%);
+        }
+
+        .form-card {
+            max-width: 480px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group { margin-bottom: 16px; }
+        
+        .input-v2 {
+            width: 100%;
+            height: 56px;
+            padding: 0 16px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .input-v2:focus {
+            outline: none;
+            border-color: #a855f7;
+            box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin: 24px 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        
+        .checkbox-group input {
+            width: 20px; height: 20px;
+            accent-color: #a855f7;
+            margin-top: 2px;
+        }
+
+        .success-overlay {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- SECTION 8: FAQ --- */
+        .faq-container { max-width: 720px; margin: 0 auto; }
+        
+        .faq-item {
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        .faq-question {
+            padding: 24px 0;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+        
+        .faq-item.active .faq-answer { max-height: 200px; padding-bottom: 24px; }
+        .faq-item.active .faq-question { color: #a855f7; }
+        .faq-icon { transition: transform 0.3s; }
+        .faq-item.active .faq-icon { transform: rotate(180deg); }
+
+        /* --- FOOTER --- */
+        .footer {
+            background: #000;
+            padding: 60px 0 20px;
+            border-top: 1px solid var(--glass-border);
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .footer a { color: var(--text-muted); text-decoration: none; display: block; margin-bottom: 12px; }
+        .footer a:hover { color: #fff; }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .hero-grid, .hiw-grid, .vibe-explainer-grid, .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+            .hero-headline { font-size: 2.5rem; }
+            .hiw-grid::before { display: none; }
+            .artist-arrow { display: none; }
+            .comp-row { grid-template-columns: 1fr; gap: 8px; }
+            .comp-col-right { border-left: none; padding-left: 0; padding-top: 8px; }
+            .phone-mockup-wrapper { transform: scale(0.8); margin-top: -40px; margin-bottom: -40px; }
+        }
+
+        /* --- SCROLL REVEAL --- */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+        
+        .reveal-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- SECTION 1: STICKY HEADER -->
+    <header class="sticky-header" id="header">
+        <div class="container header-inner">
+            <a href="#" class="brand-wordmark">Chaarfm</a>
+            
+            <div class="nav-items">
+                <a href="#how-it-works" class="nav-link">How it works</a>
+                <a href="#demo" class="nav-link">Demo</a>
+                <a href="#faq" class="nav-link">FAQ</a>
+                <a href="#waitlist" class="btn-cta" style="height: 40px; font-size: 0.9rem; padding: 0 20px;">Join the waitlist</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- SECTION 2: HERO -->
+    <section class="hero-section">
+        <div class="container hero-grid">
+            <div class="hero-content">
+                <div class="social-proof-pill">
+                    <i class="fas fa-user-group"></i> 1,247 music lovers already waiting
+                </div>
+                <h1 class="hero-headline">Music as a feed that <span class="text-gradient">adapts to you.</span></h1>
+                <p class="hero-sub">Chaarfm is a music app that works like a short-form feed. Swipe to like or skip, and the next song adapts. No playlists. No searching. Just flow.</p>
+                
+                <a href="#waitlist" class="btn-cta">Join the waitlist</a>
+                
+                <div class="hero-microcopy">
+                    <i class="fas fa-clock"></i> Limited early access. No spam, just vibes.
+                </div>
+            </div>
+
+            <!-- Animated Phone Mockup -->
+            <div class="phone-mockup-wrapper">
+                <div class="phone-frame">
+                    <div class="phone-notch"></div>
+                    <div class="app-screen">
+                        <!-- Card 3 (Bottom/Next) -->
+                        <div class="song-card-anim" id="card-3">
+                            <div class="art-placeholder art-gradient-3"></div>
+                            <div class="song-info-anim">
+                                <div class="anim-line"></div>
+                                <div class="anim-line short"></div>
+                            </div>
+                        </div>
+                        <!-- Card 2 (Middle/Next) -->
+                        <div class="song-card-anim" id="card-2">
+                            <div class="art-placeholder art-gradient-2"></div>
+                            <div class="song-info-anim">
+                                <div class="anim-line"></div>
+                                <div class="anim-line short"></div>
+                            </div>
+                        </div>
+                        <!-- Card 1 (Top/Active) -->
+                        <div class="song-card-anim" id="card-1">
+                            <div class="art-placeholder art-gradient-1"></div>
+                            <div class="song-info-anim">
+                                <div class="anim-line"></div>
+                                <div class="anim-line short"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: HOW IT WORKS -->
+    <section id="how-it-works" class="section">
+        <div class="container">
+            <div class="text-center" style="margin-bottom: 60px;">
+                <h2 class="hero-headline" style="font-size: 2.5rem;">Music discovery, reinvented as a feed</h2>
+                <p class="hero-sub" style="margin: 0 auto;">No search. No playlists. Just swipe, and let the vibe unfold.</p>
+            </div>
+
+            <div class="hiw-grid">
+                <div class="hiw-step reveal-on-scroll">
+                    <div class="step-icon"><i class="fas fa-sliders"></i></div>
+                    <h3 class="step-title">1. Start with a vibe</h3>
+                    <p class="step-desc">Pick one or two moods. The feed begins.</p>
+                </div>
+                <div class="hiw-step reveal-on-scroll" style="transition-delay: 100ms;">
+                    <div class="step-icon"><i class="fas fa-hand-pointer"></i></div>
+                    <h3 class="step-title">2. Swipe to guide it</h3>
+                    <p class="step-desc">Like or skip. Every action teaches the system.</p>
+                </div>
+                <div class="hiw-step reveal-on-scroll" style="transition-delay: 200ms;">
+                    <div class="step-icon"><i class="fas fa-infinity"></i></div>
+                    <h3 class="step-title">3. Stay in flow</h3>
+                    <p class="step-desc">Smooth transitions. No interruptions. Pure discovery.</p>
+                </div>
+            </div>
+
+            <div class="text-center" style="margin-top: 60px;">
+                <a href="#waitlist" class="btn-cta-secondary">Join the waitlist</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: VIBE QUEST DEMO EXPLAINER -->
+    <section id="demo" class="section" style="background: rgba(255,255,255,0.02);">
+        <div class="container vibe-explainer-grid">
+            <div class="reveal-on-scroll">
+                <h2 class="hero-headline" style="font-size: 2.5rem;">Try the Vibe Quest Demo</h2>
+                <p class="hero-sub">A 2-minute experience that shows how Chaarfm learns your taste in real-time.</p>
+                
+                <div class="step-list">
+                    <div class="step-item">
+                        <div>
+                            <div style="font-weight: 700; margin-bottom: 4px;">Pick your starting vibe</div>
+                            <div style="color: var(--text-muted);">Choose 1–2 moods from our starter palette.</div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div>
+                            <div style="font-weight: 700; margin-bottom: 4px;">Swipe 8–12 songs</div>
+                            <div style="color: var(--text-muted);">Like what fits. Skip what doesn't. The system watches.</div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div>
+                            <div style="font-weight: 700; margin-bottom: 4px;">Lock into your lane</div>
+                            <div style="color: var(--text-muted);">After a few swipes, the feed narrows into your vibe zone.</div>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div>
+                            <div style="font-weight: 700; margin-bottom: 4px;">Preview your personalized flow</div>
+                            <div style="color: var(--text-muted);">Experience a short sequence with smooth transitions between tracks.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="transparency-box">
+                    The demo uses placeholder tracks to showcase how the learning engine works. We're building our catalog intentionally—transparency first.
+                </div>
+
+                <a href="#waitlist" class="btn-cta">Join the waitlist</a>
+            </div>
+
+            <div class="mockup-grid reveal-on-scroll">
+                <!-- Visual mockups of the 4 steps -->
+                <div class="mockup-mini"></div>
+                <div class="mockup-mini"></div>
+                <div class="mockup-mini"></div>
+                <div class="mockup-mini"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 5: COMPARISON -->
+    <section class="section">
+        <div class="container">
+            <div class="text-center" style="margin-bottom: 60px;">
+                <h2 class="hero-headline" style="font-size: 2.5rem;">The old way vs. the Chaarfm way</h2>
+            </div>
+
+            <div class="comparison-wrapper reveal-on-scroll">
+                <div class="comp-grid comp-header">
+                    <div class="comp-col-left">Traditional apps</div>
+                    <div class="comp-col-right" style="color: #a855f7;">Chaarfm</div>
+                </div>
+                
+                <div class="comp-row">
+                    <div class="comp-col-left">Search for songs, build playlists manually</div>
+                    <div class="comp-col-right">Swipe through a feed that adapts as you go</div>
+                </div>
+                <div class="comp-row">
+                    <div class="comp-col-left">Static recommendations based on past data</div>
+                    <div class="comp-col-right">Real-time learning from your current mood</div>
+                </div>
+                <div class="comp-row">
+                    <div class="comp-col-left">Jarring transitions between tracks</div>
+                    <div class="comp-col-right">Smooth crossfades that maintain flow</div>
+                </div>
+                <div class="comp-row">
+                    <div class="comp-col-left">Decision fatigue: "What should I play next?"</div>
+                    <div class="comp-col-right">Zero friction: just like or skip</div>
+                </div>
+            </div>
+
+            <div class="text-center" style="margin-top: 40px;">
+                <a href="#waitlist" class="btn-cta">Join the waitlist</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 6: FOR ARTISTS -->
+    <section id="artists" class="section">
+        <div class="container">
+            <div class="artist-callout reveal-on-scroll">
+                <h2 class="hero-headline" style="font-size: 2rem;">Built to surface the right music, not just the famous music</h2>
+                <p class="hero-sub" style="margin: 20px auto;">Once our catalog scales, Chaarfm's engine will route listeners to emerging artists based on vibe-fit, not follower count.</p>
+                
+                <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 20px;">
+                    We're starting with a demo catalog to prove the learning engine works. But our vision is bigger: a system where artists get discovered because their sound matches what a listener is <em>feeling right now</em>—not because they gamed an algorithm or paid for placement.
+                </p>
+                
+                <p style="color: var(--text-muted); line-height: 1.6;">
+                    If you're an artist or label, there's a checkbox in the waitlist form below to receive updates on creator onboarding. We'll reach out when we're ready.
+                </p>
+
+                <div class="artist-checkbox-viz">
+                    <div style="background: rgba(0,0,0,0.5); padding: 12px 24px; border-radius: 8px; border: 1px solid #a855f7; display: inline-flex; align-items: center; gap: 12px;">
+                        <div style="width: 20px; height: 20px; background: #a855f7; border-radius: 4px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-check" style="font-size: 12px;"></i></div>
+                        <span style="font-size: 0.9rem;">I'm an artist or label...</span>
+                    </div>
+                    <div class="artist-arrow">
+                        <i class="fas fa-long-arrow-alt-left"></i> Check this to get creator updates
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 7: WAITLIST FORM -->
+    <section id="waitlist" class="section waitlist-section">
+        <div class="container">
+            <div class="form-card reveal-on-scroll" id="waitlist-container">
+                <div class="text-center" style="margin-bottom: 32px;">
+                    <h2 class="hero-headline" style="font-size: 2rem;">Join the Vibe Quest Demo waitlist</h2>
+                    <p style="color: var(--text-muted);">Limited early access. We'll notify you when your spot is ready.</p>
+                </div>
+
+                <form id="signup-form" onsubmit="handleSignup(event)">
+                    <div class="form-group">
+                        <input type="email" class="input-v2" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="input-v2" placeholder="What should we call you? (Optional)">
+                    </div>
+                    
+                    <label class="checkbox-group">
+                        <input type="checkbox" id="artist-check">
+                        <span>I'm an artist or label—send me creator onboarding updates</span>
+                    </label>
+
+                    <button type="submit" class="btn-cta" style="width: 100%;">Join the waitlist</button>
+                </form>
+
+                <div class="success-overlay" id="success-msg">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 16px;">You're on the list.</h3>
+                    <p style="color: var(--text-muted); line-height: 1.6;">We'll email you when the Vibe Quest Demo is ready. Check your inbox for a confirmation.</p>
+                    <p id="artist-confirm" style="color: #a855f7; margin-top: 16px; display: none;">You'll also receive creator onboarding updates separately.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 8: FAQ -->
+    <section id="faq" class="section">
+        <div class="container faq-container">
+            <div class="text-center" style="margin-bottom: 40px;">
+                <h2 class="hero-headline" style="font-size: 2.5rem;">Questions? We've got answers.</h2>
+            </div>
+
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        What is Chaarfm?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">Chaarfm is a music discovery app designed like a short-form feed. You swipe through songs, and the app learns your vibe in real-time—no playlists, no searching. It's all about staying in flow.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        What's the Vibe Quest Demo?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">It's a 2-minute interactive experience where you pick a starting vibe, swipe through 8–12 songs, and watch the system lock into your taste. You'll hear smooth transitions and feel how the feed adapts. The demo uses placeholder tracks to showcase the learning engine.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Why placeholder tracks?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">We're pre-launch and focused on proving the algorithm works before scaling our catalog. The demo uses reference music to show you exactly how in-session learning and transitions feel. Transparency matters to us—we're not pretending we have a massive library yet.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        When will the full app launch?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">We're working toward a broader release in 2026. Waitlist members get first access to the demo and will be the first to know when we expand the catalog and open the full app.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Will Chaarfm have my favorite artist?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">The demo won't have every artist. But once we scale our catalog, the goal is to combine popular music and emerging artists—surfaced based on fit, not fame. If you're looking for a specific artist right now, this might not be the experience for you yet.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        How much will it cost?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">We haven't finalized pricing, but the demo is free. We'll share more details closer to the full launch.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        I'm an artist. How do I get my music on Chaarfm?
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">We're not onboarding artists yet, but if you check the "I'm an artist/label" box in the waitlist form, we'll email you when creator onboarding opens. We're building the supply side thoughtfully.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 9: FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <a href="#" class="brand-wordmark" style="font-size: 1.2rem; margin-bottom: 16px;">Chaarfm</a>
+                    <p>Music as a feed that adapts to you.</p>
+                </div>
+                <div>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="mailto:hello@chaarfm.com">hello@chaarfm.com</a>
+                </div>
+                <div>
+                    <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px;">Follow our journey</div>
+                    <div style="display: flex; gap: 16px; font-size: 1.5rem;">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center" style="opacity: 0.5; font-size: 0.8rem;">
+                &copy; 2024 Chaarfm. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Sticky Header
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) header.classList.add('scrolled');
+            else header.classList.remove('scrolled');
+        });
+
+        // FAQ Toggle
+        function toggleFaq(el) {
+            el.parentElement.classList.toggle('active');
+        }
+
+        // Scroll Reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+
+        // Form Handling
+        function handleSignup(e) {
+            e.preventDefault();
+            const isArtist = document.getElementById('artist-check').checked;
+            
+            document.getElementById('signup-form').style.display = 'none';
+            document.getElementById('success-msg').style.display = 'block';
+            
+            if (isArtist) {
+                document.getElementById('artist-confirm').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

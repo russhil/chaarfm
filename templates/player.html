@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#050505">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/images/logo-192.png">
+    <title>chaar.fm</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header-bar">
+            <div class="logo-mark">
+                <div class="logo-dot"></div>
+                CHAAR.FM
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span id="user-badge" class="text-label"></span>
+                
+                <button id="btn-admin" class="btn-ghost btn-icon" style="display: none;" title="Admin">
+                    <i class="fas fa-chart-line"></i>
+                </button>
+                
+                <button id="btn-search" class="btn-ghost btn-icon" title="Search">
+                    <i class="fas fa-search"></i>
+                </button>
+                
+                <button id="btn-reset" class="btn-ghost btn-icon" title="Reset History">
+                    <i class="fas fa-history"></i>
+                </button>
+                
+                <button id="btn-logout" class="btn-ghost btn-icon" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="album-frame">
+                <i class="fas fa-compact-disc"></i>
+            </div>
+
+            <div class="track-meta">
+                <h2 class="track-title" id="track-title">Ready.</h2>
+                <div class="track-status">
+                    <div class="status-indicator" id="status-dot"></div>
+                    <span id="track-status">Initialize playback</span>
+                </div>
+                <div id="track-reasoning" class="reasoning-badge">WAITING_FOR_INPUT</div>
+            </div>
+
+            <!-- Waveform Progress -->
+            <div class="progress-container">
+                <div class="progress-track">
+                    <div class="progress-fill" id="progress"></div>
+                </div>
+                <div class="time-labels">
+                    <span id="current-time">0:00</span>
+                    <span id="total-time">--:--</span>
+                </div>
+            </div>
+
+            <div class="controls-row">
+                <button id="btn-prev" class="btn-ghost btn-icon" style="font-size: 1.2rem;">
+                    <i class="fas fa-backward-step"></i>
+                </button>
+
+                <button id="btn-play" class="play-btn">
+                    <i class="fas fa-play" id="play-icon"></i>
+                </button>
+
+                <button id="btn-next" class="btn-ghost btn-icon" style="font-size: 1.2rem;">
+                    <i class="fas fa-forward-step"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Batch Strip -->
+        <div class="batch-strip">
+            <div class="batch-step" id="dot-0"></div>
+            <div class="batch-step" id="dot-1"></div>
+            <div class="batch-step" id="dot-2"></div>
+            <div class="batch-step" id="dot-3"></div>
+            <div class="batch-step" id="dot-4"></div>
+        </div>
+        <div style="text-align: center; padding-bottom: 16px;">
+            <span id="batch-label" class="text-label">QUEUE INITIALIZED</span>
+        </div>
+    </div>
+
+    <!-- Search Overlay -->
+    <div id="search-overlay" class="search-modal" style="display:none;">
+        <div class="search-input-area">
+            <button id="btn-close-search" class="btn-ghost btn-icon"><i class="fas fa-arrow-left"></i></button>
+            <input type="text" id="search-input" class="input-field" placeholder="SEARCH DATABASE..." style="background: var(--surface-color); border: none;">
+        </div>
+        <div id="search-results" style="flex: 1; overflow-y: auto; padding: 20px;"></div>
+    </div>
+
+    <!-- Clear History Modal -->
+    <div id="clear-history-modal" class="modal-overlay" style="display:none; position: fixed; top:0; left:0; right:0; bottom:0; z-index: 1000; align-items: center; justify-content: center;">
+        <div class="modal-card">
+            <h3 style="margin-bottom: 24px;">Clear Context</h3>
+            
+            <div id="history-stats" style="margin-bottom: 24px; padding: 16px; background: var(--surface-color); border-radius: 8px;">
+                <p class="text-label">Loading stats...</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button class="btn btn-ghost clear-option" data-mode="session" style="justify-content: flex-start; border: 1px solid var(--surface-border);">
+                    <span class="text-mono" style="margin-right: 10px;">></span> RESTART SESSION
+                </button>
+                <button class="btn btn-ghost clear-option" data-mode="1h" style="justify-content: flex-start; border: 1px solid var(--surface-border);">
+                    <span class="text-mono" style="margin-right: 10px;">></span> CLEAR LAST 1H
+                </button>
+                <button class="btn btn-ghost clear-option danger" data-mode="all" style="justify-content: flex-start; border: 1px solid var(--error); color: var(--error);">
+                    <span class="text-mono" style="margin-right: 10px;">></span> RESET ALL DATA
+                </button>
+            </div>
+
+            <div style="margin-top: 24px; text-align: right;">
+                <button id="btn-cancel-clear" class="btn btn-primary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audio-player"></audio>
+
+    <script>
+        // Session management
+        const sessionId = localStorage.getItem('chaar_session');
+        const userName = localStorage.getItem('chaar_user');
+        const isGuest = localStorage.getItem('chaar_is_guest') === 'true';
+
+        if (!sessionId) {
+            window.location.href = '/';
+        }
+
+        document.getElementById('user-badge').textContent = isGuest ? 'GUEST_MODE' : userName.toUpperCase();
+
+        const ADMIN_USERS = ['russhil'];
+        if (ADMIN_USERS.includes(userName?.toLowerCase())) {
+            const adminBtn = document.getElementById('btn-admin');
+            adminBtn.style.display = 'flex';
+            adminBtn.addEventListener('click', () => {
+                window.location.href = `/admin?session_id=${sessionId}`;
+            });
+        }
+
+        // Audio elements
+        const audio = document.getElementById('audio-player');
+        const titleEl = document.getElementById('track-title');
+        const statusEl = document.getElementById('track-status');
+        const playBtn = document.getElementById('btn-play');
+        const playIcon = document.getElementById('play-icon');
+        const progressFill = document.getElementById('progress');
+        const batchLabel = document.getElementById('batch-label');
+        const reasoningEl = document.getElementById('track-reasoning');
+        const currentTimeEl = document.getElementById('current-time');
+        const totalTimeEl = document.getElementById('total-time');
+        const statusDot = document.getElementById('status-dot');
+
+        let currentTrackId = null;
+        let currentTrackUrl = null;
+        let currentTrackTitle = null;
+        let currentTrackJustification = "";
+        let isPlaying = false;
+
+        // Batch tracking
+        let batchSize = 5;
+        let queueRemaining = 5; 
+        let currentBatchIndex = 0;
+        let batchFeedback = [null, null, null, null, null];
+        
+        function updateBatchUI() {
+            const dots = document.querySelectorAll('.batch-step');
+            dots.forEach((dot, index) => {
+                dot.className = 'batch-step'; 
+                
+                if (index < currentBatchIndex) {
+                    const status = batchFeedback[index];
+                    if (status === 'positive') dot.classList.add('positive');
+                    else if (status === 'negative') dot.classList.add('negative');
+                    else dot.classList.add('played');
+                } else if (index === currentBatchIndex) {
+                    dot.classList.add('active');
+                }
+            });
+            
+            batchLabel.textContent = `QUEUE_BUFFER: ${queueRemaining}`;
+        }
+
+        // History
+        let trackHistory = [];
+        let historyIndex = -1;
+
+        // Search
+        const searchOverlay = document.getElementById('search-overlay');
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        let searchTimeout = null;
+
+        async function api(endpoint, options = {}) {
+            const url = new URL(endpoint, window.location.origin);
+            url.searchParams.set('session_id', sessionId);
+
+            const res = await fetch(url, options);
+
+            if (res.status === 401) {
+                localStorage.clear();
+                window.location.href = '/';
+                return null;
+            }
+
+            return res;
+        }
+
+        document.getElementById('btn-logout').addEventListener('click', async () => {
+            await api('/api/logout', { method: 'POST' });
+            localStorage.clear();
+            window.location.href = '/';
+        });
+
+        document.getElementById('btn-search').addEventListener('click', () => {
+            searchOverlay.style.display = 'flex';
+            searchInput.focus();
+        });
+
+        document.getElementById('btn-close-search').addEventListener('click', () => {
+            searchOverlay.style.display = 'none';
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => performSearch(e.target.value), 300);
+        });
+
+        async function performSearch(query) {
+            if (!query) {
+                searchResults.innerHTML = '';
+                return;
+            }
+
+            try {
+                const res = await api(`/api/search?q=${encodeURIComponent(query)}`);
+                const results = await res.json();
+
+                searchResults.innerHTML = '';
+                results.forEach(track => {
+                    const div = document.createElement('div');
+                    div.style.padding = '12px';
+                    div.style.borderBottom = '1px solid var(--surface-border)';
+                    div.style.cursor = 'pointer';
+                    div.innerHTML = `<div class="text-mono" style="font-size: 0.9rem;">${track.title}</div>`;
+                    div.onclick = () => selectTrack(track.id);
+                    div.onmouseover = () => div.style.background = 'var(--surface-color)';
+                    div.onmouseout = () => div.style.background = 'transparent';
+                    searchResults.appendChild(div);
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function selectTrack(id) {
+            try {
+                const res = await api('/api/select', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                });
+                const data = await res.json();
+
+                if (data.url) {
+                    playTrackData(data);
+                    searchOverlay.style.display = 'none';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // Reset
+        const resetBtn = document.getElementById('btn-reset');
+        const historyModal = document.getElementById('clear-history-modal');
+        const cancelClearBtn = document.getElementById('btn-cancel-clear');
+        const statsEl = document.getElementById('history-stats');
+
+        resetBtn.addEventListener('click', async () => {
+            historyModal.style.display = 'flex';
+            loadHistoryStats();
+        });
+
+        cancelClearBtn.addEventListener('click', () => {
+            historyModal.style.display = 'none';
+        });
+
+        historyModal.addEventListener('click', (e) => {
+            if (e.target === historyModal) {
+                historyModal.style.display = 'none';
+            }
+        });
+
+        async function loadHistoryStats() {
+            statsEl.innerHTML = '<p class="text-mono">FETCHING DATA...</p>';
+            try {
+                const res = await api('/api/history-stats');
+                const data = await res.json();
+
+                if (data.user === 'guest') {
+                    statsEl.innerHTML = `
+                        <p class="text-mono">MODE: GUEST</p>
+                        <p class="text-label">DATA NOT PERSISTED</p>
+                    `;
+                } else {
+                    statsEl.innerHTML = `
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <div class="text-label">VIBES</div>
+                                <div class="text-mono" style="font-size: 1.2rem; color: var(--accent);">${data.clusters_explored}</div>
+                            </div>
+                            <div>
+                                <div class="text-label">LIKES</div>
+                                <div class="text-mono" style="font-size: 1.2rem; color: var(--success);">${data.total_positives}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                statsEl.innerHTML = '<p class="text-mono error">DATA_FETCH_ERROR</p>';
+            }
+        }
+
+        document.querySelectorAll('.clear-option').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const mode = btn.dataset.mode;
+                if (confirm(`CONFIRM RESET: ${mode.toUpperCase()}?`)) {
+                    await clearHistory(mode);
+                }
+            });
+        });
+
+        async function clearHistory(mode) {
+            try {
+                audio.pause();
+                const res = await api('/api/clear-history', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: mode })
+                });
+
+                historyModal.style.display = 'none';
+                trackHistory = [];
+                historyIndex = -1;
+                batchFeedback = [null, null, null, null, null];
+                currentBatchIndex = 0;
+                currentTrackId = null;
+
+                titleEl.innerText = "CONTEXT CLEARED";
+                statusEl.innerText = "SYSTEM RESET";
+                reasoningEl.innerText = "MEMORY_WIPED";
+                updatePlayButton(false);
+                progressFill.style.width = '0%';
+                
+                updateBatchUI();
+
+            } catch (e) {
+                console.error("Clear error:", e);
+                alert("RESET FAILED");
+                historyModal.style.display = 'none';
+            }
+        }
+
+        document.getElementById('btn-next').addEventListener('click', () => nextTrack());
+        document.getElementById('btn-prev').addEventListener('click', () => previousTrack());
+        playBtn.addEventListener('click', togglePlay);
+
+        audio.addEventListener('ended', () => {
+            sendFeedback();
+            nextTrack();
+        });
+
+        audio.addEventListener('error', (e) => {
+            console.error("Audio playback error:", e);
+            statusEl.innerText = "PLAYBACK ERROR";
+            statusEl.style.color = "var(--error)";
+            setTimeout(() => {
+                if (currentTrackId) nextTrack();
+            }, 2000);
+        });
+
+        // Scrubbing
+        const progressBar = document.querySelector('.progress-container');
+        let isScrubbing = false;
+
+        function getScrubTime(clientX) {
+            const rect = progressBar.getBoundingClientRect();
+            let pct = (clientX - rect.left) / rect.width;
+            pct = Math.max(0, Math.min(1, pct));
+            return pct * audio.duration;
+        }
+
+        function updateScrubVisual(clientX) {
+            const rect = progressBar.getBoundingClientRect();
+            let pct = (clientX - rect.left) / rect.width;
+            pct = Math.max(0, Math.min(1, pct));
+            progressFill.style.width = (pct * 100) + '%';
+        }
+
+        function startScrub(e) {
+            if (!audio.duration) return;
+            isScrubbing = true;
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            updateScrubVisual(clientX);
+        }
+
+        function moveScrub(e) {
+            if (!isScrubbing) return;
+            if (e.cancelable) e.preventDefault();
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            updateScrubVisual(clientX);
+        }
+
+        function endScrub(e) {
+            if (!isScrubbing) return;
+            isScrubbing = false;
+            const clientX = e.type.includes('touch') ? e.changedTouches[0].clientX : e.clientX;
+            const newTime = getScrubTime(clientX);
+            if (isFinite(newTime)) {
+                audio.currentTime = newTime;
+            }
+        }
+
+        progressBar.addEventListener('mousedown', startScrub);
+        document.addEventListener('mousemove', moveScrub);
+        document.addEventListener('mouseup', endScrub);
+        
+        progressBar.addEventListener('touchstart', startScrub, {passive: false});
+        document.addEventListener('touchmove', moveScrub, {passive: false});
+        document.addEventListener('touchend', endScrub);
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            if (!currentTrackId) return;
+
+            if (audio.duration) {
+                if (!isScrubbing) {
+                    const pct = (audio.currentTime / audio.duration) * 100;
+                    progressFill.style.width = pct + '%';
+                }
+                currentTimeEl.innerText = formatTime(audio.currentTime);
+                totalTimeEl.innerText = formatTime(audio.duration);
+            }
+        });
+
+        function togglePlay() {
+            if (!currentTrackId) {
+                loadNextTrack();
+                return;
+            }
+
+            if (audio.paused) {
+                audio.play().then(() => {
+                    updatePlayButton(true);
+                }).catch(e => console.error("Play error:", e));
+            } else {
+                audio.pause();
+                updatePlayButton(false);
+            }
+        }
+
+        function updatePlayButton(playing) {
+            isPlaying = playing;
+            playIcon.className = playing ? 'fas fa-pause' : 'fas fa-play';
+            statusDot.className = playing ? 'status-indicator active' : 'status-indicator';
+            statusEl.innerText = playing ? 'Playing' : 'Paused';
+        }
+
+        function setupMediaSession() {
+            if (!('mediaSession' in navigator)) return;
+            navigator.mediaSession.setActionHandler('play', () => { audio.play(); updatePlayButton(true); });
+            navigator.mediaSession.setActionHandler('pause', () => { audio.pause(); updatePlayButton(false); });
+            navigator.mediaSession.setActionHandler('previoustrack', () => previousTrack());
+            navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+        }
+        setupMediaSession();
+
+        function playTrackData(data) {
+            currentTrackId = data.id;
+            currentTrackUrl = data.url;
+            currentTrackTitle = data.title;
+            currentTrackJustification = data.justification || "";
+
+            titleEl.innerText = data.title;
+            reasoningEl.innerText = currentTrackJustification ? `> ${currentTrackJustification.toUpperCase()}` : "> OPTIMIZED";
+
+            if (data.queue_remaining !== undefined) {
+                queueRemaining = data.queue_remaining;
+                currentBatchIndex = 5 - queueRemaining - 1;
+                if (currentBatchIndex < 0) currentBatchIndex = 0;
+                if (currentBatchIndex === 0) batchFeedback = [null, null, null, null, null];
+                updateBatchUI();
+            }
+
+            audio.src = data.url;
+            audio.play().then(() => updatePlayButton(true)).catch(e => {
+                console.error("Autoplay error:", e);
+                statusEl.innerText = "Ready to Play";
+                updatePlayButton(false);
+            });
+        }
+
+        async function loadNextTrack() {
+            try {
+                statusEl.innerText = "Buffering...";
+                const res = await api('/api/next');
+                if (res.status === 404) {
+                    titleEl.innerText = "Queue Empty";
+                    return;
+                }
+                const data = await res.json();
+                if (data.error) return;
+
+                if (currentTrackId) {
+                    trackHistory.push({
+                        id: currentTrackId, url: currentTrackUrl, title: currentTrackTitle, justification: currentTrackJustification
+                    });
+                }
+                historyIndex = trackHistory.length;
+
+                if (data.queue_remaining !== undefined) {
+                    queueRemaining = data.queue_remaining;
+                    currentBatchIndex = 5 - queueRemaining - 1;
+                    if (currentBatchIndex < 0) currentBatchIndex = 0;
+                    if (currentBatchIndex === 0) batchFeedback = [null, null, null, null, null];
+                    updateBatchUI();
+                }
+                playTrackData(data);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function nextTrack() {
+            if (currentTrackId) sendFeedback();
+            if (historyIndex < trackHistory.length - 1) {
+                historyIndex++;
+                playTrackData(trackHistory[historyIndex]);
+            } else {
+                loadNextTrack();
+            }
+        }
+
+        function previousTrack() {
+            if (historyIndex > 0) {
+                if (currentTrackId) sendFeedback();
+                historyIndex--;
+                playTrackData(trackHistory[historyIndex]);
+            }
+        }
+
+        async function sendFeedback() {
+            if (!currentTrackId) return;
+            const durationSec = audio.currentTime;
+            
+            if (currentBatchIndex >= 0 && currentBatchIndex < 5) {
+                if (durationSec > 30) batchFeedback[currentBatchIndex] = 'positive';
+                else if (durationSec < 10) batchFeedback[currentBatchIndex] = 'negative';
+                else batchFeedback[currentBatchIndex] = 'neutral';
+                updateBatchUI();
+            }
+
+            try {
+                await api('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: currentTrackId, duration: durationSec })
+                });
+            } catch (e) {
+                console.error("Feedback error:", e);
+            }
+        }
+
+        titleEl.innerText = "System Ready.";
+        statusEl.innerText = "Awaiting Input";
+    </script>
+</body>
+</html>

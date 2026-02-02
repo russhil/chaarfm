@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/images/logo.png">
+    <title>chaar.fm</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="player-container glass">
+        <!-- Logo Header -->
+        <div class="brand-header">
+            <img src="/static/images/logo.png" alt="chaar.fm" class="brand-logo">
+            <div style="float:right; margin-top:10px;">
+                <button id="btn-reset"
+                    style="background:none; border:none; color:#ff6b6b; font-size:1.2rem; cursor:pointer; margin-right:15px;"
+                    title="Reset Session">
+                    <i class="fas fa-refresh"></i>
+                </button>
+                <button id="btn-search"
+                    style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="search-overlay" class="search-overlay" style="display:none;">
+            <div class="search-header">
+                <input type="text" id="search-input" placeholder="Find your vibe...">
+                <button id="btn-close-search"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="search-results" class="search-results"></div>
+        </div>
+
+        <div class="album-art">
+            <i class="fas fa-compact-disc"></i>
+            <div class="glow"></div>
+        </div>
+
+        <div class="track-info">
+            <h2 id="track-title">Ready to Vibe</h2>
+            <p id="track-status">Tap play to start</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+
+        <div class="controls">
+            <button id="btn-prev" class="control-btn" title="Previous">
+                <i class="fas fa-backward"></i>
+            </button>
+
+            <button id="btn-play" class="control-btn main-btn">
+                <i class="fas fa-play" id="play-icon"></i>
+            </button>
+
+            <button id="btn-next" class="control-btn" title="Next">
+                <i class="fas fa-forward"></i>
+            </button>
+        </div>
+
+        <!-- Batch Progress Indicator -->
+        <div class="batch-indicator">
+            <div class="batch-dots">
+                <span class="batch-dot" id="dot-0"></span>
+                <span class="batch-dot" id="dot-1"></span>
+                <span class="batch-dot" id="dot-2"></span>
+                <span class="batch-dot" id="dot-3"></span>
+                <span class="batch-dot" id="dot-4"></span>
+            </div>
+            <span class="batch-label" id="batch-label">Loading...</span>
+        </div>
+    </div>
+
+    <audio id="audio-player"></audio>
+    <script src="/static/js/player.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/service-worker.js')
+                    .then(reg => console.log('SW Registered!', reg))
+                    .catch(err => console.log('SW Failed:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,400 @@
+:root {
+    --bg-color: #050505;
+    --surface-color: #0f0f0f;
+    --surface-border: #222222;
+    --primary: #ffffff;
+    --secondary: #888888;
+    --accent: #6366f1; /* Electric Indigo */
+    --accent-glow: rgba(99, 102, 241, 0.4);
+    --error: #f43f5e;
+    --success: #10b981;
+    --font-stack: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-stack);
+    background-color: var(--bg-color);
+    color: var(--primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Grid Background */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: 
+        linear-gradient(var(--surface-border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--surface-border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center center;
+    opacity: 0.15;
+    z-index: -1;
+    mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+}
+
+/* --- Layout Components --- */
+
+.app-container {
+    width: 100%;
+    max-width: 420px; /* Slightly wider for pro feel */
+    height: 100vh;
+    max-height: 850px;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-color);
+    position: relative;
+}
+
+@media (min-width: 768px) {
+    .app-container {
+        height: auto;
+        min-height: 700px;
+        border: 1px solid var(--surface-border);
+        border-radius: 12px; /* Subtle rounding */
+        box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+        background: var(--bg-color); /* Solid matte */
+    }
+}
+
+/* --- Typography --- */
+
+h1, h2, h3, h4 {
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.text-mono {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.text-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--secondary);
+    font-weight: 600;
+}
+
+/* --- UI Elements --- */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.1s ease;
+    cursor: pointer;
+    border: none;
+    font-family: var(--font-stack);
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: var(--bg-color);
+    border: 1px solid var(--primary);
+}
+
+.btn-primary:hover {
+    background: #e0e0e0;
+    transform: translateY(-1px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--secondary);
+    border: 1px solid transparent;
+}
+
+.btn-ghost:hover {
+    color: var(--primary);
+    background: var(--surface-color);
+    border-color: var(--surface-border);
+}
+
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.input-field {
+    background: var(--surface-color);
+    border: 1px solid var(--surface-border);
+    color: var(--primary);
+    padding: 14px 16px;
+    border-radius: 6px;
+    font-family: var(--font-stack);
+    font-size: 0.95rem;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* --- Player Specifics --- */
+
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.logo-mark {
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: -0.03em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 32px;
+}
+
+.album-frame {
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: var(--surface-color);
+    border: 1px solid var(--surface-border);
+    border-radius: 4px; /* Minimal rounding */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.album-frame i {
+    font-size: 80px;
+    color: var(--surface-border);
+}
+
+.track-meta {
+    margin-bottom: 32px;
+}
+
+.track-title {
+    font-size: 1.75rem;
+    line-height: 1.2;
+    margin-bottom: 8px;
+}
+
+.track-status {
+    color: var(--secondary);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--secondary);
+}
+
+.status-indicator.active {
+    background: var(--success);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.reasoning-badge {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 6px 10px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    color: #a5a6f6;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    border-radius: 4px;
+}
+
+/* Waveform Progress */
+.progress-container {
+    margin-bottom: 40px;
+    cursor: pointer;
+    padding: 10px 0; /* Hit area */
+}
+
+.progress-track {
+    height: 2px;
+    background: var(--surface-border);
+    position: relative;
+    width: 100%;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary);
+    width: 0%;
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: -3px;
+    width: 8px;
+    height: 8px;
+    background: var(--primary);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+
+.progress-container:hover .progress-fill::after {
+    opacity: 1;
+}
+
+.time-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--secondary);
+}
+
+/* Controls */
+.controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.play-btn {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--bg-color);
+    border: none;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.play-btn:active {
+    transform: scale(0.96);
+}
+
+/* Batch Strip */
+.batch-strip {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    padding: 16px;
+    border-top: 1px solid var(--surface-border);
+    background: var(--surface-color);
+}
+
+.batch-step {
+    width: 40px;
+    height: 4px;
+    background: var(--surface-border);
+    border-radius: 2px;
+    transition: all 0.3s;
+}
+
+.batch-step.active {
+    background: var(--primary);
+    box-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+
+.batch-step.played {
+    background: var(--secondary);
+}
+
+.batch-step.positive {
+    background: var(--success);
+}
+
+.batch-step.negative {
+    background: var(--error);
+}
+
+/* Modal */
+.modal-overlay {
+    background: rgba(5, 5, 5, 0.9);
+    backdrop-filter: blur(5px);
+}
+
+.modal-card {
+    background: var(--bg-color);
+    border: 1px solid var(--surface-border);
+    border-radius: 12px;
+    padding: 32px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+}
+
+/* Search */
+.search-modal {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg-color);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+}
+
+.search-input-area {
+    padding: 24px;
+    border-bottom: 1px solid var(--surface-border);
+    display: flex;
+    gap: 16px;
+}

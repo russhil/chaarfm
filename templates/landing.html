@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Chaarfm - Swipe into your next favorite song</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- Landing Page Specific Styles --- */
+        body {
+            display: block;
+            overflow-x: hidden;
+            overflow-y: auto;
+            height: auto;
+            background-color: var(--bg-color);
+            scroll-behavior: smooth;
+        }
+
+        /* Sticky Scroll Scrollytelling Utilities */
+        .scroll-sequence-section {
+            height: 400vh; /* Scroll "runway" length */
+            position: relative;
+            padding: 0; /* Remove default padding as sticky container handles spacing */
+            view-timeline-name: --section-scroll;
+        }
+
+        .sticky-wrapper {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Reduced Motion Fallback */
+        @media (prefers-reduced-motion: reduce) {
+            *, ::before, ::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* Layout Utilities */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        .text-center { text-align: center; }
+        .flex-col { display: flex; flex-direction: column; }
+        .flex-row { display: flex; flex-direction: row; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-16 { gap: 16px; }
+        .gap-24 { gap: 24px; }
+        .gap-32 { gap: 32px; }
+
+        /* Typography Overrides for Landing */
+        .landing-h1 {
+            font-size: 3.5rem;
+            line-height: 1.1;
+            font-weight: 700;
+            margin-bottom: 24px;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #fff 0%, #888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .landing-h2 {
+            font-size: 2.5rem;
+            line-height: 1.2;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+            color: var(--primary);
+        }
+
+        .landing-h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+
+        .landing-sub {
+            font-size: 1.125rem;
+            line-height: 1.6;
+            color: var(--secondary);
+            margin-bottom: 32px;
+            max-width: 600px;
+        }
+
+        .landing-bullet {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+            color: var(--secondary);
+            font-size: 1rem;
+        }
+
+        .landing-bullet i {
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        /* --- Scroll Progress --- */
+        #scroll-progress {
+            position: fixed;
+            top: 0; left: 0;
+            height: 3px;
+            background: var(--accent);
+            width: 0%;
+            z-index: 1001;
+            transition: width 0.1s;
+        }
+
+        /* --- Header --- */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 24px 0;
+            transition: padding 0.3s ease;
+        }
+
+        .header.scrolled {
+            padding: 16px 0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-mark {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-link {
+            color: var(--secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover { color: var(--primary); }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: var(--bg-color);
+            padding: 80px 24px 40px;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 999;
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .mobile-menu.open { transform: translateY(0); }
+
+        /* --- Hero --- */
+        .hero-section {
+            padding-top: 60px;
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .phone-mock-container {
+            position: relative;
+            width: 300px;
+            height: 600px;
+            margin: 0 auto;
+            border: 8px solid #222;
+            border-radius: 40px;
+            background: #000;
+            overflow: hidden;
+            box-shadow: 0 40px 100px -20px rgba(0,0,0,0.8);
+        }
+        
+        .phone-overlay {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            padding: 16px 24px;
+            border-radius: 30px;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            font-family: 'JetBrains Mono';
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            z-index: 10;
+            text-align: center;
+            width: 80%;
+        }
+
+        .feed-scroll {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 16px;
+            /* Static feed, no auto-scroll */
+        }
+
+        .track-card-mock {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            aspect-ratio: 3/4;
+            justify-content: flex-end;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .track-art-placeholder {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(45deg, #222, #111);
+            z-index: 0;
+        }
+
+        .track-info-mock {
+            position: relative;
+            z-index: 1;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .mock-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+
+        .mock-btn {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem;
+        }
+        
+        .vibe-learned-badge {
+            position: absolute;
+            top: 16px; right: 16px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 0.6rem;
+            padding: 4px 8px;
+            border-radius: 100px;
+            font-weight: 700;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+            z-index: 2;
+        }
+        
+        .vibe-learned-badge.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .transparency-line {
+            font-size: 0.75rem;
+            color: var(--secondary);
+            opacity: 0.6;
+            margin-top: 16px;
+            border-top: 1px solid var(--surface-border);
+            padding-top: 16px;
+            display: inline-block;
+        }
+
+        /* --- Social Proof --- */
+        .proof-chips {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .proof-chip {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        
+        .proof-chip.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Pain Cards --- */
+        .pain-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .pain-card {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            padding: 24px;
+            border-radius: 12px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+        
+        .pain-card.visible { opacity: 1; transform: translateY(0); }
+
+        .pain-card h4 {
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .pain-card p {
+            color: var(--secondary);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* --- Solution --- */
+        .pillar-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            margin-top: 40px;
+        }
+
+        .pillar-card {
+            text-align: center;
+            padding: 24px;
+        }
+
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-top: 40px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s;
+        }
+        
+        .progress-indicator.visible { opacity: 1; transform: translateY(0); }
+
+        /* --- Vibe Quest --- */
+        .quest-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .quest-step {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+        
+        .quest-step.active { opacity: 1; }
+
+        .step-num {
+            width: 32px; height: 32px;
+            background: var(--surface-border);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        .step-num.active { background: var(--accent); color: #fff; }
+
+        .timeline-container {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 24px;
+            padding: 32px;
+            position: relative;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .taste-map-viz {
+            flex: 1;
+            position: relative;
+            border: 1px dashed var(--surface-border);
+            border-radius: 12px;
+            margin-top: 16px;
+            overflow: hidden;
+        }
+        
+        .map-dot {
+            width: 8px; height: 8px;
+            background: var(--secondary);
+            border-radius: 50%;
+            position: absolute;
+            transition: all 0.8s ease;
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        .map-dot.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .map-dot.clustered {
+            left: 50% !important;
+            top: 50% !important;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .badge-unlocked {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -40%);
+            background: var(--accent);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 100px;
+            font-weight: 700;
+            box-shadow: 0 0 20px var(--accent-glow);
+            transition: all 0.5s ease;
+            opacity: 0;
+            z-index: 10;
+        }
+        
+        .badge-unlocked.show { transform: translate(-50%, -50%); opacity: 1; }
+
+        /* --- How It Works --- */
+        .hiw-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .hiw-card {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            padding: 32px;
+            border-radius: 16px;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s ease;
+        }
+        
+        .hiw-card.visible { opacity: 1; transform: translateY(0); }
+
+        .hiw-icon {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        /* --- Comparison --- */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 40px;
+        }
+
+        .comparison-table th {
+            text-align: left;
+            padding: 20px;
+            border-bottom: 1px solid var(--surface-border);
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .comparison-table td {
+            padding: 20px;
+            border-bottom: 1px solid var(--surface-border);
+            color: var(--secondary);
+        }
+
+        .comp-row {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s ease;
+        }
+        
+        .comp-row.visible { opacity: 1; transform: translateY(0); }
+
+        .check-icon { color: var(--success); }
+        .x-icon { color: var(--error); }
+
+        /* --- For Artists --- */
+        .artist-box {
+            background: linear-gradient(135deg, var(--surface-color) 0%, rgba(99,102,241,0.1) 100%);
+            border: 1px solid var(--accent-glow);
+            border-radius: 24px;
+            padding: 40px;
+            margin-top: 40px;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+        
+        .artist-box.visible { opacity: 1; }
+
+        /* --- Waitlist Form --- */
+        .waitlist-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 24px;
+            padding: 40px;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+        
+        .waitlist-container.visible { transform: translateY(0); opacity: 1; }
+
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            background: var(--bg-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 8px;
+            color: #fff;
+            margin-bottom: 16px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            color: var(--secondary);
+            cursor: pointer;
+        }
+        
+        .form-checkbox input {
+            width: 18px; height: 18px;
+            accent-color: var(--accent);
+        }
+
+        .success-state {
+            display: none;
+            text-align: center;
+        }
+        
+        .success-icon {
+            font-size: 3rem;
+            color: var(--success);
+            margin-bottom: 20px;
+            animation: fade-up 0.5s ease;
+        }
+
+        @keyframes fade-up {
+            0% { transform: translateY(10px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        /* --- FAQ --- */
+        .accordion-item {
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .accordion-header {
+            padding: 20px 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            color: var(--secondary);
+            font-size: 0.95rem;
+        }
+        
+        .accordion-content p { margin-bottom: 20px; }
+
+        .accordion-icon { transition: transform 0.3s; }
+        .accordion-item.active .accordion-icon { transform: rotate(180deg); }
+        .accordion-item.active .accordion-content { max-height: 200px; }
+
+        /* --- Footer --- */
+        footer {
+            border-top: 1px solid var(--surface-border);
+            padding: 60px 0;
+            margin-top: 80px;
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+
+        .footer-links a {
+            color: var(--secondary);
+            margin: 0 12px;
+            text-decoration: none;
+        }
+        .footer-links a:hover { color: var(--primary); }
+
+        /* --- Back to Top --- */
+        #back-to-top {
+            position: fixed;
+            bottom: 32px; right: 32px;
+            width: 48px; height: 48px;
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--primary);
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 99;
+        }
+        
+        #back-to-top.visible { opacity: 1; }
+        #back-to-top:hover { transform: translateY(-4px); }
+
+        /* --- Mobile Responsive --- */
+        @media (max-width: 768px) {
+            .landing-h1 { font-size: 2.5rem; }
+            .hero-grid { grid-template-columns: 1fr; text-align: center; }
+            .hero-content { order: 1; }
+            .phone-mock-container { order: 2; width: 280px; height: 500px; margin-top: 40px; }
+            .nav-links { display: none; }
+            .mobile-menu-btn { display: block; }
+            .pain-grid { grid-template-columns: 1fr; }
+            .pillar-grid { grid-template-columns: 1fr; }
+            .quest-grid { grid-template-columns: 1fr; }
+            .hiw-grid { grid-template-columns: 1fr; }
+            .comparison-table th, .comparison-table td { display: block; width: 100%; border: none; padding: 10px 0; }
+            .comparison-table tr { display: block; margin-bottom: 24px; border-bottom: 1px solid var(--surface-border); padding-bottom: 24px; }
+            .comparison-table thead { display: none; }
+            /* Mock headers for mobile table */
+            .comp-cell::before { content: attr(data-label); display: block; font-size: 0.75rem; color: var(--secondary); margin-bottom: 4px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Scroll Progress -->
+    <div id="scroll-progress"></div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container header-content">
+            <a href="#" class="logo-mark">Chaarfm</a>
+            
+            <nav class="nav-links">
+                <a href="#how-it-works" class="nav-link">How it works</a>
+                <a href="#demo" class="nav-link">Demo</a>
+                <a href="#artists" class="nav-link">For Artists</a>
+                <a href="#faq" class="nav-link">FAQ</a>
+            </nav>
+
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <a href="#waitlist" class="btn btn-primary" style="font-size: 0.9rem; padding: 10px 20px;">Join the waitlist</a>
+                <button class="mobile-menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobile-menu">
+        <div class="flex-col gap-24 text-center">
+            <a href="#how-it-works" class="nav-link" onclick="toggleMenu()">How it works</a>
+            <a href="#demo" class="nav-link" onclick="toggleMenu()">Demo</a>
+            <a href="#artists" class="nav-link" onclick="toggleMenu()">For Artists</a>
+            <a href="#faq" class="nav-link" onclick="toggleMenu()">FAQ</a>
+            <a href="#waitlist" class="btn btn-primary" onclick="toggleMenu()">Join the waitlist</a>
+        </div>
+    </div>
+
+    <!-- Section 1: Hero -->
+    <section class="hero-section">
+        <div class="container hero-grid">
+            <div class="hero-content">
+                <h1 class="landing-h1">Swipe into your next favorite song.</h1>
+                <p class="landing-sub">Chaarfm is a music discovery feed that maps your vibe in minutes and adapts in-session—no searching, no playlists.</p>
+                
+                <div class="flex-col gap-16" style="margin-bottom: 32px;">
+                    <div class="landing-bullet"><i class="fas fa-check"></i> Instant vibe mapping in ~60 seconds</div>
+                    <div class="landing-bullet"><i class="fas fa-check"></i> Smooth transitions based on sound similarity</div>
+                    <div class="landing-bullet"><i class="fas fa-check"></i> Discovery that doesn’t get trapped in the same artists</div>
+                </div>
+
+                <a href="#waitlist" class="btn btn-primary" style="padding: 16px 32px; font-size: 1.1rem;">Join the waitlist</a>
+                <p style="font-size: 0.8rem; color: var(--secondary); margin-top: 12px;">Limited demo access. No spam. Opt out anytime.</p>
+                
+                <div class="transparency-line">Demo currently runs on a reference/placeholder catalog to showcase the engine.</div>
+            </div>
+
+            <div class="phone-mock-container">
+                <div class="phone-overlay" id="phone-overlay">Taste Map forming...</div>
+                <div class="feed-scroll" id="feed-scroll">
+                    <!-- Placeholder Cards -->
+                    <div class="track-card-mock">
+                        <div class="track-art-placeholder" style="background: #333;"></div>
+                        <div class="track-info-mock">
+                            <div style="font-weight: 600;">Neon Nights</div>
+                            <div style="font-size: 0.8rem; color: #ccc;">Synthwave Collective</div>
+                            <div style="height: 2px; background: rgba(255,255,255,0.2); margin-top: 8px; border-radius: 2px;">
+                                <div style="width: 40%; height: 100%; background: var(--accent);"></div>
+                            </div>
+                            <div class="mock-actions">
+                                <div class="mock-btn"><i class="fas fa-times"></i></div>
+                                <div class="mock-btn" id="mock-like-btn" style="color: var(--accent); border: 1px solid var(--accent);"><i class="fas fa-heart"></i></div>
+                                <div class="mock-btn"><i class="fas fa-bookmark"></i></div>
+                            </div>
+                        </div>
+                        <div class="vibe-learned-badge" id="vibe-badge">Vibe learned</div>
+                    </div>
+                    <div class="track-card-mock">
+                        <div class="track-art-placeholder" style="background: #444;"></div>
+                        <div class="track-info-mock">
+                            <div style="font-weight: 600;">Midnight Drive</div>
+                            <div style="font-size: 0.8rem; color: #ccc;">Lo-Fi Beats</div>
+                            <div class="mock-actions">
+                                <div class="mock-btn"><i class="fas fa-times"></i></div>
+                                <div class="mock-btn"><i class="fas fa-heart"></i></div>
+                                <div class="mock-btn"><i class="fas fa-bookmark"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Social Proof -->
+    <section>
+        <div class="container">
+            <div class="proof-chips">
+                <div class="proof-chip">Building with early beta listeners</div>
+                <div class="proof-chip">Founder-led recommendation engine</div>
+                <div class="proof-chip">Limited demo invites rolling out</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: The Problem -->
+    <section>
+        <div class="container">
+            <div class="hero-grid" style="align-items: start;">
+                <div>
+                    <h2 class="landing-h2">Music discovery still makes you do the work.</h2>
+                    <p class="landing-sub">Playlists and search assume you know what you want. Most of the time, you just want something that fits.</p>
+                </div>
+                <div class="pain-grid">
+                    <div class="pain-card">
+                        <h4>Decision fatigue</h4>
+                        <p>Choosing before listening kills the vibe.</p>
+                    </div>
+                    <div class="pain-card">
+                        <h4>Discovery loops</h4>
+                        <p>Same artists, same sound, every day.</p>
+                    </div>
+                    <div class="pain-card">
+                        <h4>Friction</h4>
+                        <p>Search → Playlist → Skip → Repeat.</p>
+                    </div>
+                    <div class="pain-card">
+                        <h4>Background listening</h4>
+                        <p>You want flow, not control panels.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: The Solution -->
+    <section>
+        <div class="container text-center">
+            <h2 class="landing-h2">A feed, not a library.</h2>
+            <p class="landing-sub" style="margin: 0 auto;">Chaarfm turns listening into a continuous, personalized stream.</p>
+            
+            <div class="pillar-grid">
+                <div class="pillar-card">
+                    <h3 class="landing-h3">Instant personalization</h3>
+                    <p style="color: var(--secondary);">Your feed starts immediately.</p>
+                </div>
+                <div class="pillar-card">
+                    <h3 class="landing-h3">Sound-based transitions</h3>
+                    <p style="color: var(--secondary);">Tracks connect like neighborhoods.</p>
+                </div>
+                <div class="pillar-card">
+                    <h3 class="landing-h3">In-session learning</h3>
+                    <p style="color: var(--secondary);">Every swipe improves the next one.</p>
+                </div>
+            </div>
+
+            <div class="progress-indicator" id="progress-indicator">
+                <span>OPEN</span> <i class="fas fa-arrow-right"></i> <span>REACT</span> <i class="fas fa-arrow-right"></i> <span>ADAPTS</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: Vibe Quest Demo -->
+    <section id="demo" class="scroll-sequence-section">
+        <div class="sticky-wrapper">
+            <div class="container">
+                <div class="hero-grid">
+                    <div>
+                        <h2 class="landing-h2">Vibe Quest: unlock your feed in 60 seconds.</h2>
+                        <p class="landing-sub">A short interactive demo that maps your taste and shows the engine working.</p>
+                        
+                        <div class="flex-col gap-24">
+                            <div class="quest-step" id="step-1">
+                                <div class="step-num active">1</div>
+                                <div>Pick 1–2 starting vibes (e.g., Focus / Hype)</div>
+                            </div>
+                            <div class="quest-step" id="step-2">
+                                <div class="step-num">2</div>
+                                <div>Swipe 8 tracks (Like / Skip)</div>
+                            </div>
+                            <div class="quest-step" id="step-3">
+                                <div class="step-num">3</div>
+                                <div>Watch your Taste Map form in real time</div>
+                            </div>
+                            <div class="quest-step" id="step-4">
+                                <div class="step-num">4</div>
+                                <div>Enter your ‘vibe lane’ and preview a personalized feed</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-container">
+                        <div style="font-weight: 600; text-align: center; color: var(--primary);">TASTE MAP PREVIEW</div>
+                        <div class="taste-map-viz" id="taste-map">
+                            <!-- Pre-rendered Dots -->
+                            <div class="map-dot" style="top: 20%; left: 30%;"></div>
+                            <div class="map-dot" style="top: 70%; left: 80%;"></div>
+                            <div class="map-dot" style="top: 40%; left: 10%;"></div>
+                            <div class="map-dot" style="top: 80%; left: 40%;"></div>
+                            <div class="map-dot" style="top: 15%; left: 60%;"></div>
+                            
+                            <div class="map-dot" style="top: 30%; left: 70%;"></div>
+                            <div class="map-dot" style="top: 60%; left: 20%;"></div>
+                            <div class="map-dot" style="top: 90%; left: 50%;"></div>
+                            <div class="map-dot" style="top: 10%; left: 90%;"></div>
+                            <div class="map-dot" style="top: 50%; left: 15%;"></div>
+
+                            <div class="map-dot" style="top: 35%; left: 45%;"></div>
+                            <div class="map-dot" style="top: 65%; left: 75%;"></div>
+                            <div class="map-dot" style="top: 25%; left: 85%;"></div>
+                            <div class="map-dot" style="top: 85%; left: 25%;"></div>
+                            <div class="map-dot" style="top: 55%; left: 55%;"></div>
+
+                            <div class="badge-unlocked" id="badge-unlocked">Vibe Unlocked <i class="fas fa-check-circle"></i></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--secondary); margin-top: 16px;">
+                            <span>START</span>
+                            <span>MAPPING...</span>
+                            <span>LOCKED IN</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 6: How It Works -->
+    <section id="how-it-works">
+        <div class="container">
+            <h2 class="landing-h2 text-center">How it works</h2>
+            
+            <div class="hiw-grid" style="margin-top: 40px;">
+                <div class="hiw-card">
+                    <div class="hiw-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <h3 class="landing-h3">Open the feed</h3>
+                    <p style="color: var(--secondary);">No setup. Start swiping.</p>
+                </div>
+                <div class="hiw-card">
+                    <div class="hiw-icon"><i class="fas fa-thumbs-up"></i></div>
+                    <h3 class="landing-h3">React</h3>
+                    <p style="color: var(--secondary);">Like/skip teaches the system instantly.</p>
+                </div>
+                <div class="hiw-card">
+                    <div class="hiw-icon"><i class="fas fa-magic"></i></div>
+                    <h3 class="landing-h3">Adapt</h3>
+                    <p style="color: var(--secondary);">Next tracks shift toward your sound—smoothly.</p>
+                </div>
+            </div>
+
+            <p class="text-center" style="margin-top: 32px; font-size: 0.9rem; color: var(--secondary); opacity: 0.8;">
+                We’re demonstrating the experience with a reference catalog now; the same engine routes to emerging artists as the catalog scales.
+            </p>
+        </div>
+    </section>
+
+    <!-- Section 7: Comparison -->
+    <section>
+        <div class="container">
+            <h2 class="landing-h2 text-center">Why it’s different</h2>
+            
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%"></th>
+                        <th style="width: 30%">Playlists & Search</th>
+                        <th style="width: 30%; color: var(--accent);">Chaarfm Feed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="comp-row">
+                        <td>Start-up effort</td>
+                        <td class="comp-cell" data-label="Playlists & Search">High (Manual)</td>
+                        <td class="comp-cell" data-label="Chaarfm Feed" style="color: var(--primary);">Zero (Instant)</td>
+                    </tr>
+                    <tr class="comp-row">
+                        <td>Discovery breadth</td>
+                        <td class="comp-cell" data-label="Playlists & Search">Limited (Echo chamber)</td>
+                        <td class="comp-cell" data-label="Chaarfm Feed" style="color: var(--primary);">Wide (Sound-based)</td>
+                    </tr>
+                    <tr class="comp-row">
+                        <td>Flow / transitions</td>
+                        <td class="comp-cell" data-label="Playlists & Search">Jarring / Random</td>
+                        <td class="comp-cell" data-label="Chaarfm Feed" style="color: var(--primary);">Seamless</td>
+                    </tr>
+                    <tr class="comp-row">
+                        <td>Personalization speed</td>
+                        <td class="comp-cell" data-label="Playlists & Search">Slow (Historical)</td>
+                        <td class="comp-cell" data-label="Chaarfm Feed" style="color: var(--primary);">Real-time</td>
+                    </tr>
+                    <tr class="comp-row">
+                        <td>Session experience</td>
+                        <td class="comp-cell" data-label="Playlists & Search">Active Management</td>
+                        <td class="comp-cell" data-label="Chaarfm Feed" style="color: var(--primary);">Subconscious Flow</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Section 8: For Artists -->
+    <section id="artists">
+        <div class="container">
+            <div class="artist-box">
+                <h2 class="landing-h2">For artists: discovery based on fit, not fame.</h2>
+                <p class="landing-sub">We’re building the distribution layer after the engine. Join early to be first when creator onboarding opens.</p>
+                
+                <div class="flex-col gap-16">
+                    <div class="landing-bullet"><i class="fas fa-check"></i> Listeners arrive via sound match</div>
+                    <div class="landing-bullet"><i class="fas fa-check"></i> More surface area than playlists</div>
+                    <div class="landing-bullet"><i class="fas fa-check"></i> Early creator onboarding priority</div>
+                </div>
+                
+                <p style="margin-top: 24px; font-size: 0.9rem; color: var(--primary); font-weight: 500;">
+                    Joining the waitlist? Check ‘I’m an artist/label’ to get creator updates.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 9: Waitlist Form -->
+    <section id="waitlist">
+        <div class="container">
+            <div class="waitlist-container">
+                <div id="waitlist-form-state">
+                    <h2 class="landing-h2 text-center" style="font-size: 2rem;">Get limited access to the Vibe Quest demo.</h2>
+                    <p class="text-center" style="color: var(--secondary); margin-bottom: 32px;">Join the waitlist for demo invites and early access.</p>
+                    
+                    <form id="signup-form" onsubmit="handleSignup(event)">
+                        <input type="email" class="form-input" placeholder="Email Address" required>
+                        <input type="text" class="form-input" placeholder="Country / City (Optional)">
+                        
+                        <label class="form-checkbox">
+                            <input type="checkbox"> I’m an artist/label
+                        </label>
+                        <label class="form-checkbox">
+                            <input type="checkbox"> I want to beta test + give feedback
+                        </label>
+                        
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px; padding: 14px;">Join the waitlist</button>
+                    </form>
+                    
+                    <p class="text-center" style="font-size: 0.8rem; color: var(--secondary); margin-top: 24px; opacity: 0.7;">
+                        You’ll get a demo invite when your cohort opens.<br>No spam. Unsubscribe anytime.
+                    </p>
+                </div>
+
+                <div id="waitlist-success-state" class="success-state">
+                    <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+                    <h2 class="landing-h2" style="font-size: 2rem;">You’re in.</h2>
+                    <p class="landing-sub" style="margin: 0 auto 32px;">We’ll email your demo invite soon. Want to help shape the product?</p>
+                    
+                    <div class="flex-col gap-16">
+                        <button class="btn btn-ghost" style="border: 1px solid var(--surface-border);">Answer 3 quick questions</button>
+                        <button class="btn btn-ghost">Share to a friend</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 10: FAQ -->
+    <section id="faq">
+        <div class="container" style="max-width: 800px;">
+            <h2 class="landing-h2 text-center">FAQ</h2>
+            
+            <div style="border-top: 1px solid var(--surface-border); margin-top: 40px;">
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        Is this a real music app or just a demo?
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <p>It is a real discovery engine currently in closed demo. The engine works, but we are scaling the catalog and infrastructure before a public launch.</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        Why a placeholder/reference catalog?
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <p>To showcase the personalization technology effectively, we use a controlled set of tracks. This ensures the "Vibe Quest" experience is consistent for early testers.</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        When will indie music be available?
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <p>We are opening creator tools in Phase 2. Indie artists will be the backbone of our discovery ecosystem.</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        How does personalization work?
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <p>We map songs based on their sonic characteristics (vectors). Your interactions (likes/skips) move your position on this map in real-time.</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        Do you store my listening data?
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <p>We collect minimal interaction data to make the recommendations work. You can opt out or clear your history at any time.</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        When will I get access?
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <p>We are rolling out invites in cohorts every week. Join the waitlist to secure your spot.</p>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        How can artists join?
+                        <i class="fas fa-chevron-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <p>Check the "I'm an artist" box in the waitlist form. We will contact you when the upload portal opens.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center">
+            <div class="footer-links" style="margin-bottom: 24px;">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Contact</a>
+                <a href="/login">Admin</a>
+            </div>
+            <p>Demo uses reference/placeholder catalog for engine preview.</p>
+            <p style="margin-top: 16px;">&copy; 2026 Chaarfm.</p>
+        </div>
+    </footer>
+
+    <!-- Back to Top -->
+    <div id="back-to-top" onclick="window.scrollTo(0,0)">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <script>
+        // --- Scroll Progress ---
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.body.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            document.getElementById('scroll-progress').style.width = progress + '%';
+
+            // Header Compression
+            const header = document.getElementById('header');
+            if (scrollTop > 50) header.classList.add('scrolled');
+            else header.classList.remove('scrolled');
+
+            // Back to Top
+            const btt = document.getElementById('back-to-top');
+            if (scrollTop > docHeight * 0.4) btt.classList.add('visible');
+            else btt.classList.remove('visible');
+        });
+
+        // --- Mobile Menu ---
+        function toggleMenu() {
+            document.getElementById('mobile-menu').classList.toggle('open');
+        }
+
+        // --- Scroll Animations (Intersection Observer) ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target); // Reveal once
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.proof-chip, .pain-card, .progress-indicator, .hiw-card, .comp-row, .artist-box, .waitlist-container').forEach(el => {
+            observer.observe(el);
+        });
+
+        // --- Vibe Quest Scroll Logic (Sticky Scrollytelling) ---
+        const demoSection = document.getElementById('demo');
+        const dots = document.querySelectorAll('.map-dot');
+        const badge = document.getElementById('badge-unlocked');
+        
+        window.addEventListener('scroll', () => {
+            if (!demoSection) return;
+            
+            // Calculate progress relative to the scroll section container
+            const sectionTop = demoSection.offsetTop;
+            const sectionHeight = demoSection.offsetHeight;
+            const scrollY = window.scrollY;
+            const viewportHeight = window.innerHeight;
+            
+            // Calculate how far we've scrolled into the section
+            // Start: When section top hits viewport top (sticky starts)
+            // End: When section bottom hits viewport bottom (sticky ends)
+            // Actually, for sticky behavior, we want 0% when section top is at 0, and 100% when we've scrolled through the height
+            
+            const scrollDistance = sectionHeight - viewportHeight;
+            let progress = (scrollY - sectionTop) / scrollDistance;
+            
+            // Clamp progress between 0 and 1
+            progress = Math.max(0, Math.min(1, progress));
+            
+            // Only trigger steps if we are effectively "in" the section or just passed it
+            // We use a small buffer to ensure we don't trigger when it's way below view
+            if (scrollY < sectionTop - viewportHeight) return; 
+
+            // Map progress to steps
+            let step = 1;
+            if (progress > 0.25) step = 2;
+            if (progress > 0.50) step = 3;
+            if (progress > 0.75) step = 4;
+            
+            updateStep(step);
+        });
+
+        function updateStep(step) {
+            // Update Text Steps
+            document.querySelectorAll('.quest-step').forEach((el, i) => {
+                if (i + 1 <= step) el.classList.add('active'); // Cumulative active
+                else el.classList.remove('active');
+            });
+            document.querySelectorAll('.step-num').forEach((el, i) => {
+                if (i + 1 <= step) el.classList.add('active');
+                else el.classList.remove('active');
+            });
+            
+            // Update Visuals (Dots)
+            dots.forEach((dot, i) => {
+                // Step 1: Show first 5 (indices 0-4)
+                // Step 2: Show next 5 (indices 5-9)
+                // Step 3: Cluster ALL dots
+                
+                // Visibility
+                if (step === 1 && i < 5) dot.classList.add('visible');
+                else if (step >= 2 && i < 15) dot.classList.add('visible');
+                else if (step === 1 && i >= 5) dot.classList.remove('visible');
+                
+                // Clustering (Step 3+)
+                if (step >= 3) dot.classList.add('clustered');
+                else dot.classList.remove('clustered');
+            });
+
+            // Step 4: Badge
+            if (step >= 4) badge.classList.add('show');
+            else badge.classList.remove('show');
+        }
+
+        // --- Form Handling ---
+        function handleSignup(e) {
+            e.preventDefault();
+            document.getElementById('waitlist-form-state').style.display = 'none';
+            document.getElementById('waitlist-success-state').style.display = 'block';
+        }
+
+        // --- FAQ ---
+        function toggleAccordion(el) {
+            const item = el.parentElement;
+            item.classList.toggle('active');
+        }
+
+    </script>
+</body>
+</html>

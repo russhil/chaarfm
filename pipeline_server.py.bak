@@ -1,0 +1,595 @@
+"""
+Vectorization Pipeline Web UI
+=============================
+
+A web interface to monitor and control the MP3 vectorization pipeline.
+
+Usage:
+    python pipeline_server.py
+    
+Then open: http://localhost:5002
+"""
+
+import os
+import sys
+import json
+import time
+import asyncio
+import threading
+from pathlib import Path
+from datetime import datetime
+from typing import Optional
+
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+import uvicorn
+
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
+
+FOLDERS = {
+    "russhil": "/Users/russhil/Desktop/aand pav/russhil",
+    "sahil": "/Users/russhil/Desktop/aand pav/sahil"
+}
+
+COLLECTIONS = {
+    "russhil": "music_russhil",
+    "sahil": "music_sahil",
+    "combined": "music_combined"
+}
+
+SUPPORTED_EXTENSIONS = {'.mp3', '.wav', '.flac', '.m4a', '.ogg'}
+VECTOR_SIZE = 200
+
+# ============================================================================
+# GLOBAL STATE
+# ============================================================================
+
+pipeline_state = {
+    "status": "idle",  # idle, running, paused, completed, error
+    "current_folder": None,
+    "current_file": None,
+    "total_files": 0,
+    "processed_files": 0,
+    "failed_files": 0,
+    "start_time": None,
+    "eta_seconds": None,
+    "logs": [],
+    "folder_progress": {},
+    "error": None
+}
+
+pipeline_thread: Optional[threading.Thread] = None
+stop_flag = threading.Event()
+
+# ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+
+def log(message: str):
+    """Add to log buffer."""
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    entry = f"[{timestamp}] {message}"
+    pipeline_state["logs"].append(entry)
+    # Keep last 100 logs
+    if len(pipeline_state["logs"]) > 100:
+        pipeline_state["logs"] = pipeline_state["logs"][-100:]
+    print(entry)
+
+def scan_folder(folder_path: str) -> list:
+    """Scan folder for audio files."""
+    files = []
+    folder = Path(folder_path)
+    if not folder.exists():
+        return files
+    for path in folder.rglob("*"):
+        if path.is_file() and path.suffix.lower() in SUPPORTED_EXTENSIONS:
+            files.append(str(path))
+    return sorted(files)
+
+def run_pipeline():
+    """Run the vectorization pipeline in a separate thread."""
+    global pipeline_state
+    
+    try:
+        # Import heavy dependencies only when running
+        import numpy as np
+        from qdrant_client import QdrantClient
+        from qdrant_client.models import VectorParams, Distance, PointStruct
+        from audio_processor import MusicNNExtractor
+        import hashlib
+        
+        pipeline_state["status"] = "running"
+        pipeline_state["start_time"] = time.time()
+        pipeline_state["error"] = None
+        
+        log("🚀 Pipeline started")
+        
+        # Scan folders
+        log("📁 Scanning folders...")
+        all_files = {}
+        total = 0
+        
+        for source, folder in FOLDERS.items():
+            files = scan_folder(folder)
+            all_files[source] = files
+            pipeline_state["folder_progress"][source] = {
+                "total": len(files),
+                "processed": 0,
+                "failed": 0
+            }
+            log(f"  {source}: {len(files)} files")
+            total += len(files)
+        
+        pipeline_state["total_files"] = total
+        
+        if total == 0:
+            log("❌ No files found!")
+            pipeline_state["status"] = "error"
+            pipeline_state["error"] = "No files found"
+            return
+        
+        # Initialize Qdrant
+        log("🗄️ Initializing Qdrant...")
+        try:
+            client = QdrantClient(host="localhost", port=6333)
+        except:
+            client = QdrantClient(path="./qdrant_data")
+        
+        # Create collections
+        for name, collection in COLLECTIONS.items():
+            try:
+                client.delete_collection(collection)
+            except:
+                pass
+            client.create_collection(
+                collection_name=collection,
+                vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE)
+            )
+            log(f"  Created: {collection}")
+        
+        # Initialize extractor
+        log("🧠 Loading MusiCNN model...")
+        extractor = MusicNNExtractor()
+        log("  Model loaded!")
+        
+        # Process files
+        log("🎵 Processing files...")
+        batch_points = {"russhil": [], "sahil": [], "combined": []}
+        batch_size = 50
+        
+        for source, files in all_files.items():
+            pipeline_state["current_folder"] = source
+            log(f"\n📂 Processing [{source}] ({len(files)} files)...")
+            
+            for i, file_path in enumerate(files):
+                if stop_flag.is_set():
+                    log("⏹️ Pipeline stopped by user")
+                    pipeline_state["status"] = "idle"
+                    return
+                
+                filename = os.path.basename(file_path)
+                pipeline_state["current_file"] = filename
+                
+                try:
+                    # Extract vector
+                    result = extractor.extract(file_path)
+                    vector = result["average_vector"]
+                    
+                    # Create point
+                    point_id = hashlib.md5(f"{source}:{filename}".encode()).hexdigest()
+                    point = PointStruct(
+                        id=point_id,
+                        vector=vector.tolist(),
+                        payload={
+                            "filename": filename,
+                            "source": source,
+                            "path": file_path
+                        }
+                    )
+                    
+                    batch_points[source].append(point)
+                    
+                    # Combined collection
+                    combined_id = hashlib.md5(f"combined_{source}:{filename}".encode()).hexdigest()
+                    batch_points["combined"].append(PointStruct(
+                        id=combined_id,
+                        vector=vector.tolist(),
+                        payload={"filename": filename, "source": source, "path": file_path}
+                    ))
+                    
+                    pipeline_state["processed_files"] += 1
+                    pipeline_state["folder_progress"][source]["processed"] += 1
+                    
+                except Exception as e:
+                    pipeline_state["failed_files"] += 1
+                    pipeline_state["folder_progress"][source]["failed"] += 1
+                    log(f"  ❌ Failed: {filename[:40]}... ({str(e)[:30]})")
+                
+                # Calculate ETA
+                elapsed = time.time() - pipeline_state["start_time"]
+                if pipeline_state["processed_files"] > 0:
+                    rate = elapsed / pipeline_state["processed_files"]
+                    remaining = pipeline_state["total_files"] - pipeline_state["processed_files"]
+                    pipeline_state["eta_seconds"] = remaining * rate
+                
+                # Batch upload
+                for coll_key in [source, "combined"]:
+                    if len(batch_points[coll_key]) >= batch_size:
+                        client.upsert(
+                            collection_name=COLLECTIONS[coll_key],
+                            points=batch_points[coll_key]
+                        )
+                        batch_points[coll_key] = []
+                
+                # Log progress every 50 files
+                if (i + 1) % 50 == 0:
+                    log(f"  {source}: {i+1}/{len(files)} processed")
+        
+        # Upload remaining
+        log("\n📤 Uploading remaining points...")
+        for coll_key, points in batch_points.items():
+            if points:
+                client.upsert(collection_name=COLLECTIONS[coll_key], points=points)
+        
+        # Done
+        elapsed = time.time() - pipeline_state["start_time"]
+        log(f"\n✅ Pipeline complete!")
+        log(f"  Processed: {pipeline_state['processed_files']} files")
+        log(f"  Failed: {pipeline_state['failed_files']} files")
+        log(f"  Time: {elapsed/60:.1f} minutes")
+        
+        pipeline_state["status"] = "completed"
+        pipeline_state["current_file"] = None
+        pipeline_state["current_folder"] = None
+        
+    except Exception as e:
+        log(f"❌ Pipeline error: {e}")
+        pipeline_state["status"] = "error"
+        pipeline_state["error"] = str(e)
+        import traceback
+        traceback.print_exc()
+
+# ============================================================================
+# FASTAPI APP
+# ============================================================================
+
+app = FastAPI(title="Vectorization Pipeline")
+
+@app.get("/", response_class=HTMLResponse)
+async def index():
+    return """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vectorization Pipeline</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 40px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .status-idle { background: rgba(255,255,255,0.1); }
+        .status-running { background: rgba(76, 175, 80, 0.3); color: #81c784; }
+        .status-completed { background: rgba(33, 150, 243, 0.3); color: #64b5f6; }
+        .status-error { background: rgba(244, 67, 54, 0.3); color: #e57373; }
+        
+        .progress-bar {
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+            border-radius: 6px;
+            transition: width 0.3s;
+        }
+        .stats { display: flex; gap: 30px; margin: 20px 0; flex-wrap: wrap; }
+        .stat { text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: #f093fb; }
+        .stat-label { font-size: 0.85rem; color: rgba(255,255,255,0.5); }
+        
+        .folder-progress { margin: 15px 0; }
+        .folder-name { font-weight: 600; margin-bottom: 5px; }
+        .folder-stats { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(240,147,251,0.3); }
+        .btn-danger { background: rgba(244, 67, 54, 0.3); color: #e57373; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .logs {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            height: 250px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+        .log-entry { color: rgba(255,255,255,0.8); }
+        
+        .current-file {
+            background: rgba(240,147,251,0.1);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+        .eta { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Vectorization Pipeline</h1>
+        
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <span class="status-badge" id="status">Idle</span>
+                <div>
+                    <button class="btn btn-primary" id="startBtn" onclick="startPipeline()">▶️ Start</button>
+                    <button class="btn btn-danger" id="stopBtn" onclick="stopPipeline()" disabled>⏹️ Stop</button>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="processed">0</div>
+                    <div class="stat-label">Processed</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="total">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="failed">0</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="rate">-</div>
+                    <div class="stat-label">Files/min</div>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+            
+            <div class="eta" id="eta"></div>
+            
+            <div class="current-file" id="currentFile" style="display: none;">
+                Processing: <strong id="fileName">-</strong>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">📂 Folder Progress</h3>
+            <div id="folderProgress"></div>
+        </div>
+        
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">📋 Logs</h3>
+            <div class="logs" id="logs"></div>
+        </div>
+    </div>
+    
+    <script>
+        let eventSource;
+        
+        function connectSSE() {
+            eventSource = new EventSource('/api/progress');
+            eventSource.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                updateUI(data);
+            };
+            eventSource.onerror = () => {
+                setTimeout(connectSSE, 2000);
+            };
+        }
+        
+        function updateUI(data) {
+            // Status badge
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+            statusEl.className = 'status-badge status-' + data.status;
+            
+            // Buttons
+            document.getElementById('startBtn').disabled = data.status === 'running';
+            document.getElementById('stopBtn').disabled = data.status !== 'running';
+            
+            // Stats
+            document.getElementById('processed').textContent = data.processed_files;
+            document.getElementById('total').textContent = data.total_files;
+            document.getElementById('failed').textContent = data.failed_files;
+            
+            // Rate
+            if (data.start_time && data.processed_files > 0) {
+                const elapsed = (Date.now()/1000) - data.start_time;
+                const rate = (data.processed_files / elapsed * 60).toFixed(1);
+                document.getElementById('rate').textContent = rate;
+            }
+            
+            // Progress bar
+            const pct = data.total_files > 0 ? (data.processed_files / data.total_files * 100) : 0;
+            document.getElementById('progressBar').style.width = pct + '%';
+            
+            // ETA
+            if (data.eta_seconds) {
+                const mins = Math.floor(data.eta_seconds / 60);
+                const secs = Math.floor(data.eta_seconds % 60);
+                document.getElementById('eta').textContent = `ETA: ${mins}m ${secs}s remaining`;
+            } else {
+                document.getElementById('eta').textContent = '';
+            }
+            
+            // Current file
+            if (data.current_file) {
+                document.getElementById('currentFile').style.display = 'block';
+                document.getElementById('fileName').textContent = data.current_file;
+            } else {
+                document.getElementById('currentFile').style.display = 'none';
+            }
+            
+            // Folder progress
+            let folderHTML = '';
+            for (const [name, prog] of Object.entries(data.folder_progress || {})) {
+                const pct = prog.total > 0 ? (prog.processed / prog.total * 100) : 0;
+                folderHTML += `
+                    <div class="folder-progress">
+                        <div class="folder-name">${name}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${pct}%"></div>
+                        </div>
+                        <div class="folder-stats">${prog.processed}/${prog.total} processed, ${prog.failed} failed</div>
+                    </div>
+                `;
+            }
+            document.getElementById('folderProgress').innerHTML = folderHTML || '<p style="color: rgba(255,255,255,0.5)">No folders scanned yet</p>';
+            
+            // Logs
+            const logsEl = document.getElementById('logs');
+            logsEl.innerHTML = (data.logs || []).map(l => `<div class="log-entry">${l}</div>`).join('');
+            logsEl.scrollTop = logsEl.scrollHeight;
+        }
+        
+        async function startPipeline() {
+            await fetch('/api/start', { method: 'POST' });
+        }
+        
+        async function stopPipeline() {
+            await fetch('/api/stop', { method: 'POST' });
+        }
+        
+        connectSSE();
+    </script>
+</body>
+</html>
+"""
+
+@app.get("/api/progress")
+async def progress_stream():
+    """Server-Sent Events stream for real-time progress."""
+    async def event_generator():
+        while True:
+            data = {
+                "status": pipeline_state["status"],
+                "current_folder": pipeline_state["current_folder"],
+                "current_file": pipeline_state["current_file"],
+                "total_files": pipeline_state["total_files"],
+                "processed_files": pipeline_state["processed_files"],
+                "failed_files": pipeline_state["failed_files"],
+                "start_time": pipeline_state["start_time"],
+                "eta_seconds": pipeline_state["eta_seconds"],
+                "logs": pipeline_state["logs"][-20:],  # Last 20 logs
+                "folder_progress": pipeline_state["folder_progress"],
+                "error": pipeline_state["error"]
+            }
+            yield f"data: {json.dumps(data)}\n\n"
+            await asyncio.sleep(0.5)
+    
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "Connection": "keep-alive"}
+    )
+
+@app.post("/api/start")
+async def start_pipeline():
+    """Start the pipeline."""
+    global pipeline_thread, stop_flag
+    
+    if pipeline_state["status"] == "running":
+        return {"error": "Already running"}
+    
+    # Reset state
+    pipeline_state.update({
+        "status": "idle",
+        "current_folder": None,
+        "current_file": None,
+        "total_files": 0,
+        "processed_files": 0,
+        "failed_files": 0,
+        "start_time": None,
+        "eta_seconds": None,
+        "logs": [],
+        "folder_progress": {},
+        "error": None
+    })
+    
+    stop_flag.clear()
+    pipeline_thread = threading.Thread(target=run_pipeline, daemon=True)
+    pipeline_thread.start()
+    
+    return {"status": "started"}
+
+@app.post("/api/stop")
+async def stop_pipeline():
+    """Stop the pipeline."""
+    stop_flag.set()
+    return {"status": "stopping"}
+
+@app.get("/api/status")
+async def get_status():
+    """Get current status."""
+    return pipeline_state
+
+# ============================================================================
+# MAIN
+# ============================================================================
+
+if __name__ == "__main__":
+    print("=" * 60)
+    print("Vectorization Pipeline Web UI")
+    print("=" * 60)
+    print("Open: http://localhost:5002")
+    print()
+    uvicorn.run(app, host="0.0.0.0", port=5002)

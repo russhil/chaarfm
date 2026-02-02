@@ -1,0 +1,272 @@
+timestamp,track_id,filename,duration,liked,disliked,finished,tier,cluster_id,alpha_boost,beta_boost
+2026-01-28T20:03:58.382348,40ae8fb4-4360-51d3-aeb2-200b977bcd59,Maneater - Daryl Hall & John Oates.mp3,4.5,False,False,False,Immediate Skip,16,0,2.0
+2026-01-28T20:03:58.676755,40ae8fb4-4360-51d3-aeb2-200b977bcd59,Maneater - Daryl Hall & John Oates.mp3,205.0,False,False,True,Finished,16,2.0,0
+2026-01-28T20:04:28.724805,27bd1a2c-84e6-5690-b7d4-5ecd1d034aa4,"REGRETS - Jevin Gill, Umair, Talha Anjum.mp3",3.847228,False,False,False,Immediate Skip,12,0,2.0
+2026-01-28T20:04:31.824545,3e38471c-80be-54ab-bd5b-9acd9268f26a,"MONTAGEM PRAMIM - -Prey, NXGHT!, Scythermane, dearukia.mp3",2.992854,False,False,False,Immediate Skip,13,0,2.0
+2026-01-28T20:04:33.941044,888e3f21-a4f4-5346-8478-145d58c7c9e6,"Kesar Ki Kyari - Rini Chandra, Honey Trouper, Priyanka R Bala.mp3",2.018669,False,False,False,Immediate Skip,11,0,2.0
+2026-01-28T20:04:36.828730,1fd238da-7c36-5555-9985-bc58eed1dfd0,Dark Fantasy - Kanye West.mp3,2.79153,False,False,False,Immediate Skip,0,0,2.0
+2026-01-28T20:04:38.012103,8da0f7f3-3e37-5db3-9289-31cd40b5f93c,"Khamoshiyan - Jeet Gannguli, Arijit Singh, Rashmi Virag.mp3",1.085852,False,False,False,Immediate Skip,14,0,2.0
+2026-01-28T20:04:38.974782,7e53c853-608f-5c6c-afd6-261ace13e7ef,"Femmebot (feat. Dorian Electra and Mykki Blanco) - Charli xcx, Dorian Electra, Mykki Blanco.mp3",0.85961,False,False,False,Immediate Skip,10,0,2.0
+2026-01-28T20:04:40.442653,d5205f2d-f935-52a0-bdec-5f67f387ddfa,Take It Easy - 2013 Remaster - Eagles.mp3,1.356363,False,False,False,Immediate Skip,1,0,2.0
+2026-01-28T20:04:41.777041,d2025e57-f131-5c58-b040-6ea1848949e1,Shubh - Sicario.mp3,1.247918,False,False,False,Immediate Skip,3,0,2.0
+2026-01-28T20:04:42.656746,ac439eb0-ea73-5a16-a741-f5ada98fa3c5,"AGE OF EMPIRES - Ab 17, Hurricane, DL91 Era.mp3",0.785038,False,False,False,Immediate Skip,18,0,2.0
+2026-01-28T20:04:45.673056,58b15e44-7693-5bcd-a67a-714a96361483,Laden - Jassie Gill.mp3,2.916709,False,False,False,Immediate Skip,19,0,2.0
+2026-01-28T20:04:47.059923,73185ac7-fdec-509c-b224-a49b146a01ee,"BLACKBALL - SOS, 30KEY!.mp3",1.287497,False,False,False,Immediate Skip,2,0,2.0
+2026-01-28T20:04:47.991294,ff2cbe8a-2c38-5429-a316-ac1dbef12d6d,"Check It Out - Parmish Verma, Paradox.mp3",0.846644,False,False,False,Immediate Skip,15,0,2.0
+2026-01-28T20:04:49.125678,8823cef6-ddae-5d6c-98d2-818b86b1471b,Jigar - Natkhat.mp3,1.04061,False,False,False,Immediate Skip,7,0,2.0
+2026-01-28T20:04:50.042028,4c3f03b6-9557-5fb6-b45f-fc9f669d8a49,Don't Matter Now - George Ezra.mp3,0.819326,False,False,False,Immediate Skip,10,0,2.0
+2026-01-28T20:04:50.875008,e71a6136-fcf5-5dfe-8d28-24d052208f62,"A Horse with No Name - America, George Martin.mp3",0.751914,False,False,False,Immediate Skip,17,0,2.0
+2026-01-28T20:04:51.908778,c2477754-a5cd-537b-a11c-3126661faac1,"Good Life - Kanye West, T-Pain.mp3",0.937322,False,False,False,Immediate Skip,16,0,2.0
+2026-01-28T20:04:52.675342,b1dbc10e-4e71-507e-831e-08e4dc3bb161,Starman - 2012 Remaster - David Bowie.mp3,0.671568,False,False,False,Immediate Skip,5,0,2.0
+2026-01-28T20:04:53.324751,d47e2e9c-0ed4-5957-aa08-f0ac63dd13f7,Inaam - Anuv Jain.mp3,0.534004,False,False,False,Immediate Skip,8,0,2.0
+2026-01-28T20:04:54.125339,78825289-e2bc-5cee-aa27-5aa4c7576f84,"1 Night (feat. Charli XCX) - Mura Masa, Charli xcx.mp3",0.685393,False,False,False,Immediate Skip,7,0,2.0
+2026-01-28T20:04:54.743329,7dd4e03b-a4db-5396-9d3a-bbc6e62169ba,Green Green Grass - George Ezra.mp3,0.520482,False,False,False,Immediate Skip,6,0,2.0
+2026-01-28T20:04:55.491356,8308db9a-05f2-526c-a45d-ebcdaf0ff80d,"Baby Tujhe Paap Lagega (From _Zara Hatke Zara Bachke_) - Sachin-Jigar, Himesh Reshammiya, Amitabh Bhattacharya.mp3",0.656849,False,False,False,Immediate Skip,17,0,2.0
+2026-01-28T20:04:56.758785,ca124c4e-f07e-566f-9838-a5c321bb14e3,"Wouldn't Get Far - The Game, Kanye West.mp3",1.161765,False,False,False,Immediate Skip,2,0,2.0
+2026-01-28T20:04:57.472639,00fff49a-ea92-539a-b340-afd4ded54272,"I'ma Do My Thiiing - Karan Aujla, Ikky.mp3",0.624863,False,False,False,Immediate Skip,9,0,2.0
+2026-01-28T20:04:58.309457,939b282a-712d-53f3-a405-b2f1bb22904c,"Puch Toh Le - OG Lucifer, DL91 Era, Soultrip Beats.mp3",0.75531,False,False,False,Immediate Skip,9,0,2.0
+2026-01-28T20:04:59.125685,f2eddae6-29c5-5967-b0c8-41f72afbdc80,WAKE UP - Gurinder Gill.mp3,0.728651,False,False,False,Immediate Skip,3,0,2.0
+2026-01-28T20:05:00.191437,7df35f46-ce37-5401-8dd3-5c6c0390fa10,"falak - jaiyash, Hurricane.mp3",0.971735,False,False,False,Immediate Skip,11,0,2.0
+2026-01-28T20:05:18.428171,890510d3-5d01-5127-9701-eb05c8cecce5,"Sabar Rakh - Saar Punch, Frisk.mp3",18.128903,False,False,False,Quick Skip,5,0,1.0
+2026-01-28T20:05:19.572792,aeeeb7cc-8f20-5b1f-aecd-bd421942524e,Pashmina - Amit Trivedi.mp3,1.042067,False,False,False,Immediate Skip,0,0,2.0
+2026-01-28T20:05:20.490537,52a3969f-668d-5b41-9b6f-b4a5a99ecdbd,Roke Na Ruke Naina (From _Badrinath Ki Dulhania_) - Arijit Singh.mp3,0.795007,False,False,False,Immediate Skip,3,0,2.0
+2026-01-28T20:05:21.541404,bbca04a2-c768-5401-8fbf-7334ba15ec0d,"STANDING ON BUSINESS - Ab 17, DL91 Era, RiJ.mp3",0.960185,False,False,False,Immediate Skip,3,0,2.0
+2026-01-28T20:05:22.292513,afc7896d-5bae-59fd-92eb-425ce52e2193,Mittraan Da Naa Chalda - Harjit Harman.mp3,0.652095,False,False,False,Immediate Skip,12,0,2.0
+2026-01-28T20:05:23.124532,6b89774a-2c51-5586-8ffe-470b437cc344,"HOMAGE FUNK - KIXIA, KREZUS, Mc Kaique SP.mp3",0.751345,False,False,False,Immediate Skip,15,0,2.0
+2026-01-28T20:05:24.275730,b2cc1fc0-bb45-5425-8001-547086fd6865,Dilkashi - SHASHXNK.mp3,1.055591,False,False,False,Immediate Skip,4,0,2.0
+2026-01-28T20:05:25.059614,ee4a9aeb-fe64-54dc-bc5c-a32f74d06b7c,"OVER AND OVER - Armaan Gill, Arnaaz Gill.mp3",0.69447,False,False,False,Immediate Skip,14,0,2.0
+2026-01-28T20:05:25.958129,bb8a69a0-641e-5192-82ed-4d58ee81a6e0,"Spinning (with Charli XCX & The 1975) - No Rome, Charli xcx, The 1975.mp3",0.808774,False,False,False,Immediate Skip,14,0,2.0
+2026-01-28T20:05:27.074680,4d354504-194a-57d4-b280-0f253691b2e0,"SWITCHIN' LANES - Tegi Pannu, Sukha, Manni Sandhu.mp3",1.013395,False,False,False,Immediate Skip,13,0,2.0
+2026-01-28T20:05:27.924860,0aee4b2e-70ec-583e-be69-916431593009,Raja Bhimsen Ro Lal - Pila Re Pila - Sanju Sharma.mp3,0.747747,False,False,False,Immediate Skip,16,0,2.0
+2026-01-28T20:05:28.924666,d16a23ee-23e3-5f67-b8b9-3a7890f14081,Billy Joel - The Stranger (Legacy Edition).mp3,0.907994,False,False,False,Immediate Skip,16,0,2.0
+2026-01-28T20:05:29.842350,1b0fc49e-0a09-5588-ae60-8a4afbfe632c,My Girl - The Temptations.mp3,0.833606,False,False,False,Immediate Skip,15,0,2.0
+2026-01-28T20:05:33.040805,1877fe11-3348-541a-81b3-68985dcf5ad3,"Bhappa, A.O.D., Arpit Bala - Adhura.mp3",3.11277,False,False,False,Immediate Skip,15,0,2.0
+2026-01-28T20:05:33.759600,1bf71bb2-c5a7-58ff-9597-76c90993905a,Gulaabo - Sanjith Hegde.mp3,0.62509,False,False,False,Immediate Skip,6,0,2.0
+2026-01-28T20:05:34.411557,b791ef4a-9442-51b4-8105-114ce2dc35a3,"Hookah Bar - Himesh Reshammiya, Vineet Singh, Aaman Trikha.mp3",0.564528,False,False,False,Immediate Skip,18,0,2.0
+2026-01-28T20:05:35.144008,9bc2a0f8-6128-58dd-bb1c-111446634b61,Best Day Of My Life - American Authors.mp3,0.622508,False,False,False,Immediate Skip,13,0,2.0
+2026-01-28T20:05:35.791662,837eb357-80d7-5334-9145-87699c95ea6f,"RO LAGI TUKEHE SAU - Prem Terang, Kamalika Kashyap.mp3",0.556,False,False,False,Immediate Skip,16,0,2.0
+2026-01-28T20:05:36.509275,e0f3999a-57b9-557d-a567-db519b090a89,Jim Croce - You Don't Mess Around With Jim.mp3,0.627113,False,False,False,Immediate Skip,10,0,2.0
+2026-01-28T20:05:37.166322,77ecd6b1-0efa-59e2-94ed-e5c92a392fb2,If You Leave Me Now - Chicago.mp3,0.559036,False,False,False,Immediate Skip,13,0,2.0
+2026-01-28T20:05:37.825193,108450b1-f1ee-5f6c-afa4-9963bd57b9a9,"Hivde Ro Har - Maina Rao, Jai Vaishnav.mp3",0.572501,False,False,False,Immediate Skip,8,0,2.0
+2026-01-28T20:05:38.975381,0a890fd3-e346-5d5b-93d6-958433fad451,"khudaaya ve - sufr, Awwn1k, Sarcastically Kumar.mp3",1.046533,False,False,False,Immediate Skip,11,0,2.0
+2026-01-28T20:05:39.640724,ea0e2bc8-2650-52e2-be37-702475fc066e,"Ishqa Ve - Zeeshan Ali, Yuvraj Tung, Sandeep Aulakh, Honey Dhillon.mp3",0.563598,False,False,False,Immediate Skip,16,0,2.0
+2026-01-28T20:05:40.490021,3c86410f-9b4c-5afd-afae-dc79f2de6585,You Make My Dreams (Come True) - Daryl Hall & John Oates.mp3,0.761412,False,False,False,Immediate Skip,9,0,2.0
+2026-01-28T20:05:42.771735,08434368-a179-5036-87bd-7f65b871846e,"CHAK LO - Frappe Ash, toorjo dey, Natiq.mp3",2.183659,True,False,False,Explicit Like,9,2.0,0
+2026-01-28T20:05:43.491473,08434368-a179-5036-87bd-7f65b871846e,"CHAK LO - Frappe Ash, toorjo dey, Natiq.mp3",2.903157,False,False,False,Immediate Skip,19,0,2.0
+2026-01-28T20:05:45.222357,100d779c-efa2-53aa-beef-4e1efe75d438,"KODAK - King, Seedhe Maut.mp3",1.643876,True,False,False,Explicit Like,19,2.0,0
+2026-01-28T20:05:47.538512,100d779c-efa2-53aa-beef-4e1efe75d438,"KODAK - King, Seedhe Maut.mp3",3.957478,True,False,False,Explicit Like,19,2.0,0
+2026-01-28T20:05:48.941265,100d779c-efa2-53aa-beef-4e1efe75d438,"KODAK - King, Seedhe Maut.mp3",5.352448,False,False,False,Quick Skip,3,0,1.0
+2026-01-28T20:05:50.940702,04bc67bf-82bd-5489-aefb-70043d3ee7d7,"Pursuit Of Happiness (Nightmare) - Kid Cudi, MGMT, Ratatat.mp3",1.912634,False,False,False,Immediate Skip,19,0,2.0
+2026-01-28T20:05:52.275654,410c510a-8f0b-5b56-bebc-c5878f41188b,"E - Raftaar, Faris Shafi.mp3",1.24707,False,False,False,Immediate Skip,8,0,2.0
+2026-01-28T20:05:54.091202,1c5113d1-80e6-5e6a-ab46-d81cc5c2271a,"Mannat Noor, Gurmeet Singh - Laung Laachi Title Track (From _Laung Laachi_).mp3",1.722808,False,False,False,Immediate Skip,19,0,2.0
+2026-01-28T20:05:55.705118,adf4a178-ca9b-5b72-ac3b-65904bedfb41,"MUDDA (feat. Seedhe Maut) - YUNG SAMMY, Wamp, Seedhe Maut.mp3",1.525988,True,False,False,Explicit Like,19,2.0,0
+2026-01-28T20:05:56.879698,adf4a178-ca9b-5b72-ac3b-65904bedfb41,"MUDDA (feat. Seedhe Maut) - YUNG SAMMY, Wamp, Seedhe Maut.mp3",2.695257,False,False,False,Immediate Skip,19,0,2.0
+2026-01-28T20:05:57.855178,07748259-bbb6-54a3-ab1e-3cba15d5178c,"Nanchaku - Seedhe Maut, MC STAN.mp3",0.882936,True,False,False,Explicit Like,19,2.0,0
+2026-01-28T20:05:58.225266,07748259-bbb6-54a3-ab1e-3cba15d5178c,"Nanchaku - Seedhe Maut, MC STAN.mp3",1.258672,False,False,False,Immediate Skip,17,0,2.0
+2026-01-28T20:05:59.274240,20ea7633-e310-5614-95ed-f9520e256311,Dumb Ladke - Frappe Ash.mp3,0.949975,True,False,False,Explicit Like,17,2.0,0
+2026-01-28T20:05:59.708121,20ea7633-e310-5614-95ed-f9520e256311,Dumb Ladke - Frappe Ash.mp3,1.38469,False,False,False,Immediate Skip,17,0,2.0
+2026-01-28T20:06:01.105363,e6f88f16-e3e0-5834-b963-7af739626e9f,295 - Sidhu Moose Wala.mp3,1.284282,False,True,False,Explicit Dislike,17,0,2.0
+2026-01-28T20:06:03.071880,3e7c18f3-2360-5c53-8c12-ea970f10f684,"E - Gminxr, a4, AP Dhillon.mp3",1.87446,False,True,False,Explicit Dislike,1,0,2.0
+2026-01-28T20:06:04.941664,6561bc19-8e74-578a-ad8f-ccff13cc402b,"7_30 - Bhaktaaa, Seedhe Maut, KYABC, Hisab.mp3",1.76916,False,False,False,Immediate Skip,19,0,2.0
+2026-01-28T20:06:05.959413,a3ad405f-401f-57a1-b369-d0fe5ad8413d,"Back 2 Back - Karma, Sez on the Beat.mp3",0.915204,False,False,False,Immediate Skip,18,0,2.0
+2026-01-28T20:06:07.354900,f3d60c60-fe6d-5e41-ad79-2b7300231d90,Jassie Gill - Jassi Gill - My Favourites.mp3,1.301683,False,True,False,Explicit Dislike,18,0,2.0
+2026-01-28T20:06:08.245969,02251f98-e03b-557f-88bd-8d282a1801ad,"Kimat Na Bhool - GhAatak, DL91 Era.mp3",0.785515,False,False,False,Immediate Skip,10,0,2.0
+2026-01-28T20:06:08.904802,9dbd7f61-b7c9-5027-ba69-020062423006,Milne Hai Mujhse Aayi (From _Aashiqui 2_) - Arijit Singh.mp3,0.571965,False,True,False,Explicit Dislike,10,0,2.0
+2026-01-28T20:06:10.391324,d5b72769-2423-526d-8d6a-548d6c7ba2c1,"Droptop - AP Dhillon, Gurinder Gill, Gminxr.mp3",1.386227,False,False,False,Immediate Skip,9,0,2.0
+2026-01-28T20:06:10.977082,cfadd543-53b5-51bc-be98-07440e5ca35e,"Foreigns - AP Dhillon, Gurinder Gill, Money Musik.mp3",0.480652,False,False,False,Immediate Skip,19,0,2.0
+2026-01-28T20:06:12.955091,ea36d517-7c8e-5a63-9331-263d413877f4,"WHAT WOULD THE CREDIT DEPARTMENT DO_ - Dhanji, Arpit Bala, BAGI MUNDA, EBE, Faizan, Lit Trust, PSV, Siyaahi.mp3",1.887607,True,False,False,Explicit Like,19,2.0,0
+2026-01-28T20:06:13.422876,ea36d517-7c8e-5a63-9331-263d413877f4,"WHAT WOULD THE CREDIT DEPARTMENT DO_ - Dhanji, Arpit Bala, BAGI MUNDA, EBE, Faizan, Lit Trust, PSV, Siyaahi.mp3",2.349485,False,False,False,Immediate Skip,19,0,2.0
+2026-01-28T20:06:15.210706,fbc61a39-da65-527e-827f-3ee617a26e09,"Terrible Wishlists - Siyaahi, Ikka, ACHARYA.mp3",1.688729,False,False,False,Immediate Skip,5,0,2.0
+2026-01-28T20:06:15.955626,fff8a65f-5554-52b5-9441-bd404b78dbd2,"Nazdiqiyan - Bharg, Maamuli.mp3",0.649178,False,False,False,Immediate Skip,19,0,2.0
+2026-01-28T20:11:47.467894,efd5c15d-752e-54b7-9c34-8e16b3ece4c0,"SO IT GOES - Arnaaz Gill, Armaan Gill.mp3",6.888611,False,True,False,Explicit Dislike,7,0,2.0
+2026-01-28T20:11:49.269116,efd5c15d-752e-54b7-9c34-8e16b3ece4c0,"SO IT GOES - Arnaaz Gill, Armaan Gill.mp3",8.050825,False,False,False,Quick Skip,19,0,1.0
+2026-01-28T20:11:58.367049,805ad45f-c78d-5b06-99ea-bf6c2aadce1c,"Shanivaar Raati (From _Main Tera Hero_) - Arijit Singh, Shalmali Kholgade.mp3",0,False,False,False,Immediate Skip,6,0,2.0
+2026-01-28T20:12:16.938404,1ca36d05-f3bd-5368-9988-acf94a904f49,"Pritam, Neeraj Shridhar, Amrita Kak - Ready.mp3",12.95822,True,False,False,Explicit Like,6,2.0,0
+2026-01-28T20:25:16.780726,73185ac7-fdec-509c-b224-a49b146a01ee,"BLACKBALL - SOS, 30KEY!.mp3",5.519111,False,False,False,Quick Skip,7,0,1.0
+2026-01-28T20:25:32.762770,4c3f03b6-9557-5fb6-b45f-fc9f669d8a49,Don't Matter Now - George Ezra.mp3,0.761255,False,False,False,Immediate Skip,19,0,2.0
+2026-01-28T21:16:54.420394,888e3f21-a4f4-5346-8478-145d58c7c9e6,"Kesar Ki Kyari - Rini Chandra, Honey Trouper, Priyanka R Bala.mp3",2.463243,False,False,False,Immediate Skip,2,0,2.0
+2026-01-28T21:16:57.998601,ff2cbe8a-2c38-5429-a316-ac1dbef12d6d,"Check It Out - Parmish Verma, Paradox.mp3",3.601112,False,False,False,Immediate Skip,2,0,2.0
+2026-01-28T21:17:00.033157,40ae8fb4-4360-51d3-aeb2-200b977bcd59,Maneater - Daryl Hall & John Oates.mp3,1.967434,False,False,False,Immediate Skip,16,0,2.0
+2026-01-28T21:17:02.920988,73185ac7-fdec-509c-b224-a49b146a01ee,"BLACKBALL - SOS, 30KEY!.mp3",2.804958,False,False,False,Immediate Skip,19,0,2.0
+2026-01-28T21:17:04.639247,d47e2e9c-0ed4-5957-aa08-f0ac63dd13f7,Inaam - Anuv Jain.mp3,1.597004,False,False,False,Immediate Skip,5,0,2.0
+2026-01-28T21:17:06.816772,d5205f2d-f935-52a0-bdec-5f67f387ddfa,Take It Easy - 2013 Remaster - Eagles.mp3,2.054945,False,False,False,Immediate Skip,10,0,2.0
+2026-01-28T21:17:08.761432,27bd1a2c-84e6-5690-b7d4-5ecd1d034aa4,"REGRETS - Jevin Gill, Umair, Talha Anjum.mp3",1.883599,False,False,False,Immediate Skip,4,0,2.0
+2026-01-28T21:17:11.423865,8308db9a-05f2-526c-a45d-ebcdaf0ff80d,"Baby Tujhe Paap Lagega (From _Zara Hatke Zara Bachke_) - Sachin-Jigar, Himesh Reshammiya, Amitabh Bhattacharya.mp3",2.501758,False,False,False,Immediate Skip,7,0,2.0
+2026-01-28T21:17:12.440024,4c3f03b6-9557-5fb6-b45f-fc9f669d8a49,Don't Matter Now - George Ezra.mp3,0.977474,False,False,False,Immediate Skip,7,0,2.0
+2026-01-28T21:17:15.308996,d2025e57-f131-5c58-b040-6ea1848949e1,Shubh - Sicario.mp3,2.799663,False,False,False,Immediate Skip,1,0,2.0
+2026-01-28T21:17:22.863357,8823cef6-ddae-5d6c-98d2-818b86b1471b,Jigar - Natkhat.mp3,7.507726,False,False,False,Quick Skip,3,0,1.0
+2026-01-28T21:17:23.918348,ac439eb0-ea73-5a16-a741-f5ada98fa3c5,"AGE OF EMPIRES - Ab 17, Hurricane, DL91 Era.mp3",0.881673,False,False,False,Immediate Skip,3,0,2.0
+2026-01-28T21:17:24.979225,8da0f7f3-3e37-5db3-9289-31cd40b5f93c,"Khamoshiyan - Jeet Gannguli, Arijit Singh, Rashmi Virag.mp3",0.955089,False,False,False,Immediate Skip,0,0,2.0
+2026-01-28T21:17:28.103231,1fd238da-7c36-5555-9985-bc58eed1dfd0,Dark Fantasy - Kanye West.mp3,3.094513,False,False,False,Immediate Skip,11,0,2.0
+2026-01-28T21:17:32.410070,7e53c853-608f-5c6c-afd6-261ace13e7ef,"Femmebot (feat. Dorian Electra and Mykki Blanco) - Charli xcx, Dorian Electra, Mykki Blanco.mp3",4.219671,False,False,False,Immediate Skip,14,0,2.0
+2026-01-28T21:17:36.363602,c2477754-a5cd-537b-a11c-3126661faac1,"Good Life - Kanye West, T-Pain.mp3",3.924246,False,False,False,Immediate Skip,17,0,2.0
+2026-01-28T21:17:38.765852,78825289-e2bc-5cee-aa27-5aa4c7576f84,"1 Night (feat. Charli XCX) - Mura Masa, Charli xcx.mp3",2.276296,False,False,False,Immediate Skip,8,0,2.0
+2026-01-28T21:17:40.499931,afc7896d-5bae-59fd-92eb-425ce52e2193,Mittraan Da Naa Chalda - Harjit Harman.mp3,1.557584,False,False,False,Immediate Skip,6,0,2.0
+2026-01-28T21:17:42.754140,58b15e44-7693-5bcd-a67a-714a96361483,Laden - Jassie Gill.mp3,2.12089,False,False,False,Immediate Skip,18,0,2.0
+2026-01-28T21:17:59.479699,939b282a-712d-53f3-a405-b2f1bb22904c,"Puch Toh Le - OG Lucifer, DL91 Era, Soultrip Beats.mp3",16.677744,False,False,False,Quick Skip,9,0,1.0
+2026-01-28T21:18:15.222181,b2cc1fc0-bb45-5425-8001-547086fd6865,Dilkashi - SHASHXNK.mp3,15.526886,False,False,False,Quick Skip,17,0,1.0
+2026-01-28T21:18:19.009880,ca124c4e-f07e-566f-9838-a5c321bb14e3,"Wouldn't Get Far - The Game, Kanye West.mp3",3.722535,False,False,False,Immediate Skip,17,0,2.0
+2026-01-28T21:18:20.344563,b1dbc10e-4e71-507e-831e-08e4dc3bb161,Starman - 2012 Remaster - David Bowie.mp3,1.136738,False,False,False,Immediate Skip,16,0,2.0
+2026-01-28T21:18:21.359303,0aee4b2e-70ec-583e-be69-916431593009,Raja Bhimsen Ro Lal - Pila Re Pila - Sanju Sharma.mp3,0.955221,False,False,False,Immediate Skip,13,0,2.0
+2026-01-28T21:18:22.590439,3e38471c-80be-54ab-bd5b-9acd9268f26a,"MONTAGEM PRAMIM - -Prey, NXGHT!, Scythermane, dearukia.mp3",1.195955,False,False,False,Immediate Skip,12,0,2.0
+2026-01-28T21:18:23.720400,6b89774a-2c51-5586-8ffe-470b437cc344,"HOMAGE FUNK - KIXIA, KREZUS, Mc Kaique SP.mp3",1.071905,False,False,False,Immediate Skip,2,0,2.0
+2026-01-28T21:18:25.125126,00fff49a-ea92-539a-b340-afd4ded54272,"I'ma Do My Thiiing - Karan Aujla, Ikky.mp3",1.362966,False,False,False,Immediate Skip,2,0,2.0
+2026-01-28T21:18:25.805356,aeeeb7cc-8f20-5b1f-aecd-bd421942524e,Pashmina - Amit Trivedi.mp3,0.586305,False,False,False,Immediate Skip,5,0,2.0
+2026-01-28T21:18:26.594597,ee4a9aeb-fe64-54dc-bc5c-a32f74d06b7c,"OVER AND OVER - Armaan Gill, Arnaaz Gill.mp3",0.770282,False,False,False,Immediate Skip,4,0,2.0
+2026-01-28T21:18:28.924928,890510d3-5d01-5127-9701-eb05c8cecce5,"Sabar Rakh - Saar Punch, Frisk.mp3",2.276227,False,False,False,Immediate Skip,6,0,2.0
+2026-01-28T21:18:29.661600,b791ef4a-9442-51b4-8105-114ce2dc35a3,"Hookah Bar - Himesh Reshammiya, Vineet Singh, Aaman Trikha.mp3",0.679766,False,False,False,Immediate Skip,6,0,2.0
+2026-01-28T21:18:30.959635,4d354504-194a-57d4-b280-0f253691b2e0,"SWITCHIN' LANES - Tegi Pannu, Sukha, Manni Sandhu.mp3",1.26102,False,False,False,Immediate Skip,1,0,2.0
+2026-01-28T21:18:32.625302,9bc2a0f8-6128-58dd-bb1c-111446634b61,Best Day Of My Life - American Authors.mp3,1.494977,False,False,False,Immediate Skip,18,0,2.0
+2026-01-28T21:18:33.412872,a1f582e3-398f-583e-b8dd-81c83835427f,"Vem Vem - Slowed - Jmilton, MC Xangai.mp3",0.742257,False,False,False,Immediate Skip,12,0,2.0
+2026-01-28T21:18:34.628668,f2eddae6-29c5-5967-b0c8-41f72afbdc80,WAKE UP - Gurinder Gill.mp3,1.190533,False,False,False,Immediate Skip,9,0,2.0
+2026-01-28T21:18:35.336186,52a3969f-668d-5b41-9b6f-b4a5a99ecdbd,Roke Na Ruke Naina (From _Badrinath Ki Dulhania_) - Arijit Singh.mp3,0.644226,False,False,False,Immediate Skip,0,0,2.0
+2026-01-28T21:18:36.313670,13cf41bd-45ef-5570-89b6-03ed7624e10d,Chaar Din - Sandeep Brar.mp3,0.93318,False,False,False,Immediate Skip,18,0,2.0
+2026-01-28T21:18:37.128490,805ad45f-c78d-5b06-99ea-bf6c2aadce1c,"Shanivaar Raati (From _Main Tera Hero_) - Arijit Singh, Shalmali Kholgade.mp3",0.740314,False,False,False,Immediate Skip,6,0,2.0
+2026-01-28T21:19:32.230331,100d779c-efa2-53aa-beef-4e1efe75d438,"KODAK - King, Seedhe Maut.mp3",54.994599,True,False,False,Explicit Like,19,2.0,0
+2026-01-28T21:20:52.484837,100d779c-efa2-53aa-beef-4e1efe75d438,"KODAK - King, Seedhe Maut.mp3",135.256675,False,False,False,Deep Listen,19,1.0,0
+2026-01-28T21:20:58.062193,0a890fd3-e346-5d5b-93d6-958433fad451,"khudaaya ve - sufr, Awwn1k, Sarcastically Kumar.mp3",5.52988,False,False,False,Quick Skip,8,0,1.0
+2026-01-28T21:21:09.912001,410c510a-8f0b-5b56-bebc-c5878f41188b,"E - Raftaar, Faris Shafi.mp3",11.752617,False,False,False,Quick Skip,19,0,1.0
+2026-01-28T21:21:13.602102,e71a6136-fcf5-5dfe-8d28-24d052208f62,"A Horse with No Name - America, George Martin.mp3",3.598634,False,False,False,Immediate Skip,19,0,2.0
+2026-01-28T21:21:23.532290,adf4a178-ca9b-5b72-ac3b-65904bedfb41,"MUDDA (feat. Seedhe Maut) - YUNG SAMMY, Wamp, Seedhe Maut.mp3",9.878753,False,False,False,Quick Skip,19,0,1.0
+2026-01-28T21:22:15.812755,07748259-bbb6-54a3-ab1e-3cba15d5178c,"Nanchaku - Seedhe Maut, MC STAN.mp3",52.087601,False,False,False,Engaged,19,0.5,0
+2026-01-28T21:22:42.078411,d5cf8784-32e0-5b03-9ad3-a8609d9c7079,"Remember the Name (feat. Styles of Beyond) - Fort Minor, Styles Of Beyond.mp3",26.147183,False,False,False,Engaged,19,0.5,0
+2026-01-28T21:24:06.990890,3289560e-89f2-5c0a-84e3-272797d6c39b,"PSA - Yashraj, Talal Qureshi.mp3",84.802037,False,False,False,Deep Listen,19,1.0,0
+2026-01-28T21:24:16.670628,3289560e-89f2-5c0a-84e3-272797d6c39b,"PSA - Yashraj, Talal Qureshi.mp3",94.496536,False,False,False,Deep Listen,19,1.0,0
+2026-01-28T22:23:27.852572,bd1ae776-5886-56d3-a24d-c7f597437c9f,"Sunehri Zindagi - Rawal, Bharg.mp3",11.774525,True,False,False,Explicit Like,,2.0,0
+2026-01-28T22:26:47.515302,bd1ae776-5886-56d3-a24d-c7f597437c9f,"Sunehri Zindagi - Rawal, Bharg.mp3",211.580227,False,False,True,Finished,,2.0,0
+2026-01-28T22:26:58.456824,bd1ae776-5886-56d3-a24d-c7f597437c9f,"Sunehri Zindagi - Rawal, Bharg.mp3",211.580227,False,False,False,Deep Listen,,2.0,0
+2026-01-28T22:28:56.544183,3770f7de-04ed-5ed0-83a4-f6dfa884cd12,Stand By Me - Ben E. King.mp3,8.1542,False,True,False,Explicit Dislike,8,0,2.0
+2026-01-28T22:29:09.271404,d47e2e9c-0ed4-5957-aa08-f0ac63dd13f7,Inaam - Anuv Jain.mp3,12.426319,False,True,False,Explicit Dislike,7,0,2.0
+2026-01-28T22:29:15.115430,4ed11f73-35af-51e8-ace3-1edc061e605d,"3 Shaukk (From _De De Pyaar De 2_) - Avvy Sra, Karan Aujla, Jaani, Jyotica Tangri, Dj Chetas.mp3",5.295088,False,False,False,Immediate Skip,11,0,2.0
+2026-01-28T22:29:28.461379,9e63cdcc-0d0e-5c59-923b-759fd2accadf,"Guilty - Inder Chahal, Karan Aujla.mp3",13.294909,False,True,False,Explicit Dislike,3,0,2.0
+2026-01-28T22:29:34.299354,062bfecd-cc05-57a3-a8c5-020b5538f798,Don't Dream It's Over - Crowded House.mp3,5.20124,False,True,False,Explicit Dislike,4,0,2.0
+2026-01-28T22:29:54.848179,729fa308-6205-5bc4-8d08-ce1d52f33395,"From The Start - Funk Slowed - -Prey, ZMAJOR, zxnc, Emrld!.mp3",20.002215,True,False,False,Explicit Like,1,2.0,0
+2026-01-28T22:30:24.659262,729fa308-6205-5bc4-8d08-ce1d52f33395,"From The Start - Funk Slowed - -Prey, ZMAJOR, zxnc, Emrld!.mp3",50.182055,False,False,False,Engaged,1,1.0,0
+2026-01-28T22:48:50.191134,fefdddf0-e967-591c-8443-7579af0e4aa2,"RO LAGI TUKEHE SAU - Prem Terang, Kamalika Kashyap.mp3",5.774138,False,True,False,Explicit Dislike,18,0,2.0
+2026-01-28T22:48:54.693773,b9fee8a4-0609-52a3-816e-113b3698014f,"Night Life - GhAatak, Ab 17, DL91 Era.mp3",4.34614,False,True,False,Explicit Dislike,4,0,2.0
+2026-01-28T22:49:04.522632,b1dbc10e-4e71-507e-831e-08e4dc3bb161,Starman - 2012 Remaster - David Bowie.mp3,9.058376,False,True,False,Explicit Dislike,16,0,2.0
+2026-01-28T22:49:05.946072,921cc178-a1d0-5599-b95a-1534e75c444a,Lemonade - Diljit Dosanjh.mp3,1.327056,False,True,False,Explicit Dislike,19,0,2.0
+2026-01-28T22:49:07.855274,cd75be8d-c6b8-53e7-ac04-5f8cedd43e6a,Scenes from an Italian Restaurant - Billy Joel.mp3,1.807567,False,True,False,Explicit Dislike,5,0,2.0
+2026-01-28T22:49:10.497048,10438cf4-8044-5607-9d88-224b6f85719a,"Arpit Bala, Adil - Keychain Laalu.mp3",2.438312,False,True,False,Explicit Dislike,3,0,2.0
+2026-01-28T22:49:13.662037,bb8a69a0-641e-5192-82ed-4d58ee81a6e0,"Spinning (with Charli XCX & The 1975) - No Rome, Charli xcx, The 1975.mp3",3.088337,False,True,False,Explicit Dislike,7,0,2.0
+2026-01-28T22:49:15.336475,a3ffdf31-eb76-5bd6-b352-9bc4eda67013,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,1.464648,False,True,False,Explicit Dislike,11,0,2.0
+2026-01-28T22:49:18.422142,fc5f3bd6-d527-55c7-8def-15f7fa058c46,"Lighthouse - Tama, Langston.mp3",2.991385,False,True,False,Explicit Dislike,6,0,2.0
+2026-01-28T22:49:21.166781,a9609b4d-3db5-55f2-85e3-2b6e421b4723,"KEYS TO MY LIFE - ¥$, Kanye West, Ty Dolla $ign.mp3",2.651756,False,True,False,Explicit Dislike,1,0,2.0
+2026-01-28T22:49:30.141868,145d349b-def1-5380-a245-0b71f4c03a4b,"famous - jaiyash, Arpit Bala, 3eedio.mp3",8.850858,False,False,False,Immediate Skip,12,0,2.0
+2026-01-28T22:49:31.424694,080525f0-159f-58b8-abe4-e2baf55464f9,"HEAT - Sukha, Prodgk.mp3",1.235711,False,True,False,Explicit Dislike,8,0,2.0
+2026-01-28T22:49:32.453499,255ab79a-1b5c-5365-a609-ff562d294ad3,"maikhana - Vasu Raina, Nanku, Lambo Drive.mp3",0.868017,False,True,False,Explicit Dislike,9,0,2.0
+2026-01-28T22:49:33.668652,1e63c7c2-c757-5f11-80ec-7d1d2b7de31a,Jatt 24 Carat Da - Harjit Harman.mp3,1.119738,False,True,False,Explicit Dislike,13,0,2.0
+2026-01-28T22:49:35.777505,d8390ec1-409e-5a23-b907-dd16083c230c,Champagne Poetry - Drake.mp3,1.995311,False,True,False,Explicit Dislike,1,0,2.0
+2026-01-28T22:49:36.666931,e3bd456e-e07b-5042-8d25-872d1157d59d,DHUAAN - Natkhat.mp3,0.793847,False,True,False,Explicit Dislike,14,0,2.0
+2026-01-28T22:49:37.430760,0de013cc-7bd1-5d7a-a311-ef6876a24445,Tujhme Nahi Hai - Bharg.mp3,0.618603,False,True,False,Explicit Dislike,17,0,2.0
+2026-01-28T22:49:38.332402,8d653f7e-09d2-51da-aa39-a7e2d3dba027,"Bolna (From _Kapoor & Sons (Since 1921)_) - Tanishk Bagchi, Arijit Singh, Asees Kaur.mp3",0.680941,False,True,False,Explicit Dislike,19,0,2.0
+2026-01-28T22:49:48.028655,729fa308-6205-5bc4-8d08-ce1d52f33395,"From The Start - Funk Slowed - -Prey, ZMAJOR, zxnc, Emrld!.mp3",9.550735,True,False,False,Explicit Like,15,2.0,0
+2026-01-28T22:50:13.898880,729fa308-6205-5bc4-8d08-ce1d52f33395,"From The Start - Funk Slowed - -Prey, ZMAJOR, zxnc, Emrld!.mp3",35.409663,False,False,False,Engaged,15,1.0,0
+2026-01-28T22:50:22.083302,e220b6c7-103c-5403-a825-80af2d82e56c,"Analog Horror Funk - Slowed - qqPues, DJ Raulipues.mp3",8.048237,True,False,False,Explicit Like,10,2.0,0
+2026-01-28T22:50:22.684465,e220b6c7-103c-5403-a825-80af2d82e56c,"Analog Horror Funk - Slowed - qqPues, DJ Raulipues.mp3",8.6829,False,False,False,Immediate Skip,10,0,2.0
+2026-01-28T22:50:39.914664,2e9982f4-a5d5-56dd-9611-f78b67ef5125,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,16.882093,False,True,False,Explicit Dislike,10,0,2.0
+2026-01-28T22:50:41.498956,2e9982f4-a5d5-56dd-9611-f78b67ef5125,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,1.448725,False,True,False,Explicit Dislike,15,0,2.0
+2026-01-28T22:50:43.118196,383822ab-39e3-580c-b8f4-87cf99cbce03,"Uyi Amma - From _Azaad_ - Amit Trivedi, Madhubanti Bagchi, Amitabh Bhattacharya.mp3",1.418216,False,True,False,Explicit Dislike,15,0,2.0
+2026-01-28T22:50:43.853927,d4ede31f-77c4-59d0-a288-cbde9d232f09,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,0.586436,False,True,False,Explicit Dislike,11,0,2.0
+2026-01-28T22:50:44.713844,940fa11d-04fd-5657-ba9f-2cfc29627bdb,DHUAAN - Natkhat.mp3,0.763467,False,True,False,Explicit Dislike,2,0,2.0
+2026-01-28T22:50:45.521340,c4283b00-1e09-5586-9e63-6ba3215f514c,Jado Jor Ko - Nitesh Sharma Golu.mp3,0.582218,False,True,False,Explicit Dislike,2,0,2.0
+2026-01-28T22:50:46.127567,719622f8-9c52-59b2-a60c-d43299cde4ba,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,0.494225,False,True,False,Explicit Dislike,2,0,2.0
+2026-01-28T22:50:46.803846,0c903341-8df0-5998-9aa8-867726b1bdca,"Soch Na Sake - Amaal Mallik, Arijit Singh, Tulsi Kumar.mp3",0.584545,False,True,False,Explicit Dislike,19,0,2.0
+2026-01-28T22:50:47.767145,09e82f2c-2e91-575a-b64b-649fbde748be,"NYPD - Baggh-e SMG, Farmaan SMG, BIG KAY SMG.mp3",0.818806,False,True,False,Explicit Dislike,17,0,2.0
+2026-01-28T22:50:48.693940,08df752d-946b-5c89-ae22-77c609f3f4fb,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,0.768558,False,True,False,Explicit Dislike,17,0,2.0
+2026-01-28T22:50:49.514955,606c7d40-b940-539b-a6e8-e62f42e6b444,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,0.685096,False,True,False,Explicit Dislike,17,0,2.0
+2026-01-28T22:50:51.156960,8d20554c-9a16-587a-8d2a-89c724dc1a43,Starman - 2012 Remaster - David Bowie.mp3,1.529083,False,True,False,Explicit Dislike,16,0,2.0
+2026-01-28T22:50:52.021164,d830c3c6-1c97-553d-8c3d-db59b4283363,"Tu Hi Hai Aashiqui - Duet - Palash Muchhal, Arijit Singh, Palak Muchhal.mp3",0.675532,False,True,False,Explicit Dislike,0,0,2.0
+2026-01-28T22:50:53.890820,a0830a9b-6146-549f-a968-3549c31cbe3b,New York State of Mind - Billy Joel.mp3,0.674786,False,True,False,Explicit Dislike,0,0,2.0
+2026-01-28T22:50:54.075602,a0830a9b-6146-549f-a968-3549c31cbe3b,New York State of Mind - Billy Joel.mp3,1.468879,False,True,False,Explicit Dislike,10,0,2.0
+2026-01-28T22:50:54.731517,9d83b1f9-c7eb-5a84-b67e-e2261102f186,"RO LAGI TUKEHE SAU - Prem Terang, Kamalika Kashyap.mp3",0.511763,False,True,False,Explicit Dislike,18,0,2.0
+2026-01-28T22:50:56.281027,d47e2e9c-0ed4-5957-aa08-f0ac63dd13f7,Inaam - Anuv Jain.mp3,0.661921,False,True,False,Explicit Dislike,3,0,2.0
+2026-01-28T22:50:56.283767,d47e2e9c-0ed4-5957-aa08-f0ac63dd13f7,Inaam - Anuv Jain.mp3,1.261294,False,True,False,Explicit Dislike,3,0,2.0
+2026-01-28T22:50:57.179301,ebf81f4e-f553-5f2d-aacc-b0e82e169041,"Dark Red - Funk - ZMAJOR, dearukia, SEKIMANE, zxnc.mp3",0.143425,False,True,False,Explicit Dislike,3,0,2.0
+2026-01-28T22:50:59.536323,bef7bdba-2244-5ff6-b968-01a8260dc6da,"3 Peg - Sharry Mann, Raviraj.mp3",2.206714,False,True,False,Explicit Dislike,3,0,2.0
+2026-01-28T22:51:01.386481,a457ba8f-f45b-59a0-b3f1-abd474225754,Ignore - Lofi - Raju Rawal.mp3,0.870258,False,True,False,Explicit Dislike,3,0,2.0
+2026-01-28T22:51:02.386279,d999b1a1-7130-5dc5-98af-bc6f4f1f3cfc,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,0.844784,False,True,False,Explicit Dislike,3,0,2.0
+2026-01-28T22:51:03.434521,8bda1f9a-7f17-59e2-b698-c9c47ac90466,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,0.929994,False,True,False,Explicit Dislike,3,0,2.0
+2026-01-28T22:51:04.938947,a3c25443-696d-5424-994a-b1bfebbfb72a,Ignore - Lofi - Raju Rawal.mp3,1.311685,False,True,False,Explicit Dislike,3,0,2.0
+2026-01-28T22:51:05.760764,3e20037d-767d-573f-a896-17d63674c814,Best Day Of My Life - American Authors.mp3,0.698948,False,True,False,Explicit Dislike,3,0,2.0
+2026-01-28T22:51:06.798702,9e63cdcc-0d0e-5c59-923b-759fd2accadf,"Guilty - Inder Chahal, Karan Aujla.mp3",0.466928,False,True,False,Explicit Dislike,8,0,2.0
+2026-01-28T22:51:07.645550,606c7d40-b940-539b-a6e8-e62f42e6b444,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,0.702825,False,True,False,Explicit Dislike,15,0,2.0
+2026-01-28T22:51:08.417043,ef66e04a-6069-58f5-a1d8-9053d83a50ef,"Alors On Danse - Remix - Explicit - Stromae, Kanye West, Gilbere Forté.mp3",0.635931,False,True,False,Explicit Dislike,15,0,2.0
+2026-01-28T22:52:04.378679,41685986-d7ba-5a8a-a9b2-82bc656a5293,"Spinning (with Charli XCX & The 1975) - No Rome, Charli xcx, The 1975.mp3",1.571014,False,False,False,Immediate Skip,7,0,2.0
+2026-01-28T22:52:05.094173,f925d0e4-aa2b-5135-833c-68e20149268f,Dance with Me Tonight - Olly Murs.mp3,0.398417,False,False,False,Immediate Skip,7,0,2.0
+2026-01-28T22:52:05.615651,880ec4c2-2fb3-5da5-9940-fe4a661a7eb3,Jado Jor Ko - Nitesh Sharma Golu.mp3,0.440475,False,True,False,Explicit Dislike,7,0,2.0
+2026-01-28T22:52:05.968213,fc9389bb-80f4-5562-948d-7ae2cf2d6209,"Gorgeous - Kanye West, Kid Cudi, Raekwon.mp3",0.187975,False,True,False,Explicit Dislike,7,0,2.0
+2026-01-28T22:52:06.342803,edb84620-e2bb-564a-ae9d-92249be008dd,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,0.266659,False,True,False,Explicit Dislike,7,0,2.0
+2026-01-28T22:57:52.779672,60d81d73-6f02-5a0b-966d-d08dbd11edc1,"Kesar Ki Kyari - Rini Chandra, Honey Trouper, Priyanka R Bala.mp3",1.335653,False,True,False,Explicit Dislike,11,0,2.0
+2026-01-28T22:57:53.737045,a9609b4d-3db5-55f2-85e3-2b6e421b4723,"KEYS TO MY LIFE - ¥$, Kanye West, Ty Dolla $ign.mp3",0.81547,False,True,False,Explicit Dislike,0,0,2.0
+2026-01-28T22:57:54.753908,a3ffdf31-eb76-5bd6-b352-9bc4eda67013,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,0.921931,False,True,False,Explicit Dislike,,0,7.0
+2026-01-28T22:57:56.084499,b532b2db-5da1-50cd-9b65-6d8bf36e30bc,"Tenu Sang Rakhna - Achint, Arijit Singh, Anumita Nadesan, Varun Grover.mp3",1.192343,False,True,False,Explicit Dislike,12,0,2.0
+2026-01-28T22:57:58.534900,fc5f3bd6-d527-55c7-8def-15f7fa058c46,"Lighthouse - Tama, Langston.mp3",2.338873,False,True,False,Explicit Dislike,14,0,2.0
+2026-01-28T22:58:00.225933,78780484-c659-5e96-bd77-b0ca044abf12,"Ishq Wala Love - Vishal-Shekhar, Shekhar Ravjiani, Salim Merchant, Neeti Mohan.mp3",1.459683,False,True,False,Explicit Dislike,,0,7.0
+2026-01-28T22:58:06.591475,c63ad507-4917-58d1-86b5-d3bbd279bd20,Track 1 - sayuruxt.mp3,6.045982,True,False,False,Explicit Like,16,2.0,0
+2026-01-28T22:59:10.779631,c63ad507-4917-58d1-86b5-d3bbd279bd20,Track 1 - sayuruxt.mp3,70.036034,False,False,False,Deep Listen,15,2.0,0
+2026-01-28T22:59:14.049043,9346d7a2-5700-5576-9574-0d652bd3067e,"Aankhon - SangeetKir, Arpit Bala.mp3",3.523163,False,False,False,Immediate Skip,15,0,2.0
+2026-01-28T22:59:18.208009,bb8a69a0-641e-5192-82ed-4d58ee81a6e0,"Spinning (with Charli XCX & The 1975) - No Rome, Charli xcx, The 1975.mp3",3.952888,False,False,False,Immediate Skip,16,0,2.0
+2026-01-28T22:59:31.404246,bb8a69a0-641e-5192-82ed-4d58ee81a6e0,"Spinning (with Charli XCX & The 1975) - No Rome, Charli xcx, The 1975.mp3",16.954067,False,False,False,Warm Skip,19,0.5,0
+2026-01-28T22:59:36.223881,cd75be8d-c6b8-53e7-ac04-5f8cedd43e6a,Scenes from an Italian Restaurant - Billy Joel.mp3,4.785795,False,False,False,Immediate Skip,19,0,2.0
+2026-01-28T22:59:37.764552,cd75be8d-c6b8-53e7-ac04-5f8cedd43e6a,Scenes from an Italian Restaurant - Billy Joel.mp3,6.281285,False,False,False,Immediate Skip,19,0,2.0
+2026-01-28T22:59:38.393929,cd75be8d-c6b8-53e7-ac04-5f8cedd43e6a,Scenes from an Italian Restaurant - Billy Joel.mp3,6.879804,False,False,False,Immediate Skip,,0,7.0
+2026-01-28T22:59:39.916469,229774cb-e1bf-587b-8ace-0dcd46c8fca8,New York State of Mind - Billy Joel.mp3,1.377682,False,False,False,Immediate Skip,6,0,2.0
+2026-01-28T22:59:50.358674,09e82f2c-2e91-575a-b64b-649fbde748be,"NYPD - Baggh-e SMG, Farmaan SMG, BIG KAY SMG.mp3",10.356548,False,False,False,Warm Skip,13,0.5,0
+2026-01-28T22:59:52.561034,09e82f2c-2e91-575a-b64b-649fbde748be,"NYPD - Baggh-e SMG, Farmaan SMG, BIG KAY SMG.mp3",12.573132,False,False,False,Warm Skip,13,0.5,0
+2026-01-28T22:59:55.221941,09e82f2c-2e91-575a-b64b-649fbde748be,"NYPD - Baggh-e SMG, Farmaan SMG, BIG KAY SMG.mp3",15.236841,False,False,False,Warm Skip,13,0.5,0
+2026-01-28T23:04:41.770395,067ea46a-af40-5942-99b7-b8d534ff6e47,"Sunehri Zindagi - Rawal, Bharg.mp3",13.312509,True,False,False,Explicit Like,,2.0,0
+2026-01-28T23:04:44.799826,067ea46a-af40-5942-99b7-b8d534ff6e47,"Sunehri Zindagi - Rawal, Bharg.mp3",16.368301,False,False,False,Warm Skip,,0.5,0
+2026-01-28T23:04:48.319696,ab28ce67-71d0-58d7-a372-aa73f71bca57,Light Weight - Kulwinder Billa.mp3,3.461738,False,False,False,Immediate Skip,3,0,2.0
+2026-01-28T23:04:54.789665,ab28ce67-71d0-58d7-a372-aa73f71bca57,Light Weight - Kulwinder Billa.mp3,9.93312,False,False,False,Immediate Skip,3,0,2.0
+2026-01-28T23:09:32.745896,a9609b4d-3db5-55f2-85e3-2b6e421b4723,"KEYS TO MY LIFE - ¥$, Kanye West, Ty Dolla $ign.mp3",4.857189,False,False,False,Immediate Skip,0,0,2.0
+2026-01-28T23:09:37.245074,7590bbba-428e-5080-a52c-93b156e64b8e,"Lighthouse - Tama, Langston.mp3",4.479367,False,False,False,Immediate Skip,1,0,2.0
+2026-01-28T23:10:01.396460,255ab79a-1b5c-5365-a609-ff562d294ad3,"maikhana - Vasu Raina, Nanku, Lambo Drive.mp3",24.103154,True,False,False,Explicit Like,16,2.0,0
+2026-01-28T23:10:03.389293,255ab79a-1b5c-5365-a609-ff562d294ad3,"maikhana - Vasu Raina, Nanku, Lambo Drive.mp3",26.126243,False,False,False,Warm Skip,16,0.5,0
+2026-01-28T23:13:38.217728,ab28ce67-71d0-58d7-a372-aa73f71bca57,Light Weight - Kulwinder Billa.mp3,2.930999,False,False,False,Immediate Skip,13,0,2.0
+2026-01-28T23:13:39.706199,b4c37ad0-cb99-523b-a702-a9321626dc6c,"Lighthouse - Tama, Langston.mp3",1.376462,False,False,False,Immediate Skip,14,0,2.0
+2026-01-28T23:13:40.931455,a3ffdf31-eb76-5bd6-b352-9bc4eda67013,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,1.141161,False,False,False,Immediate Skip,,0,7.0
+2026-01-28T23:13:42.074238,bb8a69a0-641e-5192-82ed-4d58ee81a6e0,"Spinning (with Charli XCX & The 1975) - No Rome, Charli xcx, The 1975.mp3",1.065013,False,False,False,Immediate Skip,1,0,2.0
+2026-01-28T23:14:01.995424,255ab79a-1b5c-5365-a609-ff562d294ad3,"maikhana - Vasu Raina, Nanku, Lambo Drive.mp3",19.876307,True,False,False,Explicit Like,6,2.0,0
+2026-01-28T23:14:06.278370,255ab79a-1b5c-5365-a609-ff562d294ad3,"maikhana - Vasu Raina, Nanku, Lambo Drive.mp3",24.158974,False,False,False,Warm Skip,6,0.5,0
+2026-01-28T23:17:18.033040,35fd0c8f-9758-5c17-9e6a-28fc32a060da,"Lighthouse - Tama, Langston.mp3",1.06903,False,False,False,Immediate Skip,3,0,2.0
+2026-01-28T23:17:18.647946,080525f0-159f-58b8-abe4-e2baf55464f9,"HEAT - Sukha, Prodgk.mp3",0.543867,False,False,False,Immediate Skip,0,0,2.0
+2026-01-28T23:17:19.246018,b9fee8a4-0609-52a3-816e-113b3698014f,"Night Life - GhAatak, Ab 17, DL91 Era.mp3",0.50843,False,False,False,Immediate Skip,,0,7.0
+2026-01-28T23:17:19.978656,fc5f3bd6-d527-55c7-8def-15f7fa058c46,"Lighthouse - Tama, Langston.mp3",0.654139,False,False,False,Immediate Skip,10,0,2.0
+2026-01-28T23:17:20.591390,ab28ce67-71d0-58d7-a372-aa73f71bca57,Light Weight - Kulwinder Billa.mp3,0.526297,False,False,False,Immediate Skip,16,0,2.0
+2026-01-28T23:17:21.204601,60d81d73-6f02-5a0b-966d-d08dbd11edc1,"Kesar Ki Kyari - Rini Chandra, Honey Trouper, Priyanka R Bala.mp3",0.539347,False,False,False,Immediate Skip,,0,7.0
+2026-01-28T23:17:21.886368,8d653f7e-09d2-51da-aa39-a7e2d3dba027,"Bolna (From _Kapoor & Sons (Since 1921)_) - Tanishk Bagchi, Arijit Singh, Asees Kaur.mp3",0.628046,False,False,False,Immediate Skip,12,0,2.0
+2026-01-28T23:17:35.369219,848a200f-ec9f-51dd-8284-896dbb090cac,"Gourmet Shit! - Seedhe Maut, Raftaar.mp3",13.345381,True,False,False,Explicit Like,15,2.0,0
+2026-01-28T23:17:35.844707,848a200f-ec9f-51dd-8284-896dbb090cac,"Gourmet Shit! - Seedhe Maut, Raftaar.mp3",13.83679,False,False,False,Warm Skip,15,0.5,0
+2026-01-28T23:17:44.471423,ddf6d546-dad3-5a06-a968-a465a970ffe4,"F16 - Raftaar, Sikander Kahlon.mp3",8.533369,False,False,False,Immediate Skip,15,0,2.0
+2026-01-28T23:17:46.909709,b28247fc-ad47-5027-9059-da65812926ff,"Gourmet Shit! - Seedhe Maut, Raftaar.mp3",2.27711,True,False,False,Explicit Like,15,2.0,0
+2026-01-28T23:17:47.386435,b28247fc-ad47-5027-9059-da65812926ff,"Gourmet Shit! - Seedhe Maut, Raftaar.mp3",2.815546,False,False,False,Immediate Skip,15,0,2.0
+2026-01-28T23:17:53.461554,145d349b-def1-5380-a245-0b71f4c03a4b,"famous - jaiyash, Arpit Bala, 3eedio.mp3",6.044964,False,False,False,Immediate Skip,17,0,2.0
+2026-01-28T23:17:55.087892,a9609b4d-3db5-55f2-85e3-2b6e421b4723,"KEYS TO MY LIFE - ¥$, Kanye West, Ty Dolla $ign.mp3",1.559513,False,True,False,Explicit Dislike,,0,7.0
+2026-01-28T23:17:59.753543,78780484-c659-5e96-bd77-b0ca044abf12,"Ishq Wala Love - Vishal-Shekhar, Shekhar Ravjiani, Salim Merchant, Neeti Mohan.mp3",4.54847,False,False,False,Immediate Skip,8,0,2.0
+2026-01-28T23:18:01.955320,d767be5c-d461-5a33-b47d-1738836c42c2,Everybody Wants To Rule The World - Tears For Fears.mp3,2.083043,False,False,False,Immediate Skip,9,0,2.0
+2026-01-28T23:18:03.227467,a3c25443-696d-5424-994a-b1bfebbfb72a,Ignore - Lofi - Raju Rawal.mp3,1.140121,False,False,False,Immediate Skip,,0,7.0
+2026-01-28T23:18:04.069145,a4557543-97ad-57a1-ad87-265e265b962e,"Thuthkaro - Sonu Kanwar, Kailash Jangid.mp3",0.812774,False,False,False,Immediate Skip,14,0,2.0
+2026-01-28T23:18:05.494415,1c5113d1-80e6-5e6a-ab46-d81cc5c2271a,"Mannat Noor, Gurmeet Singh - Laung Laachi Title Track (From _Laung Laachi_).mp3",1.288794,False,False,False,Immediate Skip,4,0,2.0
+2026-01-28T23:18:07.397191,b0ebc5b7-bb03-5bd7-a314-5e828fa6e09f,"Yeh Fitoor Mera - Amit Trivedi, Arijit Singh.mp3",1.835287,False,False,False,Immediate Skip,,0,7.0
+2026-01-28T23:18:08.929764,8f010745-a80a-54c1-a689-262f91715cc3,goosebumps - Travis Scott.mp3,1.458359,False,False,False,Immediate Skip,1,0,2.0
+2026-01-28T23:18:09.736475,b1dbc10e-4e71-507e-831e-08e4dc3bb161,Starman - 2012 Remaster - David Bowie.mp3,0.654948,False,False,False,Immediate Skip,2,0,2.0
+2026-01-28T23:18:10.565389,a3ffdf31-eb76-5bd6-b352-9bc4eda67013,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,0.693613,False,False,False,Immediate Skip,,0,7.0
+2026-01-28T23:18:11.413825,d4ede31f-77c4-59d0-a288-cbde9d232f09,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,0.79997,False,False,False,Immediate Skip,11,0,2.0
+2026-01-28T23:18:12.206290,ff5f25ff-98f4-5009-a4ef-861ab866d9a5,"Count Contessa - Azealia Banks, Lone.mp3",0.740978,False,False,False,Immediate Skip,6,0,2.0
+2026-01-28T23:18:13.969692,9346d7a2-5700-5576-9574-0d652bd3067e,"Aankhon - SangeetKir, Arpit Bala.mp3",1.256974,False,False,False,Immediate Skip,,0,7.0
+2026-01-28T23:18:15.061242,27c75739-0a4b-5ceb-a95a-6c1421a62145,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,0.931306,False,False,False,Immediate Skip,11,0,2.0
+2026-01-28T23:18:15.983921,99c28845-073f-53d2-bbc7-0bd6fddfa1a3,She's Always a Woman - Billy Joel.mp3,0.889504,False,False,False,Immediate Skip,7,0,2.0
+2026-01-28T23:18:16.753644,d5894b6b-32a4-5613-b4aa-d4eb495758cd,Tere Bina Na Guzara E - Josh Brar.mp3,0.730064,False,False,False,Immediate Skip,,0,7.0
+2026-01-28T23:18:17.490669,bb8a69a0-641e-5192-82ed-4d58ee81a6e0,"Spinning (with Charli XCX & The 1975) - No Rome, Charli xcx, The 1975.mp3",0.659454,False,False,False,Immediate Skip,18,0,2.0
+2026-01-28T23:18:18.614676,b4c37ad0-cb99-523b-a702-a9321626dc6c,"Lighthouse - Tama, Langston.mp3",1.079446,False,False,False,Immediate Skip,3,0,2.0
+2026-01-28T23:18:19.931130,e4a05b36-c3d3-5232-805b-8bc26a0dbb45,"Lighthouse - Tama, Langston.mp3",1.274275,False,False,False,Immediate Skip,,0,7.0
+2026-01-28T23:18:21.844171,09e82f2c-2e91-575a-b64b-649fbde748be,"NYPD - Baggh-e SMG, Farmaan SMG, BIG KAY SMG.mp3",1.88765,False,False,False,Immediate Skip,5,0,2.0
+2026-01-28T23:18:22.743610,b8179a4d-3246-5b8f-b7e1-89cc0f23c422,Churau Nazar - Dizlaw.mp3,0.84336,False,False,False,Immediate Skip,19,0,2.0
+2026-01-28T23:18:28.595445,c7a4a2e4-2db3-5273-a673-0fc6b82d592c,"From The Start - Funk Slowed - -Prey, ZMAJOR, zxnc, Emrld!.mp3",5.755885,True,False,False,Explicit Like,13,2.0,0
+2026-01-28T23:18:33.209643,c7a4a2e4-2db3-5273-a673-0fc6b82d592c,"From The Start - Funk Slowed - -Prey, ZMAJOR, zxnc, Emrld!.mp3",10.377264,False,False,False,Warm Skip,13,0.5,0
+2026-01-28T23:18:52.471993,2e9982f4-a5d5-56dd-9611-f78b67ef5125,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,18.967398,False,False,False,Warm Skip,13,0.5,0
+2026-01-28T23:18:56.212251,2e9982f4-a5d5-56dd-9611-f78b67ef5125,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,3.491273,False,False,False,Immediate Skip,13,0,2.0
+2026-01-28T23:18:57.052001,2e9982f4-a5d5-56dd-9611-f78b67ef5125,Surjit Bindrakhia - World Music Day 2022 Surjit Bindrakhia Hits.mp3,0.697971,False,False,False,Immediate Skip,13,0,2.0
+2026-01-28T23:19:04.117765,950d9417-22da-5a9d-a7eb-28b5194d18cf,"Insane - AP Dhillon, Shinda Kahlon, Gurinder Gill, Gminxr.mp3",6.951028,False,False,False,Immediate Skip,,0,7.0
+2026-01-29T13:29:44.992679,ab28ce67-71d0-58d7-a372-aa73f71bca57,Light Weight - Kulwinder Billa.mp3,1.56525,False,False,False,Instant Skip,11,0,2.5

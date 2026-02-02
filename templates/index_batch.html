@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chaar.fm - Batch Mode</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0 30px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .batch-info {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .batch-info .status {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .batch-progress {
+            display: flex;
+            gap: 8px;
+        }
+
+        .batch-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .batch-dot.active {
+            background: #667eea;
+            box-shadow: 0 0 10px #667eea;
+        }
+
+        .batch-dot.liked {
+            background: #4ade80;
+        }
+
+        .batch-dot.disliked {
+            background: #f87171;
+        }
+
+        .batch-dot.played {
+            background: #888;
+        }
+
+        .now-playing {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .now-playing h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+
+        .now-playing .subtitle {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .controls button {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .controls button:hover {
+            transform: scale(1.1);
+        }
+
+        .controls .btn-play {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .controls .btn-secondary {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .controls .btn-like {
+            color: #4ade80;
+        }
+
+        .controls .btn-dislike {
+            color: #f87171;
+        }
+
+        .queue-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .queue-section h3 {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: #888;
+        }
+
+        .queue-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .queue-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .queue-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .queue-item.active {
+            background: rgba(102, 126, 234, 0.2);
+            border-left: 3px solid #667eea;
+        }
+
+        .queue-item .num {
+            width: 25px;
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .queue-item .title {
+            flex: 1;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .queue-item .reaction {
+            font-size: 1rem;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .action-bar button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-bar .btn-next-batch {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+        }
+
+        .action-bar .btn-next-batch:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .action-bar .btn-search {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Search Modal */
+        .search-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            z-index: 100;
+        }
+
+        .search-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-header input {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .search-header button {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #667eea;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .search-results {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .search-item {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .search-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        audio {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>chaar.fm</h1>
+            <p>Batch Mode - 5 Songs at a Time</p>
+        </header>
+
+        <div class="batch-info">
+            <span class="status" id="batch-status">Loading batch...</span>
+            <div class="batch-progress" id="batch-progress">
+                <div class="batch-dot" data-idx="0"></div>
+                <div class="batch-dot" data-idx="1"></div>
+                <div class="batch-dot" data-idx="2"></div>
+                <div class="batch-dot" data-idx="3"></div>
+                <div class="batch-dot" data-idx="4"></div>
+            </div>
+        </div>
+
+        <div class="now-playing">
+            <h2 id="track-title">Ready to Vibe?</h2>
+            <p class="subtitle" id="track-subtitle">Click play to start</p>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+
+            <div class="time-display">
+                <span id="time-current">0:00</span>
+                <span id="time-total">0:00</span>
+            </div>
+
+            <div class="controls">
+                <button class="btn-secondary btn-dislike" id="btn-dislike" title="Dislike">
+                    <i class="fas fa-thumbs-down"></i>
+                </button>
+                <button class="btn-play" id="btn-play">
+                    <i class="fas fa-play" id="play-icon"></i>
+                </button>
+                <button class="btn-secondary btn-like" id="btn-like" title="Like">
+                    <i class="fas fa-thumbs-up"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="queue-section">
+            <h3>Current Batch</h3>
+            <div class="queue-list" id="queue-list">
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Loading batch...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <button class="btn-search" id="btn-search">
+                <i class="fas fa-search"></i> Search
+            </button>
+            <button class="btn-next-batch" id="btn-next-batch">
+                Next Batch <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Search Overlay -->
+    <div class="search-overlay" id="search-overlay">
+        <div class="search-header">
+            <input type="text" id="search-input" placeholder="Search songs...">
+            <button id="btn-close-search"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="search-results" id="search-results"></div>
+    </div>
+
+    <audio id="audio-player"></audio>
+
+    <script>
+        const audio = document.getElementById('audio-player');
+        const titleEl = document.getElementById('track-title');
+        const subtitleEl = document.getElementById('track-subtitle');
+        const playBtn = document.getElementById('btn-play');
+        const playIcon = document.getElementById('play-icon');
+        const progressFill = document.getElementById('progress');
+        const timeCurrent = document.getElementById('time-current');
+        const timeTotal = document.getElementById('time-total');
+        const queueList = document.getElementById('queue-list');
+        const batchStatus = document.getElementById('batch-status');
+        const batchDots = document.querySelectorAll('.batch-dot');
+
+        let currentBatch = [];
+        let currentIndex = 0;
+        let batchFeedback = {};
+
+        // Load initial batch
+        loadBatch();
+
+        async function loadBatch() {
+            try {
+                batchStatus.textContent = "Loading batch...";
+                queueList.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p>Loading...</p></div>';
+
+                // Finalize previous batch first
+                await fetch('/api/finalize', { method: 'POST' });
+
+                const res = await fetch('/api/batch');
+                const data = await res.json();
+
+                currentBatch = data.batch;
+                currentIndex = 0;
+                batchFeedback = {};
+
+                renderQueue();
+                resetBatchDots();
+
+                if (currentBatch.length > 0) {
+                    playTrack(0);
+                    batchStatus.textContent = `Batch: ${currentBatch.length} songs`;
+                } else {
+                    batchStatus.textContent = "No more songs!";
+                }
+            } catch (e) {
+                console.error(e);
+                batchStatus.textContent = "Error loading batch";
+            }
+        }
+
+        function renderQueue() {
+            queueList.innerHTML = '';
+
+            currentBatch.forEach((track, idx) => {
+                const item = document.createElement('div');
+                item.className = 'queue-item' + (idx === currentIndex ? ' active' : '');
+
+                const reaction = batchFeedback[track.id];
+                let reactionIcon = '';
+                if (reaction === 'liked') reactionIcon = '👍';
+                else if (reaction === 'disliked') reactionIcon = '👎';
+                else if (reaction === 'played') reactionIcon = '✓';
+
+                item.innerHTML = `
+                    <span class="num">${idx + 1}</span>
+                    <span class="title">${track.title}</span>
+                    <span class="reaction">${reactionIcon}</span>
+                `;
+
+                item.onclick = () => playTrack(idx);
+                queueList.appendChild(item);
+            });
+        }
+
+        function resetBatchDots() {
+            batchDots.forEach((dot, idx) => {
+                dot.className = 'batch-dot';
+                if (idx < currentBatch.length) {
+                    dot.style.display = 'block';
+                } else {
+                    dot.style.display = 'none';
+                }
+            });
+        }
+
+        function updateBatchDot(idx, status) {
+            if (batchDots[idx]) {
+                batchDots[idx].className = 'batch-dot ' + status;
+            }
+        }
+
+        function playTrack(idx) {
+            if (idx >= currentBatch.length) {
+                // Batch complete
+                batchStatus.textContent = "Batch complete! Click Next Batch";
+                return;
+            }
+
+            currentIndex = idx;
+            const track = currentBatch[idx];
+
+            titleEl.textContent = track.title;
+            subtitleEl.textContent = `Track ${idx + 1} of ${currentBatch.length}`;
+            audio.src = track.url;
+
+            audio.play().then(() => {
+                updatePlayButton(true);
+                updateBatchDot(idx, 'active');
+            }).catch(e => {
+                console.error("Autoplay error:", e);
+                subtitleEl.textContent = "Click play to start";
+            });
+
+            renderQueue();
+        }
+
+        function nextTrack() {
+            // Record feedback as neutral if not already set
+            const track = currentBatch[currentIndex];
+            if (track && !batchFeedback[track.id]) {
+                recordFeedback(track.id, audio.currentTime, false, false);
+            }
+
+            if (currentIndex < currentBatch.length - 1) {
+                playTrack(currentIndex + 1);
+            } else {
+                batchStatus.textContent = "Batch complete!";
+                titleEl.textContent = "Batch Complete";
+                subtitleEl.textContent = "Click 'Next Batch' for more";
+            }
+        }
+
+        async function recordFeedback(trackId, duration, liked, disliked) {
+            try {
+                await fetch('/api/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: trackId,
+                        duration: duration,
+                        liked: liked,
+                        disliked: disliked,
+                        finished: false
+                    })
+                });
+
+                if (liked) {
+                    batchFeedback[trackId] = 'liked';
+                    updateBatchDot(currentIndex, 'liked');
+                } else if (disliked) {
+                    batchFeedback[trackId] = 'disliked';
+                    updateBatchDot(currentIndex, 'disliked');
+                } else {
+                    batchFeedback[trackId] = 'played';
+                    updateBatchDot(currentIndex, 'played');
+                }
+
+                renderQueue();
+            } catch (e) {
+                console.error("Feedback error:", e);
+            }
+        }
+
+        // Event Listeners
+        playBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play().then(() => updatePlayButton(true));
+            } else {
+                audio.pause();
+                updatePlayButton(false);
+            }
+        });
+
+        document.getElementById('btn-like').addEventListener('click', () => {
+            const track = currentBatch[currentIndex];
+            if (track) {
+                recordFeedback(track.id, audio.currentTime, true, false);
+                nextTrack();
+            }
+        });
+
+        document.getElementById('btn-dislike').addEventListener('click', () => {
+            const track = currentBatch[currentIndex];
+            if (track) {
+                recordFeedback(track.id, audio.currentTime, false, true);
+                nextTrack();
+            }
+        });
+
+        document.getElementById('btn-next-batch').addEventListener('click', loadBatch);
+
+        audio.addEventListener('ended', () => {
+            const track = currentBatch[currentIndex];
+            if (track) {
+                recordFeedback(track.id, audio.duration, false, false);
+            }
+            nextTrack();
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                const pct = (audio.currentTime / audio.duration) * 100;
+                progressFill.style.width = pct + '%';
+                timeCurrent.textContent = formatTime(audio.currentTime);
+                timeTotal.textContent = formatTime(audio.duration);
+            }
+        });
+
+        function updatePlayButton(playing) {
+            playIcon.className = playing ? 'fas fa-pause' : 'fas fa-play';
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Search
+        document.getElementById('btn-search').addEventListener('click', () => {
+            document.getElementById('search-overlay').style.display = 'flex';
+            document.getElementById('search-input').focus();
+        });
+
+        document.getElementById('btn-close-search').addEventListener('click', () => {
+            document.getElementById('search-overlay').style.display = 'none';
+        });
+
+        let searchTimeout;
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => performSearch(e.target.value), 300);
+        });
+
+        async function performSearch(query) {
+            if (!query) {
+                document.getElementById('search-results').innerHTML = '';
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+                const results = await res.json();
+
+                const container = document.getElementById('search-results');
+                container.innerHTML = '';
+
+                results.forEach(track => {
+                    const item = document.createElement('div');
+                    item.className = 'search-item';
+                    item.innerHTML = `<h4>${track.title}</h4>`;
+                    item.onclick = () => selectTrack(track.id);
+                    container.appendChild(item);
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function selectTrack(id) {
+            try {
+                const res = await fetch('/api/select', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                const track = await res.json();
+
+                if (track.url) {
+                    // Insert into current batch
+                    currentBatch.unshift({
+                        id: track.id,
+                        title: track.title,
+                        url: track.url
+                    });
+                    currentIndex = 0;
+                    playTrack(0);
+                    renderQueue();
+                }
+
+                document.getElementById('search-overlay').style.display = 'none';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+
+</html>

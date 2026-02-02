@@ -1,0 +1,276 @@
+"""
+MP3 to Vector Pipeline
+======================
+
+Processes MP3 files from multiple folders and creates averaged vectors.
+Stores results in 3 separate Qdrant collections:
+  - music_russhil: Only russhil's songs
+  - music_sahil: Only sahil's songs  
+  - music_combined: Both russhil + sahil songs
+
+Usage:
+    python pipeline_vectorize.py [--dry-run]
+
+    --dry-run: Just count files, don't process
+"""
+
+import os
+import sys
+import json
+import time
+import numpy as np
+from pathlib import Path
+from datetime import datetime
+from tqdm import tqdm
+
+# Qdrant
+from qdrant_client import QdrantClient
+from qdrant_client.models import VectorParams, Distance, PointStruct
+
+# Local
+from audio_processor import MusicNNExtractor
+
+# ============================================================================
+# CONFIGURATION - Edit these paths
+# ============================================================================
+
+FOLDERS = {
+    "russhil": "/Users/russhil/Desktop/aand pav/russhil",
+    "sahil": "/Users/russhil/Desktop/aand pav/sahil"
+}
+
+# Qdrant collections to create
+COLLECTIONS = {
+    "russhil": "music_russhil",
+    "sahil": "music_sahil", 
+    "combined": "music_combined"
+}
+
+# Vector config
+VECTOR_SIZE = 200  # MusiCNN output dimension
+
+# Processing config
+BATCH_SIZE = 50  # Upload to Qdrant in batches
+SUPPORTED_EXTENSIONS = {'.mp3', '.wav', '.flac', '.m4a', '.ogg'}
+
+# ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+
+def get_client():
+    """Get Qdrant client."""
+    try:
+        return QdrantClient(host="localhost", port=6333)
+    except:
+        return QdrantClient(path="./qdrant_data")
+
+def create_collection(client, collection_name: str, recreate: bool = False):
+    """Create or recreate a Qdrant collection."""
+    collections = [c.name for c in client.get_collections().collections]
+    
+    if collection_name in collections:
+        if recreate:
+            print(f"  Deleting existing collection: {collection_name}")
+            client.delete_collection(collection_name)
+        else:
+            print(f"  Collection exists: {collection_name}")
+            return
+    
+    client.create_collection(
+        collection_name=collection_name,
+        vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE)
+    )
+    print(f"  Created collection: {collection_name}")
+
+def scan_folder(folder_path: str) -> list:
+    """Scan folder for audio files recursively."""
+    files = []
+    folder = Path(folder_path)
+    
+    if not folder.exists():
+        print(f"  WARNING: Folder does not exist: {folder_path}")
+        return files
+    
+    for path in folder.rglob("*"):
+        if path.is_file() and path.suffix.lower() in SUPPORTED_EXTENSIONS:
+            files.append(str(path))
+    
+    return sorted(files)
+
+def generate_point_id(filename: str, source: str) -> str:
+    """Generate a unique ID for a point."""
+    import hashlib
+    content = f"{source}:{filename}"
+    return hashlib.md5(content.encode()).hexdigest()
+
+def process_file(extractor, file_path: str) -> np.ndarray:
+    """Extract averaged vector from audio file."""
+    try:
+        result = extractor.extract(file_path)
+        return result["average_vector"]
+    except Exception as e:
+        print(f"  ERROR processing {file_path}: {e}")
+        return None
+
+# ============================================================================
+# MAIN PIPELINE
+# ============================================================================
+
+def run_pipeline(dry_run: bool = False, recreate_collections: bool = True):
+    """Run the full vectorization pipeline."""
+    
+    print("=" * 70)
+    print("MP3 TO VECTOR PIPELINE")
+    print("=" * 70)
+    print(f"Started: {datetime.now().isoformat()}")
+    print()
+    
+    # 1. Scan folders
+    print("📁 SCANNING FOLDERS...")
+    all_files = {}
+    total_files = 0
+    
+    for source, folder in FOLDERS.items():
+        files = scan_folder(folder)
+        all_files[source] = files
+        print(f"  {source}: {len(files)} files in {folder}")
+        total_files += len(files)
+    
+    print(f"  TOTAL: {total_files} files")
+    print()
+    
+    if total_files == 0:
+        print("ERROR: No files found. Check folder paths.")
+        return
+    
+    if dry_run:
+        print("🔍 DRY RUN MODE - No processing will be done")
+        print()
+        print("Files found:")
+        for source, files in all_files.items():
+            print(f"\n  [{source}] ({len(files)} files):")
+            for f in files[:5]:
+                print(f"    - {os.path.basename(f)}")
+            if len(files) > 5:
+                print(f"    ... and {len(files) - 5} more")
+        return
+    
+    # 2. Initialize Qdrant
+    print("🗄️  INITIALIZING QDRANT...")
+    client = get_client()
+    
+    for name, collection in COLLECTIONS.items():
+        create_collection(client, collection, recreate=recreate_collections)
+    
+    print()
+    
+    # 3. Initialize extractor
+    print("🧠 INITIALIZING MUSICNN EXTRACTOR...")
+    extractor = MusicNNExtractor()
+    print()
+    
+    # 4. Process files
+    print("🎵 PROCESSING FILES...")
+    
+    # Storage for each collection
+    points_by_collection = {
+        "russhil": [],
+        "sahil": [],
+        "combined": []
+    }
+    
+    processed = 0
+    failed = 0
+    start_time = time.time()
+    
+    for source, files in all_files.items():
+        print(f"\n  Processing [{source}] ({len(files)} files)...")
+        
+        for file_path in tqdm(files, desc=f"  {source}", unit="file"):
+            filename = os.path.basename(file_path)
+            
+            # Extract vector
+            vector = process_file(extractor, file_path)
+            
+            if vector is None:
+                failed += 1
+                continue
+            
+            # Create point
+            point_id = generate_point_id(filename, source)
+            point = PointStruct(
+                id=point_id,
+                vector=vector.tolist(),
+                payload={
+                    "filename": filename,
+                    "source": source,
+                    "path": file_path,
+                    "processed_at": datetime.now().isoformat()
+                }
+            )
+            
+            # Add to source-specific collection
+            points_by_collection[source].append(point)
+            
+            # Add to combined collection (with different ID to avoid collision)
+            combined_point = PointStruct(
+                id=generate_point_id(filename, "combined_" + source),
+                vector=vector.tolist(),
+                payload={
+                    "filename": filename,
+                    "source": source,
+                    "path": file_path,
+                    "processed_at": datetime.now().isoformat()
+                }
+            )
+            points_by_collection["combined"].append(combined_point)
+            
+            processed += 1
+            
+            # Batch upload
+            for coll_key in [source, "combined"]:
+                if len(points_by_collection[coll_key]) >= BATCH_SIZE:
+                    collection_name = COLLECTIONS[coll_key]
+                    client.upsert(
+                        collection_name=collection_name,
+                        points=points_by_collection[coll_key]
+                    )
+                    points_by_collection[coll_key] = []
+    
+    # 5. Upload remaining points
+    print("\n📤 UPLOADING REMAINING POINTS...")
+    for coll_key, points in points_by_collection.items():
+        if points:
+            collection_name = COLLECTIONS[coll_key]
+            client.upsert(collection_name=collection_name, points=points)
+            print(f"  Uploaded {len(points)} remaining points to {collection_name}")
+    
+    # 6. Summary
+    elapsed = time.time() - start_time
+    print()
+    print("=" * 70)
+    print("PIPELINE COMPLETE")
+    print("=" * 70)
+    print(f"Processed: {processed} files")
+    print(f"Failed: {failed} files")
+    print(f"Time: {elapsed:.1f}s ({elapsed/max(processed,1):.2f}s per file)")
+    print()
+    print("Collections created:")
+    for name, collection in COLLECTIONS.items():
+        info = client.get_collection(collection)
+        print(f"  {collection}: {info.points_count} points")
+    print()
+    print(f"Finished: {datetime.now().isoformat()}")
+
+# ============================================================================
+# ENTRY POINT
+# ============================================================================
+
+if __name__ == "__main__":
+    dry_run = "--dry-run" in sys.argv
+    
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print(__doc__)
+        sys.exit(0)
+    
+    run_pipeline(dry_run=dry_run)
