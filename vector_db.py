@@ -1,15 +1,4 @@
 
-from qdrant_client import QdrantClient
-from qdrant_client.http import models
-import uuid
-import numpy as np
-
-# In this updated flow, we are moving AWAY from Qdrant local/docker to Postgres (pgvector).
-# However, the rest of the app (server.py, recommender.py) still uses `vector_db.py` interface.
-# We need to ADAPT `vector_db.py` to talk to Postgres (Render) instead of Qdrant.
-# OR we update the server to talk to Postgres directly.
-# The `vector_db.py` seems to be the interface. Let's rewrite it to wrap Postgres pgvector.
-
 import os
 import psycopg2
 import numpy as np
