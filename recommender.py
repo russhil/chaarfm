@@ -204,7 +204,7 @@ class RecommenderSession:
             return False
         return True
     
-    def _find_nearest_cluster(self, reference_centroid, skip_clusters):
+    def _find_nearest_cluster(self, reference_centroid, skip_clusters, youtube_mode=False):
         """Find nearest cluster to reference, excluding skip_clusters."""
         best_cluster = None
         best_dist = float('inf')
@@ -212,12 +212,25 @@ class RecommenderSession:
         for cid in self.cluster_scores.keys():
             if cid in skip_clusters:
                 continue
+            
+            # Check if cluster has VALID tracks for current mode
             cluster_tracks = self.cluster_manager.get_cluster_tracks(cid)
-            valid_tracks = [t for t in cluster_tracks 
-                          if t not in self.played_ids 
-                          and t not in self.outlier_tracks
-                          and self.cluster_manager.track_map.get(t, {}).get('filename') not in self.played_filenames]
-            if not valid_tracks:
+            has_valid_tracks = False
+            for t in cluster_tracks:
+                tinfo = self.cluster_manager.track_map.get(t)
+                if not tinfo: continue
+                
+                # Mode Check
+                if youtube_mode:
+                    if not tinfo.get('youtube_id'): continue
+                else:
+                    if not tinfo.get('s3_url'): continue
+                
+                if t not in self.played_ids and t not in self.outlier_tracks:
+                    has_valid_tracks = True
+                    break
+            
+            if not has_valid_tracks:
                 continue
             
             dist = np.linalg.norm(self.cluster_manager.centroids[cid] - reference_centroid)
@@ -227,9 +240,22 @@ class RecommenderSession:
         
         return best_cluster
     
-    def get_next_track(self):
+    def _filter_candidates(self, candidates, youtube_mode=False):
+        """Filters candidates based on the current mode."""
+        filtered = []
+        for t in candidates:
+            # Mode Check
+            if youtube_mode:
+                if not t.get('youtube_id'): continue
+            else:
+                if not t.get('s3_url'): continue
+                
+            filtered.append(t)
+        return filtered
+
+    def get_next_track(self, youtube_mode=False):
         candidates = []
-        FETCH_LIMIT = 20  # Increased to have more options for filtering
+        FETCH_LIMIT = 50  # Increased heavily to allow post-filtering for modes
         
         mode = "EXPLORE"
         exploit_prob = 0.7
@@ -242,32 +268,42 @@ class RecommenderSession:
             if np.random.random() < exploit_prob:
                 mode = "EXPLOIT"
         
-        print(f"Recommendation Mode: {mode} | Drift: {self.exploration_drift:.2f}")
+        print(f"Recommendation Mode: {mode} | Drift: {self.exploration_drift:.2f} | YouTube: {youtube_mode}")
 
         if mode == "EXPLOIT" and self.user_vector is not None:
             print("EXPLOIT: Probing near User Preference Vector...")
-            candidates = recommend_tracks(
+            raw_candidates = recommend_tracks(
                 self.client,
                 positive_vectors=[self.user_vector],
                 negative_vectors=self.disliked_vectors,
                 avoid_ids=self.played_ids,
-                limit=FETCH_LIMIT
+                limit=FETCH_LIMIT,
+                youtube_mode=youtube_mode
             )
+            candidates.extend(raw_candidates)
             
             # GRADUAL DRIFT: If drift is high, add some tracks from nearby clusters
             if self.exploration_drift >= 0.3 and self.current_cluster_id is not None:
                 nearby_cluster = self._find_nearest_cluster(
                     self.cluster_manager.centroids[self.current_cluster_id],
-                    {self.current_cluster_id}
+                    {self.current_cluster_id},
+                    youtube_mode=youtube_mode
                 )
                 if nearby_cluster is not None:
                     print(f"  🌊 Drift active - adding tracks from nearby cluster {nearby_cluster}")
                     nearby_tracks = self.cluster_manager.get_cluster_tracks(nearby_cluster)
-                    for tid in nearby_tracks[:5]:
+                    count = 0
+                    for tid in nearby_tracks:
+                        if count >= 5: break
                         if tid not in self.outlier_tracks:
                             tinfo = self.cluster_manager.track_map.get(tid)
+                            # Manual mode check here since cluster manager has everything
                             if tinfo and self._is_unique(tinfo):
+                                if youtube_mode and not tinfo.get('youtube_id'): continue
+                                if not youtube_mode and not tinfo.get('s3_url'): continue
+                                
                                 candidates.append(tinfo)
+                                count += 1
         else:
             print("EXPLORE: Using Cluster Bandit...")
             
@@ -275,12 +311,18 @@ class RecommenderSession:
             self.current_cluster_id = cluster_id
             
             # Get representatives, excluding outliers
-            reps = self.cluster_manager.get_representatives(cluster_id, limit=10)
-            valid_reps = [rid for rid in reps 
-                         if rid not in self.played_ids 
-                         and rid not in self.outlier_tracks
-                         and self.cluster_manager.track_map.get(rid, {}).get('filename') not in self.played_filenames]
+            reps = self.cluster_manager.get_representatives(cluster_id, limit=20)
             
+            # Filter reps for mode
+            valid_reps = []
+            for rid in reps:
+                if rid in self.played_ids or rid in self.outlier_tracks: continue
+                tinfo = self.cluster_manager.track_map.get(rid)
+                if not tinfo: continue
+                if youtube_mode and not tinfo.get('youtube_id'): continue
+                if not youtube_mode and not tinfo.get('s3_url'): continue
+                valid_reps.append(rid)
+
             valid_track_id = None
             if valid_reps:
                 print("Picking Cluster Representative (non-outlier)")
@@ -288,10 +330,16 @@ class RecommenderSession:
             else:
                 print("Picking from Cluster (non-outlier)")
                 cluster_tracks = self.cluster_manager.get_cluster_tracks(cluster_id)
-                valid_cluster_tracks = [t for t in cluster_tracks 
-                                       if t not in self.played_ids 
-                                       and t not in self.outlier_tracks
-                                       and self.cluster_manager.track_map.get(t, {}).get('filename') not in self.played_filenames]
+                
+                # Filter cluster tracks for mode
+                valid_cluster_tracks = []
+                for t in cluster_tracks:
+                    if t in self.played_ids or t in self.outlier_tracks: continue
+                    tinfo = self.cluster_manager.track_map.get(t)
+                    if not tinfo: continue
+                    if youtube_mode and not tinfo.get('youtube_id'): continue
+                    if not youtube_mode and not tinfo.get('s3_url'): continue
+                    valid_cluster_tracks.append(t)
                 
                 if valid_cluster_tracks:
                     # Pick closest to centroid instead of random
@@ -309,39 +357,59 @@ class RecommenderSession:
                     candidates = [{
                         "id": tinfo['id'],
                         "filename": tinfo['filename'],
-                        "s3_url": tinfo.get('s3_url'), # PASS S3 URL
+                        "s3_url": tinfo.get('s3_url'),
+                        "youtube_id": tinfo.get('youtube_id'),
                         "vector": tinfo['vector'],
                         "score": 0 
                     }]
             else:
-                 print("Cluster exhausted - finding NEAREST cluster")
+                 print("Cluster exhausted (for this mode) - finding NEAREST cluster")
                  # Find nearest cluster instead of random
                  nearest = self._find_nearest_cluster(
                      self.cluster_manager.centroids[cluster_id],
-                     {cluster_id}
+                     {cluster_id},
+                     youtube_mode=youtube_mode
                  )
                  if nearest is not None:
                      print(f"  Falling back to nearest cluster {nearest}")
                      self.current_cluster_id = nearest
                      cluster_tracks = self.cluster_manager.get_cluster_tracks(nearest)
-                     valid = [t for t in cluster_tracks 
-                             if t not in self.played_ids 
-                             and t not in self.outlier_tracks
-                             and self.cluster_manager.track_map.get(t, {}).get('filename') not in self.played_filenames]
-                     if valid:
-                         tinfo = self.cluster_manager.track_map.get(valid[0])
-                         if tinfo:
-                             candidates = [tinfo]
+                     
+                     for t in cluster_tracks:
+                         if t in self.played_ids or t in self.outlier_tracks: continue
+                         tinfo = self.cluster_manager.track_map.get(t)
+                         if not tinfo: continue
+                         if youtube_mode and not tinfo.get('youtube_id'): continue
+                         if not youtube_mode and not tinfo.get('s3_url'): continue
+                         
+                         candidates = [tinfo]
+                         break
                  
                  if not candidates and self.user_vector is not None:
-                      candidates = recommend_tracks(self.client, positive_vectors=[self.user_vector], limit=FETCH_LIMIT, avoid_ids=self.played_ids)
+                      candidates = recommend_tracks(
+                          self.client, 
+                          positive_vectors=[self.user_vector], 
+                          limit=FETCH_LIMIT, 
+                          avoid_ids=self.played_ids,
+                          youtube_mode=youtube_mode
+                      )
                  
                  if not candidates:
                       print("Fallback to library search")
-                      candidates = get_random_tracks(self.client, limit=FETCH_LIMIT, avoid_ids=self.played_ids)
+                      candidates = get_random_tracks(
+                          self.client, 
+                          limit=FETCH_LIMIT, 
+                          avoid_ids=self.played_ids,
+                          youtube_mode=youtube_mode
+                      )
 
         if not candidates:
-            candidates = get_random_tracks(self.client, limit=FETCH_LIMIT, avoid_ids=self.played_ids)
+            candidates = get_random_tracks(
+                self.client, 
+                limit=FETCH_LIMIT, 
+                avoid_ids=self.played_ids,
+                youtube_mode=youtube_mode
+            )
         
         # STRICT UNIQUENESS FILTER
         selected_track = None
@@ -362,7 +430,11 @@ class RecommenderSession:
                  ref_centroid = np.array(self.user_vector)
              
              if ref_centroid is not None:
-                 nearest = self._find_nearest_cluster(ref_centroid, {self.current_cluster_id} if self.current_cluster_id else set())
+                 nearest = self._find_nearest_cluster(
+                     ref_centroid, 
+                     {self.current_cluster_id} if self.current_cluster_id else set(),
+                     youtube_mode=youtube_mode
+                 )
                  if nearest is not None:
                      cluster_tracks = self.cluster_manager.get_cluster_tracks(nearest)
                      for tid in cluster_tracks:
@@ -370,6 +442,8 @@ class RecommenderSession:
                              continue
                          tinfo = self.cluster_manager.track_map.get(tid)
                          if tinfo and self._is_unique(tinfo):
+                             if youtube_mode and not tinfo.get('youtube_id'): continue
+                             if not youtube_mode and not tinfo.get('s3_url'): continue
                              selected_track = tinfo
                              break
         
@@ -380,7 +454,8 @@ class RecommenderSession:
             return {
                 "id": selected_track['id'],
                 "filename": selected_track['filename'],
-                "s3_url": selected_track.get('s3_url') # Ensure this is passed
+                "s3_url": selected_track.get('s3_url'),
+                "youtube_id": selected_track.get('youtube_id')
             }
         return None
 
@@ -523,43 +598,3 @@ class RecommenderSession:
              self.cluster_scores[self.current_cluster_id]['beta'] += beta_boost
              
              print(f"Updated Cluster {self.current_cluster_id}: {self.cluster_scores[self.current_cluster_id]} (Alpha+{alpha_boost}, Beta+{beta_boost})")
-
-        # Log User Behaviour
-        import csv
-        import datetime
-        
-        log_file = "user_behavior_log.csv"
-        file_exists = False
-        try:
-            with open(log_file, 'r') as f: file_exists = True
-        except FileNotFoundError: pass
-        
-        with open(log_file, 'a', newline='') as f:
-            writer = csv.writer(f)
-            if not file_exists:
-                writer.writerow(["timestamp", "track_id", "filename", "duration", "liked", "disliked", "finished", "tier", "cluster_id", "alpha_boost", "beta_boost"])
-                
-            writer.writerow([
-                datetime.datetime.now().isoformat(),
-                track_id,
-                track_info['filename'],
-                duration,
-                liked,
-                disliked,
-                finished,
-                tier,
-                self.current_cluster_id,
-                alpha_boost,
-                beta_boost
-            ])
-
-        # Add to history
-        self.history.append({
-            "id": track_id,
-            "filename": track_info['filename'],
-            "duration": duration,
-            "liked": liked,
-            "disliked": disliked,
-            "finished": finished,
-            "vector": vector 
-        })

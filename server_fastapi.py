@@ -63,17 +63,24 @@ class SelectRequest(BaseModel):
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/youtube-mode", response_class=HTMLResponse)
+async def youtube_mode_page(request: Request):
+    return templates.TemplateResponse("youtube_mode.html", {"request": request})
+
 @app.get("/api/next")
-async def next_track():
-    track = session.get_next_track()
+async def next_track(mode: Optional[str] = "mp3"):
+    youtube_mode = (mode == "youtube")
+    track = session.get_next_track(youtube_mode=youtube_mode)
+    
     if track:
         # URL Encode filename for the stream URL
         encoded_name = urllib.parse.quote(track['filename'])
         return {
             "id": track['id'],
             "title": track['filename'],
-            "url": f"/stream/{encoded_name}",
-            "filename": track['filename']
+            "url": f"/stream/{encoded_name}" if track.get('s3_url') else None,
+            "filename": track['filename'],
+            "youtube_id": track.get('youtube_id')
         }
     return JSONResponse(content={"error": "No recommendations available"}, status_code=404)
 
@@ -118,7 +125,8 @@ async def select_track(data: SelectRequest):
         return {
             "id": track_info['id'],
             "title": track_info['filename'],
-            "url": f"/stream/{encoded_name}"
+            "url": f"/stream/{encoded_name}",
+            "youtube_id": track_info.get('youtube_id')
         }
     raise HTTPException(status_code=404, detail="Track not found")
 
@@ -131,7 +139,8 @@ async def library():
              tracks.append({
                  "id": tid,
                  "title": info['filename'],
-                 "url": f"/stream/{encoded_name}"
+                 "url": f"/stream/{encoded_name}",
+                 "youtube_id": info.get("youtube_id")
              })
         return tracks
     return []

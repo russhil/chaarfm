@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chaarfm Ingest | Remote</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .ingest-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background: rgba(20, 20, 20, 0.95);
+            border-radius: 12px;
+            border: 1px solid #333;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background: #111;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .btn-ingest {
+            width: 100%;
+            padding: 12px;
+            background: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-ingest:hover { background: #cc0000; }
+        
+        .code-display {
+            font-family: 'Courier New', monospace;
+            font-size: 3rem;
+            text-align: center;
+            letter-spacing: 10px;
+            color: #00ff88;
+            margin: 20px 0;
+            padding: 20px;
+            background: #000;
+            border: 2px dashed #333;
+            border-radius: 8px;
+        }
+        
+        .status-log {
+            margin-top: 20px;
+            height: 250px;
+            overflow-y: auto;
+            background: #000;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            border: 1px solid #222;
+        }
+        .log-line { margin: 4px 0; color: #aaa; }
+        .log-success { color: #10b981; }
+        .log-error { color: #f43f5e; }
+        .log-info { color: #3b82f6; }
+        .log-warning { color: #f59e0b; }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: bold;
+        }
+        .tab-btn.active {
+            color: white;
+            border-bottom: 2px solid #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="ingest-container">
+        <h2 style="text-align: center; margin-bottom: 20px;">
+            <i class="fab fa-youtube" style="color: red;"></i> Ingestion Control
+        </h2>
+        
+        <div style="display:flex; justify-content:center; margin-bottom: 20px; border-bottom: 1px solid #333;">
+            <button class="tab-btn active" onclick="setMode('remote')">Remote Worker</button>
+            <button class="tab-btn" onclick="setMode('server')">Server Local</button>
+        </div>
+
+        <div id="remote-mode">
+            <p style="text-align: center; color: #aaa; margin-bottom: 15px;">
+                Run <code>python remote_worker.py</code> on your laptop and enter this code:
+            </p>
+            
+            <div id="pairing-code" class="code-display">----</div>
+            
+            <div class="form-group">
+                <label class="text-label" style="display:block; margin-bottom: 8px;">Last.fm Username</label>
+                <input type="text" id="username-remote" class="form-input" placeholder="e.g. russhil">
+            </div>
+            
+            <button id="start-remote-btn" class="btn-ingest" disabled>
+                Waiting for Worker...
+            </button>
+        </div>
+        
+        <div id="server-mode" style="display: none;">
+             <p style="text-align: center; color: #aaa; margin-bottom: 15px;">
+                Run processing on this server (Only if capable).
+            </p>
+            <div class="form-group">
+                <label class="text-label">Last.fm Username</label>
+                <input type="text" id="username-server" class="form-input">
+            </div>
+            <button id="start-server-btn" class="btn-ingest">Start Local Ingest</button>
+        </div>
+
+        <div id="status-log" class="status-log">
+            <div class="log-line">Ready. Select mode above.</div>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: center; display: none;" id="launch-controls">
+            <a href="/youtube-mode" class="btn" style="background: white; color: black; text-decoration: none; padding: 10px 20px; border-radius: 6px;">
+                <i class="fas fa-play" style="margin-right: 8px;"></i> Launch YouTube Mode
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const logDiv = document.getElementById('status-log');
+        let ws = null;
+        let currentCode = null;
+
+        function setMode(mode) {
+            document.getElementById('remote-mode').style.display = mode === 'remote' ? 'block' : 'none';
+            document.getElementById('server-mode').style.display = mode === 'server' ? 'block' : 'none';
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (mode === 'remote' && !ws) {
+                initRemoteSession();
+            }
+        }
+        
+        function appendLog(msg, type='normal') {
+            const div = document.createElement('div');
+            div.className = 'log-line';
+            if (type) div.classList.add(`log-${type}`);
+            div.innerText = msg;
+            logDiv.appendChild(div);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // --- REMOTE MODE ---
+        function initRemoteSession() {
+            // Generate Code
+            currentCode = Math.floor(1000 + Math.random() * 9000).toString();
+            document.getElementById('pairing-code').innerText = currentCode;
+            
+            appendLog(`Session created. Code: ${currentCode}`, 'info');
+            
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${protocol}//${window.location.host}/ws/remote/${currentCode}/ui`);
+            
+            ws.onopen = () => appendLog("Connected to Coordinator. Waiting for worker...");
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'log') {
+                    appendLog(data.message, data.level);
+                    
+                    if (data.message.includes("Worker Connected")) {
+                        document.getElementById('start-remote-btn').disabled = false;
+                        document.getElementById('start-remote-btn').innerText = "Start Remote Ingestion";
+                        document.getElementById('pairing-code').style.borderColor = "#00ff88";
+                    }
+                }
+            };
+            
+            ws.onclose = () => {
+                appendLog("Disconnected from Coordinator", 'error');
+            };
+        }
+        
+        document.getElementById('start-remote-btn').addEventListener('click', () => {
+            const username = document.getElementById('username-remote').value.trim();
+            if (!username) { alert("Enter username"); return; }
+            
+            if (ws) {
+                ws.send(JSON.stringify({
+                    type: "start",
+                    username: username
+                }));
+                document.getElementById('start-remote-btn').disabled = true;
+                document.getElementById('start-remote-btn').innerText = "Running...";
+            }
+        });
+
+        // --- SERVER MODE (Legacy) ---
+        // (Simplified for brevity, assuming existing logic if needed)
+        document.getElementById('start-server-btn').addEventListener('click', () => {
+             alert("Use Remote Worker mode for best results on Render!");
+        });
+        
+        // Auto-init remote
+        initRemoteSession();
+    </script>
+</body>
+</html>

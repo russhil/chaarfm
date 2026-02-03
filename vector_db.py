@@ -35,7 +35,7 @@ def get_client():
     """Returns a dummy client or connection object."""
     return "postgres_client"
 
-def get_random_tracks(client, limit=1, avoid_ids=None):
+def get_random_tracks(client, limit=1, avoid_ids=None, youtube_mode=False):
     """
     Retrieves random tracks using Postgres.
     """
@@ -43,7 +43,7 @@ def get_random_tracks(client, limit=1, avoid_ids=None):
     cur = conn.cursor()
     
     avoid_clause = ""
-    params = [limit]
+    params = []
     
     if avoid_ids:
         # Postgres IDs are Integers in our new schema, but Qdrant used UUID strings.
@@ -56,17 +56,27 @@ def get_random_tracks(client, limit=1, avoid_ids=None):
         valid_ids = [str(i) for i in avoid_ids if isinstance(i, int) or (isinstance(i, str) and i.isdigit())]
         if valid_ids:
             avoid_clause = f"AND id NOT IN ({','.join(valid_ids)})"
+            
+    # --- YOUTUBE MODE FILTERING ---
+    mode_clause = ""
+    if youtube_mode:
+        # Only tracks with YouTube ID
+        mode_clause = "AND youtube_id IS NOT NULL"
+    else:
+        # Standard mode: Only tracks with S3 URL (MP3s)
+        mode_clause = "AND s3_url IS NOT NULL"
     
     query = f"""
-        SELECT id, artist, title, s3_url, embedding 
+        SELECT id, artist, title, s3_url, embedding, youtube_id 
         FROM {DEFAULT_TABLE}
-        WHERE 1=1 {avoid_clause}
+        WHERE 1=1 {avoid_clause} {mode_clause}
         ORDER BY RANDOM()
         LIMIT %s
     """
+    params.append(limit)
     
     try:
-        cur.execute(query, params)
+        cur.execute(query, tuple(params))
         rows = cur.fetchall()
         
         results = []
@@ -75,7 +85,8 @@ def get_random_tracks(client, limit=1, avoid_ids=None):
                 "id": row[0],
                 "filename": f"{row[1]} - {row[2]}", # Construct filename from artist/title for compatibility
                 "s3_url": row[3],
-                "vector": np.array(row[4]).tolist() if row[4] else []
+                "vector": np.array(row[4]).tolist() if row[4] else [],
+                "youtube_id": row[5]
             })
         return results
     except Exception as e:
@@ -89,7 +100,7 @@ def get_track_by_id(client, track_id):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        query = f"SELECT id, artist, title, s3_url, embedding FROM {DEFAULT_TABLE} WHERE id = %s"
+        query = f"SELECT id, artist, title, s3_url, embedding, youtube_id FROM {DEFAULT_TABLE} WHERE id = %s"
         cur.execute(query, (track_id,))
         row = cur.fetchone()
         if row:
@@ -97,7 +108,8 @@ def get_track_by_id(client, track_id):
                 "id": row[0],
                 "filename": f"{row[1]} - {row[2]}",
                 "s3_url": row[3],
-                "vector": np.array(row[4]).tolist()
+                "vector": np.array(row[4]).tolist(),
+                "youtube_id": row[5]
             }
         return None
     except Exception as e:
@@ -107,14 +119,14 @@ def get_track_by_id(client, track_id):
         cur.close()
         conn.close()
 
-def recommend_tracks(client, positive_vectors, negative_vectors=None, avoid_ids=None, limit=1):
+def recommend_tracks(client, positive_vectors, negative_vectors=None, avoid_ids=None, limit=1, youtube_mode=False):
     """
     Uses pgvector Cosine Distance (<=>) for recommendation.
     Postgres vector operator for cosine distance is <=>
     We want NEAREST (smallest distance).
     """
     if not positive_vectors:
-        return get_random_tracks(client, limit, avoid_ids)
+        return get_random_tracks(client, limit, avoid_ids, youtube_mode=youtube_mode)
         
     target_vector = positive_vectors[0] # Simplification: use first positive
     if isinstance(target_vector, list) and len(target_vector) > 0 and isinstance(target_vector[0], list):
@@ -132,11 +144,18 @@ def recommend_tracks(client, positive_vectors, negative_vectors=None, avoid_ids=
         if valid_ids:
             avoid_clause = f"AND id NOT IN ({','.join(valid_ids)})"
 
+    # --- YOUTUBE MODE FILTERING ---
+    mode_clause = ""
+    if youtube_mode:
+        mode_clause = "AND youtube_id IS NOT NULL"
+    else:
+        mode_clause = "AND s3_url IS NOT NULL"
+
     # Order by cosine distance
     query = f"""
-        SELECT id, artist, title, s3_url, embedding, (embedding <=> %s::vector) as dist
+        SELECT id, artist, title, s3_url, embedding, youtube_id, (embedding <=> %s::vector) as dist
         FROM {DEFAULT_TABLE}
-        WHERE 1=1 {avoid_clause}
+        WHERE 1=1 {avoid_clause} {mode_clause}
         ORDER BY dist ASC
         LIMIT %s
     """
@@ -152,7 +171,8 @@ def recommend_tracks(client, positive_vectors, negative_vectors=None, avoid_ids=
                 "filename": f"{row[1]} - {row[2]}",
                 "s3_url": row[3],
                 "vector": np.array(row[4]).tolist(),
-                "score": 1 - row[5] # Convert distance to similarity score roughly
+                "youtube_id": row[5],
+                "score": 1 - row[6] # Convert distance to similarity score roughly
             })
         return results
     except Exception as e:
@@ -167,7 +187,10 @@ def get_all_vectors(client):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        query = f"SELECT id, artist, title, s3_url, embedding FROM {DEFAULT_TABLE}"
+        # Fetch everything, we filter later in memory or clustering logic
+        # Or better: fetch everything and let the cluster manager know which mode a track belongs to?
+        # For now, let's fetch everything.
+        query = f"SELECT id, artist, title, s3_url, embedding, youtube_id FROM {DEFAULT_TABLE}"
         cur.execute(query)
         rows = cur.fetchall()
         
@@ -178,7 +201,8 @@ def get_all_vectors(client):
                 "id": row[0],
                 "filename": f"{row[1]} - {row[2]}",
                 "s3_url": row[3],
-                "vector": np.array(row[4]).tolist()
+                "vector": np.array(row[4]).tolist(),
+                "youtube_id": row[5]
             })
         return results
     except Exception as e:

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Last.fm Music Vectorizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .step-content { display: none; }
+        .step-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <h1 class="text-3xl font-bold mb-8 text-center text-purple-400">🎵 Last.fm Universe Vectorizer</h1>
+        
+        <!-- Live Terminal Logs -->
+        <div class="mb-8 p-4 bg-black rounded-lg border border-gray-700 font-mono text-xs text-green-400 h-40 overflow-y-auto" id="console-logs">
+            <div class="text-gray-500">System Logs Initialized...</div>
+        </div>
+
+        <!-- Step Indicators -->
+        <div class="flex justify-center mb-8 space-x-4">
+            <div id="ind-1" class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center font-bold">1</div>
+            <div class="w-16 h-1 bg-gray-700 my-auto"></div>
+            <div id="ind-2" class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center font-bold">2</div>
+            <div class="w-16 h-1 bg-gray-700 my-auto"></div>
+            <div id="ind-3" class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center font-bold">3</div>
+        </div>
+
+        <!-- Step 1: Extraction -->
+        <div id="step-1" class="step-content active bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold mb-4">Step 1: Extract Universe</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Last.fm Username</label>
+                    <input type="text" id="username" class="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:border-purple-500 focus:outline-none" placeholder="e.g. RJ">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Songs per Artist (Deep Dive)</label>
+                    <input type="number" id="limit" value="5" class="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:border-purple-500 focus:outline-none">
+                    <p class="text-xs text-gray-400 mt-1">Higher number = More songs (slower extraction).</p>
+                </div>
+                <button onclick="extractUniverse()" id="btn-extract" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition">
+                    Extract Universe
+                </button>
+                <div id="extract-status" class="hidden mt-4 p-3 bg-gray-700 rounded text-center animate-pulse">
+                    Extracting... Please wait.
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Selection -->
+        <div id="step-2" class="step-content bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold mb-4">Step 2: Select Tracks</h2>
+            <div class="mb-4 p-4 bg-purple-900/30 rounded border border-purple-500/30">
+                <p class="text-lg">Universe Size: <span id="universe-count" class="font-bold text-purple-400">0</span> tracks</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">How many random songs to process (N)?</label>
+                    <input type="number" id="n-count" class="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:border-purple-500 focus:outline-none">
+                </div>
+                <button onclick="selectTracks()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
+                    Pick Random Selection
+                </button>
+            </div>
+            
+            <div id="selection-preview" class="hidden mt-6">
+                <h3 class="font-semibold mb-2">Preview (First 5):</h3>
+                <ul id="preview-list" class="list-disc list-inside text-gray-300 text-sm mb-4"></ul>
+                <p class="text-sm text-gray-400 mb-4">Remaining tracks in universe: <span id="remaining-count"></span></p>
+                
+                <button onclick="goToStep3()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition">
+                    Proceed to Pipeline
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Pipeline -->
+        <div id="step-3" class="step-content bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold mb-4">Step 3: Processing Pipeline</h2>
+            
+            <button onclick="startPipeline()" id="btn-start-pipeline" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition mb-6">
+                Start Processing
+            </button>
+            
+            <div class="h-96 overflow-y-auto bg-gray-900 rounded border border-gray-700 p-4 font-mono text-sm" id="logs">
+                <div class="text-gray-500 italic">Waiting to start...</div>
+            </div>
+            
+            <div class="mt-4">
+                <div class="w-full bg-gray-700 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-purple-600 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-400 mt-1">
+                    <span id="progress-text">0%</span>
+                    <span id="stats-text">0/0</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let universeData = [];
+
+        // --- Log System ---
+        function initLogs() {
+            const logsDiv = document.getElementById('console-logs');
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const ws = new WebSocket(`${protocol}//${window.location.host}/ws/logs`);
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                if(data.type === 'log') {
+                    const line = document.createElement('div');
+                    line.innerText = `> ${data.message}`;
+                    logsDiv.appendChild(line);
+                    logsDiv.scrollTop = logsDiv.scrollHeight;
+                }
+            };
+            
+            ws.onclose = function() {
+                // Auto-reconnect
+                setTimeout(initLogs, 2000);
+            };
+        }
+        initLogs();
+
+        function showStep(step) {
+            document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step-${step}`).classList.add('active');
+            
+            // Update indicators
+            for(let i=1; i<=3; i++) {
+                const ind = document.getElementById(`ind-${i}`);
+                if (i <= step) {
+                    ind.classList.remove('bg-gray-700');
+                    ind.classList.add('bg-purple-600');
+                } else {
+                    ind.classList.add('bg-gray-700');
+                    ind.classList.remove('bg-purple-600');
+                }
+            }
+        }
+
+        async function extractUniverse() {
+            const username = document.getElementById('username').value;
+            const limit = document.getElementById('limit').value;
+            
+            if(!username) return alert('Enter username');
+            
+            document.getElementById('btn-extract').disabled = true;
+            document.getElementById('extract-status').classList.remove('hidden');
+            
+            try {
+                const res = await fetch('/api/extract', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, limit: parseInt(limit)})
+                });
+                const data = await res.json();
+                
+                if(data.status === 'success') {
+                    document.getElementById('universe-count').innerText = data.count;
+                    document.getElementById('n-count').value = Math.min(10, data.count);
+                    showStep(2);
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch(e) {
+                alert('Request failed: ' + e);
+            } finally {
+                document.getElementById('btn-extract').disabled = false;
+                document.getElementById('extract-status').classList.add('hidden');
+            }
+        }
+
+        async function selectTracks() {
+            const n = document.getElementById('n-count').value;
+            try {
+                const res = await fetch('/api/select', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({n: parseInt(n)})
+                });
+                const data = await res.json();
+                
+                if(data.status === 'success') {
+                    const list = document.getElementById('preview-list');
+                    list.innerHTML = '';
+                    data.preview.slice(0, 5).forEach(t => {
+                        list.innerHTML += `<li>${t.artist} - ${t.title}</li>`;
+                    });
+                    if(data.selected_count > 5) list.innerHTML += `<li>...and ${data.selected_count - 5} more</li>`;
+                    
+                    document.getElementById('remaining-count').innerText = data.remaining;
+                    document.getElementById('selection-preview').classList.remove('hidden');
+                }
+            } catch(e) {
+                alert(e);
+            }
+        }
+
+        function goToStep3() {
+            showStep(3);
+        }
+
+        function startPipeline() {
+            document.getElementById('btn-start-pipeline').disabled = true;
+            const logs = document.getElementById('logs');
+            logs.innerHTML = ''; // Clear logs
+            
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const ws = new WebSocket(`${protocol}//${window.location.host}/ws/process`);
+            
+            let total = 0;
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                
+                if(data.type === 'start') {
+                    total = data.total;
+                    document.getElementById('stats-text').innerText = `0/${total}`;
+                } 
+                else if (data.type === 'progress') {
+                    // New item started
+                    const div = document.createElement('div');
+                    div.id = `track-${data.index}`;
+                    div.className = "mb-1 p-2 bg-gray-800 rounded border border-gray-700 flex justify-between items-center";
+                    div.innerHTML = `
+                        <span><span class="text-purple-400 font-bold">[${data.index + 1}]</span> ${data.artist} - ${data.title}</span>
+                        <span class="text-xs px-2 py-1 bg-blue-900 rounded status-badge">${data.status}</span>
+                    `;
+                    logs.appendChild(div);
+                    logs.scrollTop = logs.scrollHeight;
+                }
+                else if (data.type === 'update_status') {
+                    const row = document.getElementById(`track-${data.index}`);
+                    if(row) {
+                        const badge = row.querySelector('.status-badge');
+                        badge.innerText = data.status;
+                        if(data.status === 'Done') badge.className = "text-xs px-2 py-1 bg-green-900 text-green-200 rounded status-badge";
+                        if(data.status.includes('Error') || data.status.includes('Failed')) badge.className = "text-xs px-2 py-1 bg-red-900 text-red-200 rounded status-badge";
+                    }
+                    
+                    // Update progress bar roughly based on index + done status? 
+                    // Or just use index / total
+                    if(data.status === 'Done' || data.status.includes('Error')) {
+                        const percent = Math.round(((data.index + 1) / total) * 100);
+                        document.getElementById('progress-bar').style.width = `${percent}%`;
+                        document.getElementById('progress-text').innerText = `${percent}%`;
+                        document.getElementById('stats-text').innerText = `${data.index + 1}/${total}`;
+                    }
+                }
+                else if (data.type === 'complete') {
+                    alert(`Pipeline Complete!\nSuccess: ${data.success}\nFailed: ${data.failed}`);
+                    document.getElementById('btn-start-pipeline').disabled = false;
+                }
+                else if (data.type === 'error') {
+                    alert('Error: ' + data.message);
+                }
+            };
+            
+            ws.onerror = function(e) {
+                console.error(e);
+                alert('WebSocket connection failed');
+                document.getElementById('btn-start-pipeline').disabled = false;
+            };
+        }
+    </script>
+</body>
+</html>
