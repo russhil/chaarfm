@@ -44,6 +44,32 @@ logger = logging.getLogger(__name__)
 # Constants
 TEMP_DIR = "temp_ingest"
 
+# yt-dlp options to reduce HTTP 403 from YouTube (browser-like client + User-Agent)
+def _get_ydl_base_opts(outtmpl):
+    opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': outtmpl,
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '128',
+        }],
+        'quiet': True,
+        'no_warnings': True,
+        # Prefer android client then web; often avoids 403 when default clients are blocked
+        'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-us,en;q=0.5',
+        },
+    }
+    # Optional: use cookies from file to reduce 403 (export from browser and set YTDL_COOKIES path)
+    cookies_path = os.getenv('YTDL_COOKIES')
+    if cookies_path and os.path.isfile(cookies_path):
+        opts['cookiefile'] = cookies_path
+    return opts
+
 def ensure_schema(username):
     """
     Ensures the database table exists and has the youtube_id column.
@@ -125,21 +151,10 @@ def download_temp_youtube(artist, title):
     search_query = f"{artist} {title} lyrics"
     filename_template = f"{TEMP_DIR}/%(id)s.%(ext)s"
     
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': filename_template,
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '128', # Lower quality is fine for vectorization
-        }],
-        'default_search': 'ytsearch1',
-        'noplaylist': True,
-        'quiet': True,
-        'no_warnings': True,
-        # Avoid long mixes
-        'match_filter': yt_dlp.utils.match_filter_func("duration > 60 & duration < 600"), 
-    }
+    ydl_opts = _get_ydl_base_opts(filename_template)
+    ydl_opts['default_search'] = 'ytsearch1'
+    ydl_opts['noplaylist'] = True
+    ydl_opts['match_filter'] = yt_dlp.utils.match_filter_func("duration > 60 & duration < 600")
     
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -166,21 +181,8 @@ def download_temp_youtube_by_url(url):
     if not os.path.exists(TEMP_DIR):
         os.makedirs(TEMP_DIR)
     import yt_dlp
-    # Extract ID first to set filename
-    # We can rely on yt-dlp to give us the ID
     filename_template = f"{TEMP_DIR}/%(id)s.%(ext)s"
-    
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': filename_template,
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '128',
-        }],
-        'quiet': True,
-        'no_warnings': True,
-    }
+    ydl_opts = _get_ydl_base_opts(filename_template)
     
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -227,36 +229,114 @@ def store_entry(table_name, artist, title, youtube_id, vector):
 
 def fetch_universe(username):
     """
-    Uses pylast to fetch top tracks from Last.fm
+    Builds a music universe of 2000+ tracks from Last.fm by:
+    - User top tracks, loved tracks, recent tracks
+    - Top artists' discographies (top tracks per artist)
+    - Related/similar artists' top tracks
+    - Forgotten favorites (top artists/tracks from 1month, 3month, 6month, 12month)
+    Returns a list of (artist, title) tuples. Deduplication is done in-memory here;
+    DB-level deduplication (skip already-ingested) is done by the caller via get_existing_tracks.
     """
     import pylast
-    logger.info(f"Fetching Last.fm universe for {username}...")
+    logger.info(f"Fetching Last.fm universe for {username} (target 2k+ tracks)...")
     network = pylast.LastFMNetwork(api_key=LASTFM_API_KEY, api_secret=LASTFM_API_SECRET)
     user = network.get_user(username)
-    
-    tracks_to_process = []
-    
+
+    # Use dict keyed by (artist, title) to avoid duplicates across all sources
+    universe = {}
+
+    def add(artist, title):
+        a, t = (artist or "").strip(), (title or "").strip()
+        if a and t:
+            universe[(a, t)] = True
+
     try:
-        # Get Top Tracks
-        top = user.get_top_tracks(period=pylast.PERIOD_OVERALL, limit=100)
-        for item in top:
-            tracks_to_process.append((item.item.artist.name, item.item.title))
-            
-        # Get Loved Tracks
-        loved = user.get_loved_tracks(limit=100)
-        for item in loved:
-            tracks_to_process.append((item.track.artist.name, item.track.title))
-            
-        # Get Recent Tracks (for variety)
-        recent = user.get_recent_tracks(limit=50)
-        for item in recent:
-            tracks_to_process.append((item.track.artist.name, item.track.title))
-            
+        # 1. User top tracks (overall)
+        logger.info("  Fetching top tracks (overall)...")
+        for item in user.get_top_tracks(period=pylast.PERIOD_OVERALL, limit=100):
+            track = item.item
+            add(track.artist.name, track.title)
+        time.sleep(0.2)
+
+        # 2. Loved tracks
+        logger.info("  Fetching loved tracks...")
+        for item in user.get_loved_tracks(limit=150):
+            track = item.track
+            add(track.artist.name, track.title)
+        time.sleep(0.2)
+
+        # 3. Recent tracks (for variety)
+        logger.info("  Fetching recent tracks...")
+        for item in user.get_recent_tracks(limit=150):
+            track = item.track
+            add(track.artist.name, track.title)
+        time.sleep(0.2)
+
+        # 4. Top artists (overall) -> discography: top tracks per artist (target 2k+ total)
+        logger.info("  Fetching top artists and their top tracks...")
+        top_artists = user.get_top_artists(period=pylast.PERIOD_OVERALL, limit=60)
+        for i, item in enumerate(top_artists, 1):
+            artist = item.item
+            try:
+                for t in artist.get_top_tracks(limit=25):
+                    track = t.item
+                    add(track.artist.name, track.title)
+                if i % 10 == 0:
+                    logger.info(f"    Top artists progress: {i}/60")
+                time.sleep(0.2)
+            except Exception as e:
+                logger.warning(f"    Error fetching tracks for {artist.name}: {e}")
+
+        # 5. Related artists: similar to top 12 artists -> their top tracks
+        logger.info("  Fetching similar artists and their top tracks...")
+        top_for_similar = user.get_top_artists(period=pylast.PERIOD_OVERALL, limit=12)
+        seen_artists = set()
+        for item in top_for_similar:
+            main_artist = item.item
+            try:
+                similar = main_artist.get_similar(limit=10)
+                for sim_item in similar:
+                    sim_artist = sim_item.item
+                    if sim_artist.name in seen_artists:
+                        continue
+                    seen_artists.add(sim_artist.name)
+                    try:
+                        for t in sim_artist.get_top_tracks(limit=15):
+                            track = t.item
+                            add(track.artist.name, track.title)
+                        time.sleep(0.2)
+                    except Exception:
+                        pass
+                time.sleep(0.2)
+            except Exception as e:
+                logger.warning(f"    Error getting similar to {main_artist.name}: {e}")
+
+        # 6. Forgotten favorites: top artists from other time periods
+        for period_name, period_val in [
+            ("1month", pylast.PERIOD_1MONTH),
+            ("3month", pylast.PERIOD_3MONTHS),
+            ("6month", pylast.PERIOD_6MONTHS),
+            ("12month", pylast.PERIOD_12MONTHS),
+        ]:
+            logger.info(f"  Fetching top artists ({period_name}) and their tracks...")
+            try:
+                period_artists = user.get_top_artists(period=period_val, limit=25)
+                for item in period_artists:
+                    artist = item.item
+                    try:
+                        for t in artist.get_top_tracks(limit=15):
+                            track = t.item
+                            add(track.artist.name, track.title)
+                        time.sleep(0.2)
+                    except Exception:
+                        pass
+            except Exception as e:
+                logger.warning(f"    Error fetching {period_name} artists: {e}")
+
     except Exception as e:
         logger.error(f"Last.fm fetch failed: {e}")
-        
-    # Deduplicate list
-    unique_tracks = list(set(tracks_to_process))
+
+    unique_tracks = list(universe.keys())
     logger.info(f"Found {len(unique_tracks)} unique tracks from Last.fm")
     return unique_tracks
 
