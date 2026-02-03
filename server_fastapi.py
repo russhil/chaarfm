@@ -1,14 +1,16 @@
 import os
 import urllib.parse
-from fastapi import FastAPI, HTTPException, Request, Body, Query
+from fastapi import FastAPI, HTTPException, Request, Body, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from typing import Optional, List
+import json
 
 from recommender import RecommenderSession
+from music_pipeline.web_app import coordinator
 
 # Configuration
 DEFAULT_MUSIC_DIR = "/Users/russhil/Desktop/aand pav/songs-downloaded"
@@ -62,6 +64,33 @@ class SelectRequest(BaseModel):
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/ingest", response_class=HTMLResponse)
+async def ingest_page(request: Request):
+    return templates.TemplateResponse("youtube_ingest.html", {"request": request})
+
+@app.websocket("/ws/remote/{code}/{client_type}")
+async def remote_endpoint(websocket: WebSocket, code: str, client_type: str):
+    if client_type == 'ui':
+        await coordinator.connect_ui(code, websocket)
+    elif client_type == 'worker':
+        await coordinator.connect_worker(code, websocket)
+    
+    try:
+        while True:
+            data_str = await websocket.receive_text()
+            data = json.loads(data_str)
+            
+            if client_type == 'ui':
+                if data.get('type') == 'start':
+                    await coordinator.start_job(code, data.get('username'))
+            
+            elif client_type == 'worker':
+                if data.get('type') == 'result':
+                    await coordinator.handle_worker_result(code, data)
+                    
+    except WebSocketDisconnect:
+        coordinator.disconnect(code, client_type)
 
 @app.get("/youtube-mode", response_class=HTMLResponse)
 async def youtube_mode_page(request: Request):

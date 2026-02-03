@@ -179,6 +179,13 @@ h1, h2, h3, h4 {
     gap: 8px;
 }
 
+.brand-logo {
+    height: 32px;
+    /* Invert colors to make white bg black (transparent-ish) and black text white */
+    filter: invert(1);
+    mix-blend-mode: screen;
+}
+
 .logo-dot {
     width: 8px;
     height: 8px;
