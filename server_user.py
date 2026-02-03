@@ -217,7 +217,7 @@ class WaitlistRequest(BaseModel):
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     """Serve landing page (V3 Overhaul)."""
-    return templates.TemplateResponse("landing_v3.html", {"request": request})
+    return templates.TemplateResponse("landing.html", {"request": request})
 
 @app.get("/ingest", response_class=HTMLResponse)
 async def ingest_page(request: Request):

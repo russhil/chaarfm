@@ -36,42 +36,16 @@ document.getElementById('btn-close-search').addEventListener('click', () => {
     searchOverlay.style.display = 'none';
 });
 
-// Reset button
-document.getElementById('btn-reset').addEventListener('click', async () => {
-    if (confirm('Reset session? This will start fresh with new probing.')) {
-        try {
-            audio.pause();
-            statusEl.innerText = "Resetting...";
-
-            const res = await fetch('/api/reset', { method: 'POST' });
-            const data = await res.json();
-
-            // Clear local state
-            trackHistory = [];
-            historyIndex = -1;
-            batchFeedback = {};
-            currentBatchPosition = 0;
-            currentTrackId = null;
-
-            // Reset UI
-            titleEl.innerText = "Session Reset!";
-            statusEl.innerText = "Tap play to start fresh";
-            updatePlayButton(false);
-            progressFill.style.width = '0%';
-
-            // Reset dots
-            for (let i = 0; i < 5; i++) {
-                const dot = document.getElementById(`dot-${i}`);
-                if (dot) dot.className = 'batch-dot';
-            }
-            batchLabel.innerText = 'Fresh start!';
-
-        } catch (e) {
-            console.error("Reset error:", e);
-            statusEl.innerText = "Reset failed";
-        }
-    }
-});
+// Reset Session
+const resetBtn = document.getElementById('btn-reset');
+if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+        fetch('/api/reset_session', { method: 'POST' })
+            .then(() => {
+                window.location.href = '/login'; // Redirect to Admin/Login instead of landing
+            });
+    });
+}
 
 searchInput.addEventListener('input', (e) => {
     clearTimeout(searchTimeout);
