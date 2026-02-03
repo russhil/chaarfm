@@ -7,7 +7,6 @@ import shutil
 import logging
 import numpy as np
 import yt_dlp
-from psycopg2.extras import Json
 
 # Add project root to path to allow imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
