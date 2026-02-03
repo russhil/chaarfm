@@ -1,4 +1,5 @@
 
+import json
 import os
 import psycopg2
 import numpy as np
@@ -97,7 +98,7 @@ def get_track_by_id(client, track_id):
                 "id": row[0],
                 "filename": f"{row[1]} - {row[2]}",
                 "s3_url": row[3],
-                "vector": np.array(row[4]).tolist(),
+                "vector": np.array(json.loads(row[4])).tolist() if isinstance(row[4], str) else np.array(row[4]).tolist(),
                 "youtube_id": row[5]
             }
         return None
@@ -159,7 +160,7 @@ def recommend_tracks(client, positive_vectors, negative_vectors=None, avoid_ids=
                 "id": row[0],
                 "filename": f"{row[1]} - {row[2]}",
                 "s3_url": row[3],
-                "vector": np.array(row[4]).tolist(),
+                "vector": np.array(json.loads(row[4])).tolist() if isinstance(row[4], str) else np.array(row[4]).tolist(),
                 "youtube_id": row[5],
                 "score": 1 - row[6] # Convert distance to similarity score roughly
             })
@@ -190,7 +191,7 @@ def get_all_vectors(client):
                 "id": row[0],
                 "filename": f"{row[1]} - {row[2]}",
                 "s3_url": row[3],
-                "vector": np.array(row[4]).tolist(),
+                "vector": np.array(json.loads(row[4])).tolist() if isinstance(row[4], str) else np.array(row[4]).tolist(),
                 "youtube_id": row[5]
             })
         return results
