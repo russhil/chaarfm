@@ -5,6 +5,7 @@ import json
 import glob
 import shutil
 import logging
+import random
 import numpy as np
 
 # Add project root to path to allow imports
@@ -337,6 +338,35 @@ def main():
     print(f"\nIngestion Complete.")
     print(f"Success: {success_count}")
     print(f"Failed: {fail_count}")
+
+def prepare_random_track_batch(tracks, requested_count=None, use_max=False):
+    """
+    Deduplicate and randomize track list, then slice to requested size.
+    """
+    seen = set()
+    deduped = []
+    for artist, title in tracks:
+        key = ((artist or "").strip(), (title or "").strip())
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(key)
+
+    if not deduped:
+        return []
+
+    random.shuffle(deduped)
+
+    if use_max or requested_count is None or requested_count >= len(deduped):
+        return deduped
+
+    return deduped[:requested_count]
+
+def ensure_test_collection():
+    """
+    Convenience helper for dedicated test ingest table.
+    """
+    return ensure_schema("test")
 
 if __name__ == "__main__":
     main()

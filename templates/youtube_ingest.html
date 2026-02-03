@@ -8,9 +8,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .ingest-container {
-            max-width: 600px;
+            max-width: 640px;
             margin: 40px auto;
-            padding: 20px;
+            padding: 24px;
             background: rgba(20, 20, 20, 0.95);
             border-radius: 12px;
             border: 1px solid #333;
@@ -28,6 +28,10 @@
             font-size: 1rem;
             box-sizing: border-box;
         }
+        .form-input:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
         .btn-ingest {
             width: 100%;
             padding: 12px;
@@ -40,7 +44,10 @@
             transition: background 0.2s;
         }
         .btn-ingest:hover { background: #cc0000; }
-        
+        .btn-ingest:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         .code-display {
             font-family: 'Courier New', monospace;
             font-size: 3rem;
@@ -53,13 +60,12 @@
             border: 2px dashed #333;
             border-radius: 8px;
         }
-        
         .status-log {
             margin-top: 20px;
-            height: 250px;
+            height: 260px;
             overflow-y: auto;
             background: #000;
-            padding: 10px;
+            padding: 12px;
             font-family: monospace;
             font-size: 0.9rem;
             border-radius: 6px;
@@ -70,7 +76,6 @@
         .log-error { color: #f43f5e; }
         .log-info { color: #3b82f6; }
         .log-warning { color: #f59e0b; }
-        
         .tab-btn {
             padding: 10px 20px;
             background: transparent;
@@ -84,6 +89,76 @@
             color: white;
             border-bottom: 2px solid #ff0000;
         }
+        .section-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #ddd;
+        }
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background: #0f0f0f;
+            color: #aaa;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .mode-btn.active {
+            background: #1f1f1f;
+            border-color: #ff0000;
+            color: #fff;
+        }
+        .inline-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .inline-input input[type="number"] {
+            flex: 1;
+        }
+        .max-btn {
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #111;
+            color: #eee;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .max-btn.active {
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+        .hint {
+            font-size: 0.85rem;
+            color: #777;
+            margin-top: 6px;
+        }
+        .control-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn-secondary {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #1f1f1f;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            flex: 1;
+        }
+        .btn-secondary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -93,8 +168,8 @@
         </h2>
         
         <div style="display:flex; justify-content:center; margin-bottom: 20px; border-bottom: 1px solid #333;">
-            <button class="tab-btn active" onclick="setMode('remote')">Remote Worker</button>
-            <button class="tab-btn" onclick="setMode('server')">Server Local</button>
+            <button class="tab-btn active" onclick="setMode(event, 'remote')">Remote Worker</button>
+            <button class="tab-btn" onclick="setMode(event, 'server')">Server Local</button>
         </div>
 
         <div id="remote-mode">
@@ -105,13 +180,37 @@
             <div id="pairing-code" class="code-display">----</div>
             
             <div class="form-group">
+                <span class="section-label">Ingest Source</span>
+                <div class="mode-toggle">
+                    <button type="button" class="mode-btn active" data-ingest="lastfm">Last.fm</button>
+                    <button type="button" class="mode-btn" data-ingest="single">Single YouTube</button>
+                </div>
+            </div>
+
+            <div class="form-group" id="lastfm-config">
                 <label class="text-label" style="display:block; margin-bottom: 8px;">Last.fm Username</label>
                 <input type="text" id="username-remote" class="form-input" placeholder="e.g. russhil">
+                <div class="hint">Fetch the entire universe before sampling.</div>
+
+                <label class="text-label" style="display:block; margin: 16px 0 8px;">Random Song Count</label>
+                <div class="inline-input">
+                    <input type="number" id="song-count" class="form-input" min="1" max="500" value="25" disabled>
+                    <button type="button" id="max-btn" class="max-btn" disabled>Use Max</button>
+                </div>
+                <div class="hint">Select how many random songs to assign, or use Max.</div>
+            </div>
+
+            <div class="form-group" id="single-config" style="display:none;">
+                <label class="text-label" style="display:block; margin-bottom: 8px;">YouTube URL</label>
+                <input type="url" id="youtube-url" class="form-input" placeholder="https://www.youtube.com/watch?v=...">
+                <div class="hint">Send a single test track to the `vectors_test` collection.</div>
             </div>
             
-            <button id="start-remote-btn" class="btn-ingest" disabled>
-                Waiting for Worker...
-            </button>
+            <button id="start-remote-btn" class="btn-ingest" disabled>Waiting for Worker...</button>
+            <div class="control-row">
+                <button id="pause-btn" class="btn-secondary" disabled>Pause</button>
+                <button id="stop-btn" class="btn-secondary" disabled>Stop</button>
+            </div>
         </div>
         
         <div id="server-mode" style="display: none;">
@@ -138,14 +237,30 @@
 
     <script>
         const logDiv = document.getElementById('status-log');
+        const startBtn = document.getElementById('start-remote-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const songCountInput = document.getElementById('song-count');
+        const maxBtn = document.getElementById('max-btn');
+        const usernameInput = document.getElementById('username-remote');
+        const youtubeInput = document.getElementById('youtube-url');
+        const ingestModeButtons = document.querySelectorAll('.mode-btn');
+        const lastfmConfig = document.getElementById('lastfm-config');
+        const singleConfig = document.getElementById('single-config');
+
         let ws = null;
         let currentCode = null;
+        let workerConnected = false;
+        let ingestMode = 'lastfm';
+        let useMax = false;
+        let sessionActive = false;
+        let isPaused = false;
 
-        function setMode(mode) {
+        function setMode(evt, mode) {
             document.getElementById('remote-mode').style.display = mode === 'remote' ? 'block' : 'none';
             document.getElementById('server-mode').style.display = mode === 'server' ? 'block' : 'none';
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
+            evt.target.classList.add('active');
             
             if (mode === 'remote' && !ws) {
                 initRemoteSession();
@@ -161,9 +276,65 @@
             logDiv.scrollTop = logDiv.scrollHeight;
         }
 
+        function updateControlStates() {
+            const username = usernameInput.value.trim();
+            const youtubeUrl = youtubeInput.value.trim();
+            const countValid = useMax || (parseInt(songCountInput.value, 10) > 0);
+            const lastfmReady = ingestMode !== 'lastfm' || (workerConnected && username && countValid);
+            const youtubeReady = ingestMode !== 'single' || (workerConnected && youtubeUrl);
+            const ready = lastfmReady && youtubeReady;
+
+            songCountInput.disabled = ingestMode !== 'lastfm' || useMax || !workerConnected || !username || sessionActive;
+            maxBtn.disabled = ingestMode !== 'lastfm' || !workerConnected || !username || sessionActive;
+            maxBtn.classList.toggle('active', useMax);
+
+            startBtn.disabled = !ready || sessionActive;
+            pauseBtn.disabled = !sessionActive;
+            stopBtn.disabled = !sessionActive;
+
+            startBtn.innerText = sessionActive
+                ? (isPaused ? "Paused" : "Running...")
+                : (workerConnected ? "Start Ingestion" : "Waiting for Worker...");
+            pauseBtn.innerText = isPaused ? "Resume" : "Pause";
+        }
+
+        function updateModeUI() {
+            ingestModeButtons.forEach(btn => {
+                const isActive = btn.dataset.ingest === ingestMode;
+                btn.classList.toggle('active', isActive);
+            });
+            lastfmConfig.style.display = ingestMode === 'lastfm' ? 'block' : 'none';
+            singleConfig.style.display = ingestMode === 'single' ? 'block' : 'none';
+            updateControlStates();
+        }
+
+        function toggleMax() {
+            useMax = !useMax;
+            if (!useMax && !songCountInput.value) {
+                songCountInput.value = 25;
+            }
+            updateControlStates();
+        }
+
+        ingestModeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                ingestMode = btn.dataset.ingest;
+                updateModeUI();
+            });
+        });
+
+        maxBtn.addEventListener('click', toggleMax);
+        usernameInput.addEventListener('input', updateControlStates);
+        youtubeInput.addEventListener('input', updateControlStates);
+        songCountInput.addEventListener('input', () => {
+            if (parseInt(songCountInput.value, 10) < 1) {
+                songCountInput.value = 1;
+            }
+            updateControlStates();
+        });
+
         // --- REMOTE MODE ---
         function initRemoteSession() {
-            // Generate Code
             currentCode = Math.floor(1000 + Math.random() * 9000).toString();
             document.getElementById('pairing-code').innerText = currentCode;
             
@@ -180,40 +351,95 @@
                     appendLog(data.message, data.level);
                     
                     if (data.message.includes("Worker Connected")) {
-                        document.getElementById('start-remote-btn').disabled = false;
-                        document.getElementById('start-remote-btn').innerText = "Start Remote Ingestion";
+                        workerConnected = true;
                         document.getElementById('pairing-code').style.borderColor = "#00ff88";
+                        updateControlStates();
                     }
+                } else if (data.type === 'state') {
+                    handleStateMessage(data);
                 }
             };
             
             ws.onclose = () => {
                 appendLog("Disconnected from Coordinator", 'error');
+                workerConnected = false;
+                sessionActive = false;
+                isPaused = false;
+                updateControlStates();
             };
         }
         
-        document.getElementById('start-remote-btn').addEventListener('click', () => {
-            const username = document.getElementById('username-remote').value.trim();
-            if (!username) { alert("Enter username"); return; }
+        function handleStateMessage(data) {
+            if (data.status === 'paused') {
+                isPaused = true;
+            } else if (data.status === 'running') {
+                sessionActive = true;
+                isPaused = false;
+            } else if (data.status === 'stopped' || data.status === 'complete' || data.status === 'idle') {
+                sessionActive = false;
+                isPaused = false;
+            }
+
+            if (data.message) {
+                appendLog(data.message, data.level || 'info');
+            }
+
+            updateControlStates();
+        }
+
+        startBtn.addEventListener('click', () => {
+            const username = usernameInput.value.trim();
+            const youtubeUrl = youtubeInput.value.trim();
+            const requestedCount = parseInt(songCountInput.value, 10);
+
+            if (ingestMode === 'lastfm' && !username) { alert("Enter username"); return; }
+            if (ingestMode === 'single' && !youtubeUrl) { alert("Enter a YouTube URL"); return; }
             
             if (ws) {
                 ws.send(JSON.stringify({
                     type: "start",
-                    username: username
+                    username: username,
+                    mode: ingestMode,
+                    requestedCount: useMax ? null : requestedCount,
+                    useMax: useMax,
+                    youtubeUrl: youtubeUrl
                 }));
-                document.getElementById('start-remote-btn').disabled = true;
-                document.getElementById('start-remote-btn').innerText = "Running...";
+                sessionActive = true;
+                isPaused = false;
+                appendLog("Start requested...", 'info');
+                updateControlStates();
             }
         });
 
+        pauseBtn.addEventListener('click', () => {
+            if (!ws || !sessionActive) { return; }
+            const command = isPaused ? "resume" : "pause";
+            ws.send(JSON.stringify({ type: command }));
+            appendLog(`${command === 'pause' ? 'Pause' : 'Resume'} requested...`, 'info');
+            if (command === 'pause') {
+                isPaused = true;
+            } else {
+                isPaused = false;
+            }
+            updateControlStates();
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (!ws || !sessionActive) { return; }
+            ws.send(JSON.stringify({ type: "stop" }));
+            appendLog("Stop requested...", 'warning');
+            sessionActive = false;
+            isPaused = false;
+            updateControlStates();
+        });
+
         // --- SERVER MODE (Legacy) ---
-        // (Simplified for brevity, assuming existing logic if needed)
         document.getElementById('start-server-btn').addEventListener('click', () => {
              alert("Use Remote Worker mode for best results on Render!");
         });
         
-        // Auto-init remote
         initRemoteSession();
+        updateControlStates();
     </script>
 </body>
 </html>

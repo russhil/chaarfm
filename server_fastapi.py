@@ -83,7 +83,13 @@ async def remote_endpoint(websocket: WebSocket, code: str, client_type: str):
             
             if client_type == 'ui':
                 if data.get('type') == 'start':
-                    await coordinator.start_job(code, data.get('username'))
+                    await coordinator.start_job(code, data)
+                elif data.get('type') == 'pause':
+                    await coordinator.set_pause(code, True)
+                elif data.get('type') == 'resume':
+                    await coordinator.set_pause(code, False)
+                elif data.get('type') == 'stop':
+                    await coordinator.stop_session(code)
             
             elif client_type == 'worker':
                 if data.get('type') == 'result':

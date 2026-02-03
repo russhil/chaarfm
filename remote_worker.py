@@ -18,7 +18,7 @@ except ImportError:
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Reuse existing logic
-from populate_youtube_universe import download_temp_youtube, vectorize_audio
+from populate_youtube_universe import download_temp_youtube, download_temp_youtube_by_url, vectorize_audio
 
 # Configure Logging
 logging.basicConfig(
@@ -59,13 +59,20 @@ async def run_worker(server_url, pairing_code):
                         payload = data.get("payload", {})
                         artist = payload.get("artist")
                         title = payload.get("title")
+                        youtube_url = payload.get("youtube_url")
                         
-                        logger.info(f"Received Job: {artist} - {title}")
+                        label = youtube_url or f"{artist} - {title}"
+                        logger.info(f"Received Job: {label}")
                         
                         # Execute Job
                         try:
                             # 1. Download
-                            filepath, youtube_id = download_temp_youtube(artist, title)
+                            if youtube_url:
+                                filepath, youtube_id, metadata = download_temp_youtube_by_url(youtube_url)
+                                artist = artist or (metadata or {}).get('artist') or "YouTube Artist"
+                                title = title or (metadata or {}).get('title') or f"Test Track {youtube_id or ''}".strip()
+                            else:
+                                filepath, youtube_id = download_temp_youtube(artist, title)
                             
                             if not filepath:
                                 logger.warning("Download failed")
@@ -94,7 +101,8 @@ async def run_worker(server_url, pairing_code):
                                         "artist": artist,
                                         "title": title,
                                         "youtube_id": youtube_id,
-                                        "vector": vector
+                                        "vector": vector,
+                                        "source_url": youtube_url
                                     }
                                 }))
                             else:
@@ -127,18 +135,30 @@ async def run_worker(server_url, pairing_code):
         logger.error(f"Connection Error: {e}")
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Chaar.fm Remote Worker")
+    parser.add_argument("--url", "-u", default="", help="Server URL (e.g. https://chaarfm.onrender.com)")
+    parser.add_argument("--code", "-c", default="", help="Pairing code from /ingest page")
+    args = parser.parse_args()
+
     print("=== Chaar.fm Remote Worker ===")
-    
-    # Default to local if not provided
-    default_host = "ws://localhost:8001"
-    
-    host = input(f"Enter Server URL (default: {default_host}): ").strip() or default_host
-    code = input("Enter Pairing Code: ").strip()
-    
+    default_host = "https://chaarfm.onrender.com"
+
+    host = args.url.strip() if args.url else ""
+    code = args.code.strip() if args.code else ""
+
+    if not host or not code:
+        try:
+            host = host or input(f"Enter Server URL (default: {default_host}): ").strip() or default_host
+            code = code or input("Enter Pairing Code: ").strip()
+        except EOFError:
+            print("\nUsage: python remote_worker.py --url https://chaarfm.onrender.com --code YOUR_CODE")
+            sys.exit(1)
+
     if not code:
         print("Pairing code is required.")
         sys.exit(1)
-        
+
     try:
         asyncio.run(run_worker(host, code))
     except KeyboardInterrupt:
