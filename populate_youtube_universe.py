@@ -6,7 +6,6 @@ import glob
 import shutil
 import logging
 import numpy as np
-import yt_dlp
 
 # Add project root to path to allow imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -121,7 +120,7 @@ def download_temp_youtube(artist, title):
     """
     if not os.path.exists(TEMP_DIR):
         os.makedirs(TEMP_DIR)
-        
+    import yt_dlp
     search_query = f"{artist} {title} lyrics"
     filename_template = f"{TEMP_DIR}/%(id)s.%(ext)s"
     
@@ -165,7 +164,7 @@ def download_temp_youtube_by_url(url):
     """
     if not os.path.exists(TEMP_DIR):
         os.makedirs(TEMP_DIR)
-        
+    import yt_dlp
     # Extract ID first to set filename
     # We can rely on yt-dlp to give us the ID
     filename_template = f"{TEMP_DIR}/%(id)s.%(ext)s"
