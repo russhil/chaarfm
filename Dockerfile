@@ -23,4 +23,4 @@ COPY . .
 EXPOSE 5001
 
 # Command to run the application
-CMD ["python", "server_fastapi.py"]
+CMD ["python", "server_user.py"]

@@ -4,7 +4,7 @@ User-Aware Server - FastAPI with authentication and persistent profiles.
 Philosophy: Every decision must be data-justified. No random unless zero data.
 """
 
-from fastapi import FastAPI, Request, HTTPException, Query, Response
+from fastapi import FastAPI, Request, HTTPException, Query, Response, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -25,6 +25,9 @@ import user_db
 user_db.init_db()
 
 from user_recommender import UserRecommender
+
+# Import Ingestion Coordinator
+from music_pipeline.web_app import coordinator
 
 INTERACTION_LOG_FILE = "user_interactions.csv"
 
@@ -213,8 +216,37 @@ class WaitlistRequest(BaseModel):
 # Routes
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    """Serve landing page."""
-    return templates.TemplateResponse("landing.html", {"request": request})
+    """Serve landing page (V3 Overhaul)."""
+    return templates.TemplateResponse("landing_v3.html", {"request": request})
+
+@app.get("/ingest", response_class=HTMLResponse)
+async def ingest_page(request: Request):
+    """Serve ingestion control page."""
+    return templates.TemplateResponse("youtube_ingest.html", {"request": request})
+
+@app.websocket("/ws/remote/{code}/{client_type}")
+async def remote_endpoint(websocket: WebSocket, code: str, client_type: str):
+    """Websocket for distributed ingestion."""
+    if client_type == 'ui':
+        await coordinator.connect_ui(code, websocket)
+    elif client_type == 'worker':
+        await coordinator.connect_worker(code, websocket)
+    
+    try:
+        while True:
+            data_str = await websocket.receive_text()
+            data = json.loads(data_str)
+            
+            if client_type == 'ui':
+                if data.get('type') == 'start':
+                    await coordinator.start_job(code, data.get('username'))
+            
+            elif client_type == 'worker':
+                if data.get('type') == 'result':
+                    await coordinator.handle_worker_result(code, data)
+                    
+    except WebSocketDisconnect:
+        coordinator.disconnect(code, client_type)
 
 @app.get("/v2", response_class=HTMLResponse)
 async def landing_v2(request: Request):
