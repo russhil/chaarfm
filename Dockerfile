@@ -4,11 +4,10 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Install system dependencies
-# ffmpeg is REQUIRED for yt-dlp to extract audio
+# Removed ffmpeg as server no longer processes audio
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
-    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first to leverage Docker cache
@@ -24,6 +23,4 @@ COPY . .
 EXPOSE 5001
 
 # Command to run the application
-# We use shell form to allow variable expansion if needed, but array form is safer.
-# Using python directly as uvicorn is imported in main block of server_user.py
 CMD ["python", "server_fastapi.py"]
