@@ -115,7 +115,7 @@ COLLECTION_R2_PREFIXES = {
 
 # Session management (in-memory for simplicity)
 # In production, use Redis or JWT
-sessions = {}  # session_id -> {"user_id": str, "recommender": UserRecommender, "queue": [], "music_root": str}
+sessions = {}  # session_id -> {"user_id": str, "recommender": UserRecommender, "queue": [], "music_root": str, "youtube_mode": bool}
 
 def get_session(session_id: str) -> dict:
     """Get or create session."""
@@ -123,10 +123,10 @@ def get_session(session_id: str) -> dict:
         return sessions[session_id]
     return None
 
-def create_session(user_id: str, collection_name: str = "music_averaged") -> str:
+def create_session(user_id: str, collection_name: str = "music_averaged", youtube_mode: bool = False) -> str:
     """Create new session for user."""
     session_id = str(uuid.uuid4())
-    recommender = UserRecommender(user_id, collection_name=collection_name)
+    recommender = UserRecommender(user_id, collection_name=collection_name, youtube_mode=youtube_mode)
     
     # Get music root for this collection
     music_root = COLLECTION_MUSIC_ROOTS.get(collection_name, MUSIC_ROOT)
@@ -136,14 +136,16 @@ def create_session(user_id: str, collection_name: str = "music_averaged") -> str
         "recommender": recommender,
         "collection": collection_name,
         "music_root": music_root,
-        "queue": []
+        "queue": [],
+        "youtube_mode": youtube_mode
     }
     
     # Pre-load first batch
     batch = recommender.get_next_batch()
     sessions[session_id]["queue"] = batch.copy()
     
-    print(f"Created session {session_id[:8]}... for user {user_id} (collection: {collection_name}, root: {music_root})")
+    mode_label = "YOUTUBE" if youtube_mode else "CLASSIC"
+    print(f"Created session {session_id[:8]}... for user {user_id} (collection: {collection_name}, mode: {mode_label})")
     return session_id
 
 def ensure_queue(session):
@@ -263,10 +265,28 @@ async def login_page(request: Request):
     """Serve login page."""
     return templates.TemplateResponse("login.html", {"request": request})
 
+@app.get("/youtube-mode", response_class=HTMLResponse)
+async def youtube_mode_page(request: Request):
+    """YouTube mode: pick collection with ingested YouTube/Last.fm tracks, then launch player."""
+    return templates.TemplateResponse("youtube_mode_landing.html", {"request": request})
+
 @app.get("/player", response_class=HTMLResponse)
 async def player(request: Request):
     """Serve player page (requires valid session)."""
     return templates.TemplateResponse("player.html", {"request": request})
+
+class YouTubeModeStartRequest(BaseModel):
+    collection: str
+
+@app.post("/api/youtube-mode/start")
+async def youtube_mode_start(data: YouTubeModeStartRequest):
+    """Create a guest session for YouTube mode with the selected collection."""
+    db_cols = set(user_db.get_available_collections())
+    db_cols.add("merged")
+    db_cols.add("music_averaged")
+    collection = data.collection if data.collection in db_cols else "music_averaged"
+    session_id = create_session("guest", collection_name=collection, youtube_mode=True)
+    return {"status": "ok", "session_id": session_id, "collection": collection}
 
 @app.get("/api/collections")
 async def get_collections():
@@ -381,27 +401,23 @@ async def next_track(session_id: str = Query(...)):
     
     track = session["queue"].pop(0)
     
-    # Check if we need to refill AFTER popping (Batch Processing Logic)
-    # User Instruction: "every next batch is created only after the feedback for the previous 5 has been processed"
-    # This means we should only refill when the queue hits 0.
-    # ensure_queue(session) is now checking for len < 1, so this is handled.
-    
-    # Pre-sign URL or encode
-    encoded_name = urllib.parse.quote(track['filename'])
-    
-    # Include track_id in URL to help stream endpoint identify source collection
-    stream_url = f"/stream/{encoded_name}?track_id={track['id']}"
-    
-    # Calculate queue remaining for UI
     queue_remaining = len(session["queue"])
-    
-    return {
+    response = {
         "id": track['id'],
         "title": track['filename'],
-        "url": stream_url,
         "justification": track.get('justification', "Algorithm selection"),
         "queue_remaining": queue_remaining
     }
+    
+    if session.get("youtube_mode") and track.get("youtube_id"):
+        response["youtube_id"] = track["youtube_id"]
+        response["url"] = None
+    else:
+        encoded_name = urllib.parse.quote(track['filename'])
+        response["url"] = f"/stream/{encoded_name}?track_id={track['id']}"
+        response["youtube_id"] = None
+    
+    return response
 
 @app.post("/api/feedback")
 async def feedback(data: FeedbackRequest, session_id: str = Query(...)):
@@ -473,20 +489,19 @@ async def select_track(data: SelectRequest, session_id: str = Query(...)):
     
     track = session["recommender"].set_seed(data.id)
     if track:
-        # Clear queue and reload
         session["queue"] = []
         session["recommender"].finalize_batch()
         ensure_queue(session)
         
-        encoded_name = urllib.parse.quote(track['filename'])
-        stream_url = f"/stream/{encoded_name}?track_id={track['id']}"
-        
-        return {
-            "id": track['id'],
-            "title": track['filename'],
-            "url": stream_url,
-            "justification": "User selected manually"
-        }
+        resp = {"id": track['id'], "title": track['filename'], "justification": "User selected manually"}
+        if session.get("youtube_mode") and track.get("youtube_id"):
+            resp["youtube_id"] = track["youtube_id"]
+            resp["url"] = None
+        else:
+            encoded_name = urllib.parse.quote(track['filename'])
+            resp["url"] = f"/stream/{encoded_name}?track_id={track['id']}"
+            resp["youtube_id"] = None
+        return resp
     raise HTTPException(status_code=404, detail="Track not found")
 
 @app.get("/api/profile")

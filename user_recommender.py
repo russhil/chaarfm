@@ -68,9 +68,10 @@ class ClusterManager:
         return sorted_tids[:limit]
 
 class UserRecommender:
-    def __init__(self, user_id="guest", collection_name=None):
+    def __init__(self, user_id="guest", collection_name=None, youtube_mode=False):
         self.user_id = user_id
         self.collection_name = collection_name or "music_averaged"
+        self.youtube_mode = youtube_mode
         
         # Data Loading
         self.track_map = {}
@@ -219,15 +220,23 @@ class UserRecommender:
                         with user_db.engine.connect() as conn:
                             result = conn.execute(query).fetchall()
                     except Exception as e_public:
-                        # Try alternative schema (embedding, artist, title, s3_url)
+                        # Try alternative schema (embedding, artist, title, s3_url, youtube_id)
+                        has_youtube_col = False
                         try:
-                            query = text(f'SELECT id, embedding, artist, title, s3_url FROM public."{col_name}"')
+                            query = text(f'SELECT id, embedding, artist, title, s3_url, youtube_id FROM public."{col_name}"')
                             with user_db.engine.connect() as conn:
                                 result = conn.execute(query).fetchall()
                             standard_schema = False
+                            has_youtube_col = True
                         except Exception as e_alt:
-                            print(f"Failed to load {col_name} from both vecs and public (std & alt): {e_alt}")
-                            continue
+                            try:
+                                query = text(f'SELECT id, embedding, artist, title, s3_url FROM public."{col_name}"')
+                                with user_db.engine.connect() as conn:
+                                    result = conn.execute(query).fetchall()
+                                standard_schema = False
+                            except Exception as e_alt2:
+                                print(f"Failed to load {col_name} from both vecs and public (std & alt): {e_alt2}")
+                                continue
                     
                 for row in result:
                     if standard_schema:
@@ -243,17 +252,14 @@ class UserRecommender:
                     else:
                         # Alternative Schema
                         vec = row.embedding
-                        # Construct metadata from columns
-                        # filename usually combines artist - title, or just title
                         if row.artist and row.title:
                             filename = f"{row.artist} - {row.title}"
                         elif row.title:
                             filename = row.title
                         else:
                             filename = f"Track {row.id}"
-                            
-                        # Extract duration? Not available in alt schema, default to 0 (will be 200s default later)
                         duration = 0
+                        youtube_id = (row.youtube_id or None) if has_youtube_col else None
                         
                     # Vector parsing (common)
                     if isinstance(vec, str):
@@ -261,13 +267,15 @@ class UserRecommender:
                         except: pass
                     elif isinstance(vec, np.ndarray): vec = vec.tolist()
                     
-                    self.track_map[str(row.id)] = {
+                    entry = {
                         "id": str(row.id),
                         "filename": filename,
                         "duration": duration,
                         "vector": vec,
-                        "source_collection": col_name # Track where it came from
+                        "source_collection": col_name
                     }
+                    entry["youtube_id"] = youtube_id if not standard_schema else (meta.get("youtube_id") if isinstance(meta, dict) else None)
+                    self.track_map[str(row.id)] = entry
                 total_loaded += len(result)
             
             print(f"Total tracks loaded: {total_loaded}")
@@ -425,6 +433,7 @@ class UserRecommender:
         for tid in search_space:
             t = self.track_map[tid]
             if tid in avoid_ids: continue
+            if not self._track_valid_for_mode(t): continue
             v = np.array(t['vector'])
             
             # Gaussian Similarity: exp(-distance^2 / (2 * variance))
@@ -533,6 +542,7 @@ class UserRecommender:
         
         for tid, t in self.track_map.items():
             if tid in avoid_ids: continue
+            if not self._track_valid_for_mode(t): continue
             
             v = np.array(t['vector'])
             
@@ -654,6 +664,13 @@ class UserRecommender:
 
     def _is_unique(self, track):
         return (track['id'] not in self.played_ids and track['filename'] not in self.played_filenames)
+
+    def _track_valid_for_mode(self, track):
+        """Filter tracks by mode: youtube_mode requires youtube_id."""
+        if not track: return False
+        if self.youtube_mode and not track.get('youtube_id'):
+            return False
+        return True
 
     def _find_nearest_cluster(self, ref_centroid, skip_clusters):
         best = None
@@ -840,7 +857,7 @@ class UserRecommender:
                 cluster_tracks = self.cluster_manager.get_cluster_tracks(selected_cid)
                 
                 # Filter out played/disliked to find a valid start seed
-                valid_seeds = [tid for tid in cluster_tracks if tid not in self.global_dislikes and tid not in self.outlier_tracks]
+                valid_seeds = [tid for tid in cluster_tracks if tid not in self.global_dislikes and tid not in self.outlier_tracks and self._track_valid_for_mode(self.track_map.get(tid))]
                 
                 if valid_seeds:
                     # Pick a random track as the anchor (Real Track Anchoring)
@@ -867,7 +884,7 @@ class UserRecommender:
                     cid = random.choice(dense_clusters)
                     # Pick random track instead of centroid for variety
                     cluster_tracks = self.cluster_manager.get_cluster_tracks(cid)
-                    valid_seeds = [tid for tid in cluster_tracks if tid not in self.global_dislikes]
+                    valid_seeds = [tid for tid in cluster_tracks if tid not in self.global_dislikes and self._track_valid_for_mode(self.track_map.get(tid))]
                     
                     if valid_seeds:
                         seed_id = random.choice(valid_seeds)
@@ -887,7 +904,7 @@ class UserRecommender:
             if not candidates:
                  # Absolute fallback if everything is filtered
                  print("Warning: Radial probe empty, falling back to random safe track.")
-                 all_safe = [t for t in self.track_map.values() if t['id'] not in self.outlier_tracks and t['id'] not in self.global_dislikes]
+                 all_safe = [t for t in self.track_map.values() if t['id'] not in self.outlier_tracks and t['id'] not in self.global_dislikes and self._track_valid_for_mode(t)]
                  if all_safe:
                      candidates = [random.choice(all_safe)]
                      justification = "Emergency Random Fallback"
@@ -919,7 +936,10 @@ class UserRecommender:
         for _ in range(size):
             t, reason = self.get_next_track()
             if t: 
-                batch.append({"id": t['id'], "filename": t['filename'], "justification": reason})
+                item = {"id": t['id'], "filename": t['filename'], "justification": reason}
+                if self.youtube_mode and t.get('youtube_id'):
+                    item["youtube_id"] = t['youtube_id']
+                batch.append(item)
         return batch
 
     def finalize_batch(self):
@@ -1143,6 +1163,7 @@ class UserRecommender:
         q = query.lower()
         res = []
         for t in self.track_map.values():
+            if not self._track_valid_for_mode(t): continue
             if q in t['filename'].lower():
                 res.append(t)
                 if len(res) >= 20: break

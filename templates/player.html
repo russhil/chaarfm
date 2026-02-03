@@ -44,8 +44,9 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            <div class="album-frame">
-                <i class="fas fa-compact-disc"></i>
+            <div class="album-frame" id="album-frame">
+                <div id="youtube-container" style="position:absolute;top:0;left:0;width:100%;height:100%;display:none;border-radius:12px;overflow:hidden;"></div>
+                <i class="fas fa-compact-disc" id="album-icon"></i>
             </div>
 
             <div class="track-meta">
@@ -133,13 +134,14 @@
     </div>
 
     <audio id="audio-player"></audio>
+    <script src="https://www.youtube.com/iframe_api"></script>
 
     <script>
         // Session management
-        // Check URL params first (from OAuth redirect)
         const urlParams = new URLSearchParams(window.location.search);
         const urlSessionId = urlParams.get('session_id');
         const urlName = urlParams.get('name');
+        const youtubeMode = urlParams.get('mode') === 'youtube';
 
         if (urlSessionId) {
             // New session from OAuth - save it
@@ -164,7 +166,7 @@
             window.location.href = '/login'; // Redirect to login, not landing
         }
 
-        document.getElementById('user-badge').textContent = isGuest ? 'GUEST_MODE' : userName.toUpperCase();
+        document.getElementById('user-badge').textContent = youtubeMode ? 'YOUTUBE_MODE' : (isGuest ? 'GUEST_MODE' : userName.toUpperCase());
 
         const ADMIN_USERS = ['russhil'];
         if (ADMIN_USERS.includes(userName?.toLowerCase())) {
@@ -190,9 +192,39 @@
 
         let currentTrackId = null;
         let currentTrackUrl = null;
+        let currentTrackYoutubeId = null;
         let currentTrackTitle = null;
         let currentTrackJustification = "";
         let isPlaying = false;
+        let ytPlayer = null;
+        let ytReady = false;
+        let progressInterval = null;
+
+        if (youtubeMode) {
+            document.getElementById('album-icon').style.display = 'none';
+            window.onYouTubeIframeAPIReady = function() {
+                ytPlayer = new YT.Player('youtube-container', {
+                    height: '100%', width: '100%',
+                    playerVars: { playsinline: 1, controls: 0, disablekb: 1 },
+                    events: {
+                        onStateChange: function(e) {
+                            if (e.data === YT.PlayerState.ENDED) {
+                                stopYTProgressLoop();
+                                sendFeedback();
+                                nextTrack();
+                            } else if (e.data === YT.PlayerState.PLAYING) {
+                                updatePlayButton(true);
+                                startYTProgressLoop();
+                            } else if (e.data === YT.PlayerState.PAUSED) {
+                                updatePlayButton(false);
+                                stopYTProgressLoop();
+                            }
+                        }
+                    }
+                });
+                ytReady = true;
+            };
+        }
 
         // Batch tracking
         let batchSize = 5;
@@ -404,8 +436,10 @@
         playBtn.addEventListener('click', togglePlay);
 
         audio.addEventListener('ended', () => {
-            sendFeedback();
-            nextTrack();
+            if (!youtubeMode) {
+                sendFeedback();
+                nextTrack();
+            }
         });
 
         audio.addEventListener('error', (e) => {
@@ -491,11 +525,13 @@
                 loadNextTrack();
                 return;
             }
-
+            if (youtubeMode && ytPlayer) {
+                if (isPlaying) ytPlayer.pauseVideo();
+                else ytPlayer.playVideo();
+                return;
+            }
             if (audio.paused) {
-                audio.play().then(() => {
-                    updatePlayButton(true);
-                }).catch(e => console.error("Play error:", e));
+                audio.play().then(() => updatePlayButton(true)).catch(e => console.error("Play error:", e));
             } else {
                 audio.pause();
                 updatePlayButton(false);
@@ -507,6 +543,23 @@
             playIcon.className = playing ? 'fas fa-pause' : 'fas fa-play';
             statusDot.className = playing ? 'status-indicator active' : 'status-indicator';
             statusEl.innerText = playing ? 'Playing' : 'Paused';
+        }
+
+        function startYTProgressLoop() {
+            if (progressInterval) clearInterval(progressInterval);
+            progressInterval = setInterval(() => {
+                if (!ytPlayer || !ytPlayer.getCurrentTime) return;
+                const ct = ytPlayer.getCurrentTime();
+                const tot = ytPlayer.getDuration();
+                if (tot > 0) {
+                    progressFill.style.width = (ct / tot * 100) + '%';
+                    currentTimeEl.innerText = formatTime(ct);
+                    totalTimeEl.innerText = formatTime(tot);
+                }
+            }, 500);
+        }
+        function stopYTProgressLoop() {
+            if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
         }
 
         function setupMediaSession() {
@@ -521,6 +574,7 @@
         function playTrackData(data) {
             currentTrackId = data.id;
             currentTrackUrl = data.url;
+            currentTrackYoutubeId = data.youtube_id || null;
             currentTrackTitle = data.title;
             currentTrackJustification = data.justification || "";
 
@@ -535,12 +589,31 @@
                 updateBatchUI();
             }
 
-            audio.src = data.url;
-            audio.play().then(() => updatePlayButton(true)).catch(e => {
-                console.error("Autoplay error:", e);
-                statusEl.innerText = "Ready to Play";
-                updatePlayButton(false);
-            });
+            if (youtubeMode && data.youtube_id) {
+                function doLoadYT() {
+                    if (ytPlayer && ytPlayer.loadVideoById) {
+                        document.getElementById('youtube-container').style.display = 'block';
+                        document.getElementById('album-icon').style.display = 'none';
+                        ytPlayer.loadVideoById(data.youtube_id);
+                        updatePlayButton(true);
+                        startYTProgressLoop();
+                    } else {
+                        setTimeout(doLoadYT, 200);
+                    }
+                }
+                doLoadYT();
+            } else if (!youtubeMode && data.url) {
+                document.getElementById('youtube-container').style.display = 'none';
+                document.getElementById('album-icon').style.display = 'flex';
+                audio.src = data.url;
+                audio.play().then(() => updatePlayButton(true)).catch(e => {
+                    console.error("Autoplay error:", e);
+                    statusEl.innerText = "Ready to Play";
+                    updatePlayButton(false);
+                });
+            } else if (youtubeMode && !data.youtube_id) {
+                statusEl.innerText = "No YouTube track - try another collection";
+            }
         }
 
         async function loadNextTrack() {
@@ -556,7 +629,8 @@
 
                 if (currentTrackId) {
                     trackHistory.push({
-                        id: currentTrackId, url: currentTrackUrl, title: currentTrackTitle, justification: currentTrackJustification
+                        id: currentTrackId, url: currentTrackUrl, youtube_id: currentTrackYoutubeId,
+                        title: currentTrackTitle, justification: currentTrackJustification
                     });
                 }
                 historyIndex = trackHistory.length;
@@ -594,7 +668,7 @@
 
         async function sendFeedback() {
             if (!currentTrackId) return;
-            const durationSec = audio.currentTime;
+            const durationSec = youtubeMode && ytPlayer ? (ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0) : audio.currentTime;
             
             if (currentBatchIndex >= 0 && currentBatchIndex < 5) {
                 if (durationSec > 30) batchFeedback[currentBatchIndex] = 'positive';

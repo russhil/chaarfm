@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>chaar.fm | YouTube Mode</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .yt-landing {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: var(--bg-color);
+        }
+        .yt-card {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .yt-badge {
+            background: #ff0000;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+        .yt-card h2 { margin-bottom: 8px; }
+        .yt-card p.text-label { margin-bottom: 24px; opacity: 0.8; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--secondary); }
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+        .btn-yt {
+            width: 100%;
+            padding: 14px;
+            background: #ff0000;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-yt:hover { background: #cc0000; }
+        .btn-yt:disabled { opacity: 0.5; cursor: not-allowed; }
+        .back-link {
+            margin-top: 24px;
+            color: var(--secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .back-link:hover { color: var(--text-color); }
+    </style>
+</head>
+<body>
+    <div class="yt-landing">
+        <div class="yt-card">
+            <span class="yt-badge"><i class="fab fa-youtube"></i> YOUTUBE MODE</span>
+            <h2>Songs from Ingest</h2>
+            <p class="text-label">Load tracks you've added via the ingest tool (Last.fm or YouTube URL). Pick a collection that has YouTube-ingested tracks.</p>
+            
+            <div class="form-group">
+                <label class="form-label" for="vectormap">COLLECTION</label>
+                <select id="vectormap" class="form-select">
+                    <option value="">Loading...</option>
+                </select>
+            </div>
+            
+            <button id="btn-start" class="btn-yt" disabled>
+                <i class="fas fa-play"></i> START
+            </button>
+            
+            <a href="/login" class="back-link"><i class="fas fa-arrow-left"></i> Back to Login</a>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const select = document.getElementById('vectormap');
+            const btn = document.getElementById('btn-start');
+            try {
+                const res = await fetch('/api/collections');
+                const data = await res.json();
+                select.innerHTML = '';
+                if (data.has_merged) {
+                    const opt = document.createElement('option');
+                    opt.value = 'merged';
+                    opt.textContent = 'MERGED (ALL COLLECTIONS)';
+                    select.appendChild(opt);
+                }
+                (data.collections || []).forEach(col => {
+                    const opt = document.createElement('option');
+                    opt.value = col;
+                    opt.textContent = col.replace(/_/g, ' ').toUpperCase();
+                    select.appendChild(opt);
+                });
+                if (select.options.length) btn.disabled = false;
+            } catch (e) {
+                select.innerHTML = '<option value="music_averaged">DEFAULT (FALLBACK)</option>';
+                btn.disabled = false;
+            }
+            btn.addEventListener('click', async () => {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Starting...';
+                try {
+                    const collection = select.value || 'music_averaged';
+                    const res = await fetch('/api/youtube-mode/start', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ collection })
+                    });
+                    const d = await res.json();
+                    if (d.session_id) {
+                        localStorage.setItem('chaar_session', d.session_id);
+                        localStorage.setItem('chaar_user', 'YouTube Guest');
+                        localStorage.setItem('chaar_is_guest', 'true');
+                        window.location.href = '/player?mode=youtube';
+                    } else throw new Error('No session');
+                } catch (e) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-play"></i> START';
+                    alert('Failed to start. Try again.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 import os
 import sys
+import ssl
 import json
 import asyncio
 import logging
@@ -26,6 +27,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def _get_ssl_context():
+    """Create SSL context with proper CA certs for wss:// connections (fixes macOS certificate verify failed)."""
+    try:
+        import certifi
+        ctx = ssl.create_default_context(cafile=certifi.where())
+    except ImportError:
+        ctx = ssl.create_default_context()
+    return ctx
+
 async def run_worker(server_url, pairing_code):
     uri = f"{server_url}/ws/remote/{pairing_code}/worker"
     if uri.startswith("http"):
@@ -33,8 +43,10 @@ async def run_worker(server_url, pairing_code):
     
     logger.info(f"Connecting to {uri}...")
     
+    ssl_context = _get_ssl_context() if uri.startswith("wss://") else None
+    
     try:
-        async with websockets.connect(uri) as websocket:
+        async with websockets.connect(uri, ssl=ssl_context) as websocket:
             logger.info("Connected! Waiting for jobs...")
             
             while True:
