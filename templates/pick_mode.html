@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#050505">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/images/logo-192.png">
+    <title>chaar.fm - Choose Mode</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .pick-card {
+            background: var(--bg-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.8);
+            position: relative;
+            z-index: 10;
+        }
+        .pick-header { text-align: center; margin-bottom: 24px; }
+        .pick-logo {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: var(--surface-color); border: 1px solid var(--surface-border);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px; color: var(--primary); font-size: 24px;
+        }
+        .user-badge {
+            font-size: 0.8rem; color: var(--secondary); margin-top: 8px;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-label {
+            display: block; margin-bottom: 8px; font-size: 0.75rem;
+            text-transform: uppercase; letter-spacing: 0.05em; color: var(--secondary); font-weight: 600;
+        }
+        .mode-options {
+            display: flex; gap: 12px; flex-wrap: wrap;
+        }
+        .mode-option {
+            flex: 1; min-width: 120px;
+            padding: 14px; border-radius: 8px; border: 2px solid var(--surface-border);
+            background: var(--bg-color); color: var(--text-color);
+            cursor: pointer; text-align: center; font-weight: 600; font-size: 0.95rem;
+        }
+        .mode-option:hover { border-color: var(--primary); }
+        .mode-option.active { border-color: var(--primary); background: rgba(var(--primary-rgb, 99, 102, 241), 0.15); }
+        .mode-option.yt { border-color: #cc0000; }
+        .mode-option.yt.active { background: rgba(255,0,0,0.12); border-color: #ff0000; }
+        .form-select {
+            width: 100%; padding: 12px; background: var(--surface-color);
+            border: 1px solid var(--surface-border); border-radius: 8px;
+            color: var(--text-color); font-size: 1rem; appearance: none; cursor: pointer;
+        }
+        .btn-start {
+            width: 100%; padding: 14px; margin-top: 8px;
+            background: var(--primary); border: none; border-radius: 8px;
+            color: white; font-size: 1rem; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-start:hover { opacity: 0.95; }
+        .btn-start:disabled { opacity: 0.5; cursor: not-allowed; }
+        .back-link { margin-top: 24px; color: var(--secondary); text-decoration: none; font-size: 0.9rem; display: inline-block; }
+        .back-link:hover { color: var(--text-color); }
+        .error-message {
+            background: rgba(244, 63, 94, 0.1); border: 1px solid var(--error); color: var(--error);
+            padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 0.85rem; display: none; text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="pick-card">
+        <div class="pick-header">
+            <div class="pick-logo"><i class="fas fa-wave-square"></i></div>
+            <h2>CHAAR.FM</h2>
+            <p class="text-label">CHOOSE MODE & COLLECTION</p>
+            <p class="user-badge">Logged in as <strong>{{ user_id }}</strong></p>
+        </div>
+
+        <div id="error-message" class="error-message"></div>
+
+        <div class="form-group">
+            <label class="form-label">MODE</label>
+            <div class="mode-options">
+                <button type="button" class="mode-option active" data-mode="classic" id="btn-mode-classic">
+                    <i class="fas fa-compact-disc"></i> CLASSIC
+                </button>
+                <button type="button" class="mode-option yt" data-mode="youtube" id="btn-mode-youtube">
+                    <i class="fab fa-youtube"></i> YOUTUBE
+                </button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="collection">COLLECTION</label>
+            <select id="collection" class="form-select">
+                <option value="">Loading...</option>
+            </select>
+        </div>
+
+        <button id="btn-start" class="btn-start" disabled>
+            <i class="fas fa-play"></i> START
+        </button>
+
+        <a href="/logout" class="back-link" style="margin-top: 20px;"><i class="fas fa-arrow-left"></i> Sign out</a>
+    </div>
+
+    <script>
+        let currentMode = 'classic';
+        const collectionSelect = document.getElementById('collection');
+        const btnStart = document.getElementById('btn-start');
+        const btnModeClassic = document.getElementById('btn-mode-classic');
+        const btnModeYoutube = document.getElementById('btn-mode-youtube');
+
+        function setMode(mode) {
+            currentMode = mode;
+            btnModeClassic.classList.toggle('active', mode === 'classic');
+            btnModeYoutube.classList.toggle('active', mode === 'youtube');
+            loadCollections();
+        }
+
+        async function loadCollections() {
+            collectionSelect.innerHTML = '<option value="">Loading...</option>';
+            btnStart.disabled = true;
+            try {
+                const url = currentMode === 'youtube' ? '/api/collections?mode=youtube' : '/api/collections';
+                const res = await fetch(url);
+                const data = await res.json();
+                collectionSelect.innerHTML = '';
+                if (currentMode === 'youtube' && data.youtube_all_value) {
+                    const opt = document.createElement('option');
+                    opt.value = data.youtube_all_value;
+                    opt.textContent = '(all) — merge all YouTube collections';
+                    opt.style.fontWeight = 'bold';
+                    collectionSelect.appendChild(opt);
+                }
+                if (currentMode === 'classic' && data.has_merged) {
+                    const opt = document.createElement('option');
+                    opt.value = 'merged';
+                    opt.textContent = 'MERGED (ALL COLLECTIONS)';
+                    opt.style.fontWeight = 'bold';
+                    collectionSelect.appendChild(opt);
+                }
+                (data.collections || []).forEach(col => {
+                    const opt = document.createElement('option');
+                    opt.value = col;
+                    opt.textContent = col.replace(/_/g, ' ').toUpperCase();
+                    collectionSelect.appendChild(opt);
+                });
+                if (collectionSelect.options.length) {
+                    collectionSelect.selectedIndex = 0;
+                    btnStart.disabled = false;
+                }
+            } catch (e) {
+                console.error(e);
+                collectionSelect.innerHTML = '<option value="music_averaged">DEFAULT (FALLBACK)</option>';
+                btnStart.disabled = false;
+            }
+        }
+
+        btnModeClassic.addEventListener('click', () => setMode('classic'));
+        btnModeYoutube.addEventListener('click', () => setMode('youtube'));
+
+        btnStart.addEventListener('click', async () => {
+            const collection = collectionSelect.value;
+            if (!collection) return;
+            btnStart.disabled = true;
+            btnStart.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Starting...';
+            document.getElementById('error-message').style.display = 'none';
+            try {
+                const res = await fetch('/api/session/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: currentMode, collection })
+                });
+                const data = await res.json();
+                if (data.session_id) {
+                    localStorage.setItem('chaar_session', data.session_id);
+                    localStorage.setItem('chaar_user', '{{ user_id }}');
+                    window.location.href = '/player' + (data.youtube_mode ? '?mode=youtube' : '');
+                } else {
+                    throw new Error(data.detail || 'Failed to start');
+                }
+            } catch (e) {
+                document.getElementById('error-message').textContent = (e.message || 'Failed to start').toUpperCase();
+                document.getElementById('error-message').style.display = 'block';
+                btnStart.disabled = false;
+                btnStart.innerHTML = '<i class="fas fa-play"></i> START';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => loadCollections());
+    </script>
+</body>
+</html>

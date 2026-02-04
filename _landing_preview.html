@@ -469,76 +469,29 @@
         .ch-ft-links a { color: inherit; text-decoration: none; }
         .ch-ft-links a:hover { color: #fff; }
 
-        /* ——— Scroll progress bar ——— */
-        .ch-scroll-progress {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 3px;
-            width: 0%;
-            background: linear-gradient(90deg, var(--ch-cyan), var(--ch-magenta));
-            z-index: 1001;
-            transition: width 0.1s var(--ch-ease);
-        }
-
-        /* ——— Scroll reveal: fade up + scale ——— */
+        /* ——— Reveal (new motion: fade + slight scale) ——— */
         .ch-reveal {
             opacity: 0;
-            transform: scale(0.97) translateY(32px);
-            transition: opacity 0.95s var(--ch-ease), transform 0.95s var(--ch-ease);
+            transform: scale(0.98) translateY(20px);
+            transition: opacity 0.9s var(--ch-ease), transform 0.9s var(--ch-ease);
         }
         .ch-reveal.reveal-in {
             opacity: 1;
             transform: scale(1) translateY(0);
         }
-        /* ——— Reveal from left ——— */
-        .ch-reveal-left {
-            opacity: 0;
-            transform: translateX(-40px);
-            transition: opacity 0.9s var(--ch-ease), transform 0.9s var(--ch-ease);
-        }
-        .ch-reveal-left.reveal-in {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        /* ——— Reveal from right ——— */
-        .ch-reveal-right {
-            opacity: 0;
-            transform: translateX(40px);
-            transition: opacity 0.9s var(--ch-ease), transform 0.9s var(--ch-ease);
-        }
-        .ch-reveal-right.reveal-in {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        /* ——— Staggered children ——— */
         .ch-stagger > * {
             opacity: 0;
-            transform: translateY(28px);
-            transition: opacity 0.75s var(--ch-ease), transform 0.75s var(--ch-ease);
+            transform: translateY(24px);
+            transition: opacity 0.7s var(--ch-ease), transform 0.7s var(--ch-ease);
         }
         .ch-stagger.reveal-in > *:nth-child(1) { transition-delay: 0ms; }
-        .ch-stagger.reveal-in > *:nth-child(2) { transition-delay: 80ms; }
-        .ch-stagger.reveal-in > *:nth-child(3) { transition-delay: 160ms; }
-        .ch-stagger.reveal-in > *:nth-child(4) { transition-delay: 240ms; }
-        .ch-stagger.reveal-in > *:nth-child(5) { transition-delay: 320ms; }
-        .ch-stagger.reveal-in > *:nth-child(6) { transition-delay: 400ms; }
-        .ch-stagger.reveal-in > *:nth-child(7) { transition-delay: 480ms; }
-        .ch-stagger.reveal-in > *:nth-child(8) { transition-delay: 560ms; }
+        .ch-stagger.reveal-in > *:nth-child(2) { transition-delay: 100ms; }
+        .ch-stagger.reveal-in > *:nth-child(3) { transition-delay: 200ms; }
+        .ch-stagger.reveal-in > *:nth-child(4) { transition-delay: 300ms; }
+        .ch-stagger.reveal-in > *:nth-child(5) { transition-delay: 400ms; }
         .ch-stagger.reveal-in > * { opacity: 1; transform: translateY(0); }
-        /* ——— Hero entrance (animate on load) ——— */
-        .ch-hero .ch-reveal { transition-duration: 1s; }
-        .ch-hero .ch-reveal.reveal-in { transition-delay: 0ms; }
-        .ch-hero .ch-reveal:nth-of-type(1).reveal-in { transition-delay: 0ms; }
-        .ch-hero .ch-reveal:nth-of-type(2).reveal-in { transition-delay: 120ms; }
-        .ch-hero .ch-reveal:nth-of-type(3).reveal-in { transition-delay: 240ms; }
-        .ch-hero .ch-reveal:nth-of-type(4).reveal-in { transition-delay: 360ms; }
         @media (prefers-reduced-motion: reduce) {
-            .ch-reveal, .ch-reveal-left, .ch-reveal-right, .ch-stagger > * {
-                opacity: 1;
-                transform: none;
-                transition: none;
-            }
+            .ch-reveal, .ch-stagger > * { opacity: 1; transform: none; transition: none; }
         }
 
         /* ——— Mobile ——— */
@@ -553,7 +506,6 @@
     </style>
 </head>
 <body class="ch">
-    <div class="ch-scroll-progress" id="ch-scroll-progress" aria-hidden="true"></div>
     <nav class="ch-nav">
         <a href="#" class="ch-logo">Chaarfm</a>
         <a href="#waitlist" class="ch-nav-cta">Join waitlist</a>
@@ -572,7 +524,7 @@
     </section>
 
     <section class="ch-split">
-        <div class="ch-stagger ch-reveal-left">
+        <div class="ch-stagger">
             <h2 class="ch-split-head">A feed that learns your taste.</h2>
             <p class="ch-split-p">Swipe. It learns. You discover. No tech speak—just music that fits and new sounds you’ll love.</p>
             <ul class="ch-split-list">
@@ -581,7 +533,7 @@
                 <li>Open the app and stay in the moment</li>
             </ul>
         </div>
-        <div class="ch-split-viz ch-reveal-right">SWIPE</div>
+        <div class="ch-split-viz ch-reveal">SWIPE</div>
     </section>
 
     <section class="ch-steps ch-reveal">
@@ -605,18 +557,18 @@
         </div>
     </section>
 
-    <section class="ch-artists" id="artists">
-        <div class="ch-artists-inner ch-reveal-left">
+    <section class="ch-artists ch-reveal" id="artists">
+        <div class="ch-artists-inner">
             <h2>For artists</h2>
             <p>Get discovered by people who love your sound—not by follower count. We’re opening creator access soon.</p>
             <a href="#waitlist" class="ch-artists-cta">Join waitlist as artist <i class="fas fa-arrow-right"></i></a>
         </div>
     </section>
 
-    <section class="ch-wait" id="waitlist">
-        <h2 class="ch-reveal">Join the waitlist</h2>
-        <p class="ch-wait-sub ch-reveal">Early access. No spam. Unsubscribe anytime.</p>
-        <div class="ch-form-state ch-reveal" id="waitlist-form">
+    <section class="ch-wait ch-reveal" id="waitlist">
+        <h2>Join the waitlist</h2>
+        <p class="ch-wait-sub">Early access. No spam. Unsubscribe anytime.</p>
+        <div class="ch-form-state" id="waitlist-form">
             <form class="ch-wait-form" id="signup-form" onsubmit="handleSignup(event)">
                 <input type="email" name="email" placeholder="Email" required>
                 <input type="text" name="name" placeholder="Name (optional)">
@@ -634,8 +586,8 @@
         </div>
     </section>
 
-    <section class="ch-faq">
-        <h2 class="ch-faq-title ch-reveal">FAQ</h2>
+    <section class="ch-faq ch-reveal">
+        <h2 class="ch-faq-title">FAQ</h2>
         <div class="ch-stagger">
             <div class="ch-faq-item">
                 <button type="button" class="ch-faq-q" onclick="toggleFaq(this)">What is Chaarfm? <i class="fas fa-chevron-down"></i></button>
@@ -675,28 +627,8 @@
                         rev.unobserve(e.target);
                     }
                 });
-            }, { threshold: 0.08, rootMargin: '0px 0px -50px 0px' });
-            document.querySelectorAll('.ch-reveal, .ch-reveal-left, .ch-reveal-right, .ch-stagger').forEach(function(el) { rev.observe(el); });
-            document.querySelectorAll('.ch-hero .ch-reveal').forEach(function(el) { el.classList.add('reveal-in'); });
-        })();
-        (function() {
-            var bar = document.getElementById('ch-scroll-progress');
-            var orb = document.querySelector('.ch-hero-orb');
-            function onScroll() {
-                var y = window.scrollY;
-                var max = document.documentElement.scrollHeight - window.innerHeight;
-                if (bar) bar.style.width = (max > 0 ? (y / max) * 100 : 0) + '%';
-                if (orb && window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
-                    if (y > 30) {
-                        var move = Math.min(y * 0.12, 60);
-                        orb.style.transform = 'translate(-50%, calc(-50% + ' + move + 'px)) scale(' + (1 + y * 0.0002) + ')';
-                    } else {
-                        orb.style.transform = '';
-                    }
-                }
-            }
-            window.addEventListener('scroll', onScroll, { passive: true });
-            onScroll();
+            }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+            document.querySelectorAll('.ch-reveal, .ch-stagger').forEach(function(el) { rev.observe(el); });
         })();
         function handleSignup(e) {
             e.preventDefault();

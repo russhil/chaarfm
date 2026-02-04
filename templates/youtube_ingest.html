@@ -255,6 +255,8 @@
         let useMax = false;
         let sessionActive = false;
         let isPaused = false;
+        let reconnectTimer = null;
+        let reconnectDelay = 3000;
 
         function setMode(evt, mode) {
             document.getElementById('remote-mode').style.display = mode === 'remote' ? 'block' : 'none';
@@ -334,22 +336,20 @@
         });
 
         // --- REMOTE MODE ---
-        function initRemoteSession() {
-            currentCode = Math.floor(1000 + Math.random() * 9000).toString();
-            document.getElementById('pairing-code').innerText = currentCode;
-            
-            appendLog(`Session created. Code: ${currentCode}`, 'info');
-            
+        function connectWebSocket(code) {
+            if (ws && ws.readyState === WebSocket.OPEN) return;
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            ws = new WebSocket(`${protocol}//${window.location.host}/ws/remote/${currentCode}/ui`);
-            
-            ws.onopen = () => appendLog("Connected to Coordinator. Waiting for worker...");
-            
+            ws = new WebSocket(`${protocol}//${window.location.host}/ws/remote/${code}/ui`);
+
+            ws.onopen = () => {
+                appendLog("Connected to Coordinator. Waiting for worker...", 'info');
+                reconnectDelay = 3000;
+            };
+
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 if (data.type === 'log') {
                     appendLog(data.message, data.level);
-                    
                     if (data.message.includes("Worker Connected")) {
                         workerConnected = true;
                         document.getElementById('pairing-code').style.borderColor = "#00ff88";
@@ -359,14 +359,37 @@
                     handleStateMessage(data);
                 }
             };
-            
+
             ws.onclose = () => {
-                appendLog("Disconnected from Coordinator", 'error');
+                ws = null;
                 workerConnected = false;
                 sessionActive = false;
                 isPaused = false;
+                document.getElementById('pairing-code').style.borderColor = "";
                 updateControlStates();
+                appendLog("Disconnected. Reconnecting in " + (reconnectDelay / 1000) + "s...", 'warning');
+                reconnectTimer = setTimeout(() => {
+                    if (currentCode) {
+                        connectWebSocket(currentCode);
+                    }
+                }, reconnectDelay);
+                reconnectDelay = Math.min(reconnectDelay * 1.5, 30000);
             };
+
+            ws.onerror = () => {};
+        }
+
+        function initRemoteSession(isReconnect) {
+            if (!isReconnect) {
+                currentCode = Math.floor(1000 + Math.random() * 9000).toString();
+                document.getElementById('pairing-code').innerText = currentCode;
+                appendLog(`Session created. Code: ${currentCode}`, 'info');
+            }
+            if (reconnectTimer) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = null;
+            }
+            connectWebSocket(currentCode);
         }
         
         function handleStateMessage(data) {
@@ -438,7 +461,7 @@
              alert("Use Remote Worker mode for best results on Render!");
         });
         
-        initRemoteSession();
+        initRemoteSession(false);
         updateControlStates();
     </script>
 </body>

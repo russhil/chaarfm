@@ -210,7 +210,6 @@
                         onStateChange: function(e) {
                             if (e.data === YT.PlayerState.ENDED) {
                                 stopYTProgressLoop();
-                                sendFeedback();
                                 nextTrack();
                             } else if (e.data === YT.PlayerState.PLAYING) {
                                 updatePlayButton(true);
@@ -436,10 +435,7 @@
         playBtn.addEventListener('click', togglePlay);
 
         audio.addEventListener('ended', () => {
-            if (!youtubeMode) {
-                sendFeedback();
-                nextTrack();
-            }
+            if (!youtubeMode) nextTrack();
         });
 
         audio.addEventListener('error', (e) => {
@@ -648,19 +644,23 @@
             }
         }
 
-        function nextTrack() {
-            if (currentTrackId) sendFeedback();
+        async function nextTrack() {
+            // CRITICAL: Await feedback before loading next so batch N+1 uses reactions from batch N
+            if (currentTrackId) {
+                statusEl.innerText = "Learning...";
+                await sendFeedback();
+            }
             if (historyIndex < trackHistory.length - 1) {
                 historyIndex++;
                 playTrackData(trackHistory[historyIndex]);
             } else {
-                loadNextTrack();
+                await loadNextTrack();
             }
         }
 
-        function previousTrack() {
+        async function previousTrack() {
+            if (currentTrackId) await sendFeedback();
             if (historyIndex > 0) {
-                if (currentTrackId) sendFeedback();
                 historyIndex--;
                 playTrackData(trackHistory[historyIndex]);
             }

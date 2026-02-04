@@ -147,8 +147,9 @@ class UserRecommender:
             
             count = 0
             for row in result:
-                self.global_dislikes.add(row.track_id)
-                count += 1
+                if row.track_id is not None and str(row.track_id):
+                    self.global_dislikes.add(str(row.track_id))
+                    count += 1
             print(f"Loaded {count} historically disliked/skipped tracks.")
         except Exception as e:
             print(f"Could not load dislikes: {e}")
@@ -176,8 +177,9 @@ class UserRecommender:
                     cid = int(row.cluster_id)
                     score = float(row.score)
                     if cid in self.cluster_scores:
-                        # Boost alpha based on history
-                        self.cluster_scores[cid]['alpha'] += score * 5.0 # Give it a strong head start
+                        # Boost alpha based on history (cap to avoid overwhelming session)
+                        boost = min(score * 5.0, 25.0)
+                        self.cluster_scores[cid]['alpha'] += boost
                         print(f"Boosted Cluster {cid} alpha to {self.cluster_scores[cid]['alpha']}")
                         
                         if score > best_score:
@@ -194,9 +196,14 @@ class UserRecommender:
         print(f"Loading tracks from {self.collection_name} (Render)...")
         
         collections_to_load = []
+        merge_youtube_only = False  # When True, only add tracks that have youtube_id (for youtube_all)
         if self.collection_name == "merged":
             collections_to_load = user_db.get_available_collections()
             print(f"Merged Mode: Loading from {len(collections_to_load)} collections: {collections_to_load}")
+        elif self.collection_name == "youtube_all":
+            collections_to_load = user_db.get_youtube_collections()
+            merge_youtube_only = True
+            print(f"YouTube (all): Loading from {len(collections_to_load)} YouTube-only collections: {collections_to_load}")
         else:
             collections_to_load = [self.collection_name]
             
@@ -275,8 +282,11 @@ class UserRecommender:
                         "source_collection": col_name
                     }
                     entry["youtube_id"] = youtube_id if not standard_schema else (meta.get("youtube_id") if isinstance(meta, dict) else None)
+                    # When merging YouTube (all), exclude non-YouTube tracks so classic vectors are not mixed in
+                    if merge_youtube_only and not entry.get("youtube_id"):
+                        continue
                     self.track_map[str(row.id)] = entry
-                total_loaded += len(result)
+                    total_loaded += 1
             
             print(f"Total tracks loaded: {total_loaded}")
             
@@ -312,6 +322,8 @@ class UserRecommender:
         print(f"Identified {len(self.outlier_tracks)} outliers")
 
     def init_bandit(self):
+        if not self.cluster_manager.initialized or not self.cluster_manager.clusters:
+            return
         for cid in self.cluster_manager.clusters.keys():
             self.cluster_scores[cid] = {'alpha': BANDIT_ALPHA_PRIOR, 'beta': BANDIT_BETA_PRIOR}
 
@@ -453,7 +465,6 @@ class UserRecommender:
                 dist_sq = np.sum((mean_target - v)**2)
                 cosine_sim = np.dot(mean_target, v) / (np.linalg.norm(mean_target)*np.linalg.norm(v) + 1e-8)
             
-            cosine_dist = 1.0 - cosine_sim
             cosine_dist = 1.0 - cosine_sim
             
             # Apply Variance Scaling (The "Mathematical Pattern")
@@ -663,7 +674,8 @@ class UserRecommender:
         return best
 
     def _is_unique(self, track):
-        return (track['id'] not in self.played_ids and track['filename'] not in self.played_filenames)
+        tid = str(track.get('id', ''))
+        return (tid not in self.played_ids and track.get('filename') not in self.played_filenames)
 
     def _track_valid_for_mode(self, track):
         """Filter tracks by mode: youtube_mode requires youtube_id."""
@@ -812,8 +824,14 @@ class UserRecommender:
             
             candidates = combined
             
-            # Filter played filenames too (Double check)
-            candidates = [c for c in candidates if c['filename'] not in self.played_filenames and c['id'] not in self.outlier_tracks and c['id'] not in self.global_dislikes]
+            # Filter: played, outliers, dislikes, duplicates
+            candidates = [
+                c for c in candidates
+                if c['filename'] not in self.played_filenames
+                and c['id'] not in self.outlier_tracks
+                and str(c['id']) not in {str(x) for x in self.global_dislikes}
+                and not self.is_duplicate(c['vector'])
+            ]
             
             if not candidates:
                 print("Cluster Exhausted (No Candidates Left) - Switching to EXPLORE")
@@ -909,17 +927,27 @@ class UserRecommender:
                      candidates = [random.choice(all_safe)]
                      justification = "Emergency Random Fallback"
 
-        # Final filtering and selection
+        # Final filtering: exclude duplicates and ensure uniqueness
+        filtered = []
+        for c in candidates:
+            if c['id'] in self.played_ids or c['filename'] in self.played_filenames:
+                continue
+            if str(c['id']) in {str(x) for x in self.global_dislikes}:
+                continue
+            if self.is_duplicate(c.get('vector', [])):
+                continue
+            filtered.append(c)
+        candidates = filtered
+        
         if not candidates:
             return None, "No tracks available"
             
         # Select best candidate (Top 1)
-        # Note: candidates are already sorted by score
         selected_track = candidates[0]
         
         # Update state
         self.last_track = selected_track
-        self.played_ids.add(selected_track['id'])
+        self.played_ids.add(str(selected_track['id']))
         self.played_filenames.add(selected_track['filename'])
         
         # Find which cluster this track belongs to for logging
@@ -1063,7 +1091,7 @@ class UserRecommender:
             
             self.disliked_vectors.append(vector)
             self.session_dislikes.append(vector) # Add to session history
-            self.global_dislikes.add(track_id) # Immediate avoidance
+            self.global_dislikes.add(str(track_id))  # Immediate avoidance
             if len(self.disliked_vectors) > 50: self.disliked_vectors.pop(0)
             
         elif liked:
@@ -1103,7 +1131,7 @@ class UserRecommender:
                     print("Refining Cluster Focus (Skip - Drifting +0.15 - Moving Away)")
                     
                 self.session_dislikes.append(vector)
-                self.global_dislikes.add(track_id)
+                self.global_dislikes.add(str(track_id))
                 self.disliked_vectors.append(vector)
                 
             else: # is_green_signal (>=15s or >=10%)

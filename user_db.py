@@ -165,6 +165,21 @@ def get_available_collections() -> List[str]:
         print(f"Error fetching collections: {e}")
         return ["music_averaged"] # Fallback
 
+def get_youtube_collections() -> List[str]:
+    """Get only YouTube-ingested collections (public vectors_* tables). Used for YouTube mode and (all) merge."""
+    try:
+        with engine.connect() as conn:
+            public_tables = conn.execute(text("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name LIKE 'vectors_%'
+            """)).fetchall()
+            return [row[0] for row in public_tables]
+    except Exception as e:
+        print(f"Error fetching YouTube collections: {e}")
+        return []
+
 def get_admin_stats() -> Dict:
     """Get aggregated statistics for the admin dashboard."""
     stats = {

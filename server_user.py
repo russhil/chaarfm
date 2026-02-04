@@ -203,7 +203,10 @@ def get_file_path(filename: str, music_root: str = None) -> str:
 class LoginRequest(BaseModel):
     username: str
     password: str = ""
-    vectormap: str = "music_averaged"
+
+class SessionStartRequest(BaseModel):
+    mode: str  # "classic" | "youtube"
+    collection: str
 
 class FeedbackRequest(BaseModel):
     id: str
@@ -225,6 +228,11 @@ async def index(request: Request):
 async def ingest_page(request: Request):
     """Serve ingestion control page."""
     return templates.TemplateResponse("youtube_ingest.html", {"request": request})
+
+@app.get("/api/keepalive")
+async def keepalive():
+    """Lightweight endpoint for remote worker to ping during ingestion; keeps Render from spinning down."""
+    return {"ok": True}
 
 @app.websocket("/ws/remote/{code}/{client_type}")
 async def remote_endpoint(websocket: WebSocket, code: str, client_type: str):
@@ -268,13 +276,24 @@ async def landing_v3(request: Request):
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
-    """Serve login page."""
+    """Serve login page (username + password only)."""
     return templates.TemplateResponse("login.html", {"request": request})
+
+@app.get("/pick-mode", response_class=HTMLResponse)
+async def pick_mode_page(request: Request):
+    """After login: choose Classic vs YouTube and collection, then start session."""
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return RedirectResponse(url="/login", status_code=302)
+    return templates.TemplateResponse("pick_mode.html", {"request": request, "user_id": user_id})
 
 @app.get("/youtube-mode", response_class=HTMLResponse)
 async def youtube_mode_page(request: Request):
-    """YouTube mode: pick collection with ingested YouTube/Last.fm tracks, then launch player."""
-    return templates.TemplateResponse("youtube_mode_landing.html", {"request": request})
+    """YouTube mode shortcut: ensure guest session and redirect to pick-mode."""
+    if not request.session.get("user_id"):
+        request.session["user_id"] = "guest"
+        request.session["is_guest"] = True
+    return RedirectResponse(url="/pick-mode")
 
 @app.get("/player", response_class=HTMLResponse)
 async def player(request: Request):
@@ -284,28 +303,45 @@ async def player(request: Request):
 class YouTubeModeStartRequest(BaseModel):
     collection: str
 
+@app.post("/api/session/start")
+async def session_start(data: SessionStartRequest, request: Request):
+    """Create playback session after mode pick. Requires prior login (session has user_id)."""
+    user_id = request.session.get("user_id") or "guest"
+    youtube_mode = (data.mode or "classic").lower() == "youtube"
+    collection = (data.collection or "").strip()
+    if youtube_mode:
+        valid = set(user_db.get_youtube_collections()) | {"youtube_all"}
+        collection = collection if collection in valid else (user_db.get_youtube_collections() or ["music_averaged"])[0] if user_db.get_youtube_collections() else "music_averaged"
+    else:
+        valid = set(user_db.get_available_collections()) | {"merged", "music_averaged"}
+        collection = collection if collection in valid else "music_averaged"
+    session_id = create_session(user_id, collection_name=collection, youtube_mode=youtube_mode)
+    return {"status": "ok", "session_id": session_id, "collection": collection, "youtube_mode": youtube_mode}
+
 @app.post("/api/youtube-mode/start")
 async def youtube_mode_start(data: YouTubeModeStartRequest):
-    """Create a guest session for YouTube mode with the selected collection."""
-    db_cols = set(user_db.get_available_collections())
-    db_cols.add("merged")
-    db_cols.add("music_averaged")
-    collection = data.collection if data.collection in db_cols else "music_averaged"
+    """Legacy: create a guest session for YouTube mode with the selected collection."""
+    db_cols = set(user_db.get_youtube_collections()) | {"youtube_all"}
+    db_cols.discard("")
+    yt_cols = user_db.get_youtube_collections()
+    default = "youtube_all" if yt_cols else "music_averaged"
+    collection = data.collection if data.collection in db_cols else default
     session_id = create_session("guest", collection_name=collection, youtube_mode=True)
     return {"status": "ok", "session_id": session_id, "collection": collection}
 
 @app.get("/api/collections")
-async def get_collections():
-    """Get list of available collections."""
+async def get_collections(mode: str = Query(None)):
+    """Get list of available collections. mode=classic (default) or mode=youtube."""
+    if mode == "youtube":
+        cols = user_db.get_youtube_collections()
+        cols.sort()
+        return {"collections": cols, "youtube_all_value": "youtube_all", "mode": "youtube"}
+    # Classic: all collections + merged
     cols = user_db.get_available_collections()
-    # Ensure music_averaged and merged are present
-    if "music_averaged" not in cols: cols.append("music_averaged")
-    
-    # Sort for UI consistency
+    if "music_averaged" not in cols:
+        cols.append("music_averaged")
     cols.sort()
-    
-    # Add "merged" option if not present in DB (it's a virtual collection)
-    return {"collections": cols, "has_merged": True}
+    return {"collections": cols, "has_merged": True, "mode": "classic"}
 
 @app.get("/api/auth/google")
 async def login_google(request: Request):
@@ -336,59 +372,28 @@ async def auth_google_callback(request: Request):
             
         # Get or Create User in DB
         db_user = user_db.get_or_create_google_user(user_info)
-        
-        # Create Session
-        # We can map query param ?vectormap=... if we passed it state, but for now default.
-        # Ideally, we should check if user has a preferred collection in profile.
-        collection = "music_averaged" 
-        
-        session_id = create_session(db_user['id'], collection_name=collection)
-        
-        # Optimize: Pre-generate queue in background or async if possible?
-        # create_session already calls get_next_batch which is slow.
-        # We could offload the batch generation to a background task and return immediately?
-        # But player page needs the queue to start playing.
-        # The slowness is likely in UserRecommender.__init__ loading history/clusters.
-        # We can optimize UserRecommender.__init__ to be lazier.
-        
-        # Return HTML that closes popup or redirects
-        # Since we likely redirect the main window, we can just redirect to player
-        # But we need to pass session_id to frontend.
-        # Option 1: Set cookie (secure)
-        # Option 2: Redirect with query param (simple)
-        
-        # Extract first name
-        first_name = db_user.get('name', '').split(' ')[0] if db_user.get('name') else 'User'
-        encoded_name = urllib.parse.quote(first_name)
-        
-        response = RedirectResponse(url=f"/player?session_id={session_id}&name={encoded_name}")
-        return response
-        
+        request.session["user_id"] = db_user["id"]
+        request.session["is_guest"] = False
+        return RedirectResponse(url="/pick-mode")
     except Exception as e:
         print(f"OAuth Error: {e}")
         return RedirectResponse(url="/login?error=oauth_failed")
 
 @app.post("/api/login")
-async def login(data: LoginRequest, response: Response):
-    """Authenticate user and create session."""
+async def login(data: LoginRequest, request: Request):
+    """Authenticate user; store in session and redirect to mode pick. No playback session yet."""
     username = data.username.lower().strip()
-    
-    # Dynamic validation
-    db_cols = set(user_db.get_available_collections())
-    db_cols.add("merged")
-    db_cols.add("music_averaged")
-    
-    collection = data.vectormap if data.vectormap in db_cols else "music_averaged"
-    
+    if not username:
+        raise HTTPException(status_code=400, detail="Username required")
     if username == "guest":
-        session_id = create_session("guest", collection_name=collection)
-        return {"status": "ok", "session_id": session_id, "user": "guest", "is_guest": True, "vectormap": collection}
-    
+        request.session["user_id"] = "guest"
+        request.session["is_guest"] = True
+        return {"status": "ok", "user": "guest", "is_guest": True, "redirect": "/pick-mode"}
     user = user_db.verify_user(username, data.password)
     if user:
-        session_id = create_session(username, collection_name=collection)
-        return {"status": "ok", "session_id": session_id, "user": username, "is_guest": False, "vectormap": collection}
-    
+        request.session["user_id"] = username
+        request.session["is_guest"] = False
+        return {"status": "ok", "user": username, "is_guest": False, "redirect": "/pick-mode"}
     raise HTTPException(status_code=401, detail="Invalid credentials")
 
 @app.get("/api/next")
@@ -609,10 +614,16 @@ async def clear_history(data: ClearHistoryRequest, session_id: str = Query(...))
     
     return result
 
+@app.get("/logout")
+async def logout_get(request: Request):
+    """Clear auth session and redirect to login (e.g. from pick-mode Sign out)."""
+    request.session.clear()
+    return RedirectResponse(url="/login", status_code=302)
+
 @app.post("/api/logout")
-async def logout(session_id: str = Query(...)):
-    """End session."""
-    if session_id in sessions:
+async def logout(session_id: str = Query(None)):
+    """End playback session (pass session_id from player)."""
+    if session_id and session_id in sessions:
         del sessions[session_id]
         print(f"Session {session_id[:8]}... ended")
     return {"status": "ok"}

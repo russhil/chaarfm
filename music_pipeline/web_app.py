@@ -90,7 +90,7 @@ class Coordinator:
         self.create_session(code)
         self.sessions[code]['worker'] = ws
         await self.send_ui(code, "Worker Connected!", "success")
-        await self.send_state(code, "running", "Worker connected", "success")
+        await self.send_state(code, "idle", "Worker connected. Start ingestion when ready.", "success")
         
         # Check if queue has items and start processing
         if self.sessions[code]['queue']:
