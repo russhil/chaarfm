@@ -300,7 +300,7 @@
         function updateControlStates() {
             const username = usernameInput.value.trim();
             const youtubeUrl = youtubeInput.value.trim();
-            const genreName = genreInput ? genreInput.value.trim() : '';
+            const genreName = (genreInput && genreInput.value) ? genreInput.value.trim() : '';
             const countValid = useMax || (parseInt(songCountInput.value, 10) > 0);
             const genreCountValid = genreUseMax || (genreCountInput && parseInt(genreCountInput.value, 10) > 0);
             const lastfmReady = ingestMode !== 'lastfm' || (workerConnected && username && countValid);
@@ -312,10 +312,13 @@
             maxBtn.disabled = ingestMode !== 'lastfm' || !workerConnected || !username || sessionActive;
             maxBtn.classList.toggle('active', useMax);
 
-            if (genreCountInput) {
-                genreCountInput.disabled = ingestMode !== 'genre' || genreUseMax || !workerConnected || !genreName || sessionActive;
-                genreMaxBtn.disabled = ingestMode !== 'genre' || !workerConnected || !genreName || sessionActive;
-                genreMaxBtn.classList.toggle('active', genreUseMax);
+            if (genreCountInput && genreInput) {
+                const genreNameVal = genreInput.value ? genreInput.value.trim() : '';
+                genreCountInput.disabled = ingestMode !== 'genre' || genreUseMax || !workerConnected || !genreNameVal || sessionActive;
+                if (genreMaxBtn) {
+                    genreMaxBtn.disabled = ingestMode !== 'genre' || !workerConnected || !genreNameVal || sessionActive;
+                    genreMaxBtn.classList.toggle('active', genreUseMax);
+                }
             }
 
             startBtn.disabled = !ready || sessionActive;
@@ -335,6 +338,9 @@
             });
             lastfmConfig.style.display = ingestMode === 'lastfm' ? 'block' : 'none';
             singleConfig.style.display = ingestMode === 'single' ? 'block' : 'none';
+            if (genreConfig) {
+                genreConfig.style.display = ingestMode === 'genre' ? 'block' : 'none';
+            }
             updateControlStates();
         }
 
@@ -580,6 +586,7 @@
         });
         
         initRemoteSession(false);
+        updateModeUI();  // Initialize UI state for current mode
         updateControlStates();
     </script>
 </body>
