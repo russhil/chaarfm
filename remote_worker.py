@@ -86,6 +86,7 @@ async def run_worker_once(server_url, pairing_code):
                     logger.info(f"Received Job: {label}")
 
                     try:
+                        metadata = None  # Initialize metadata for all code paths
                         if youtube_url:
                             filepath, youtube_id, metadata = download_temp_youtube_by_url(youtube_url)
                             artist = artist or (metadata or {}).get('artist') or "YouTube Artist"
