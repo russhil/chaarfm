@@ -1,0 +1,23 @@
+================================================================================
+COPY AND PASTE - Uses Python 3.10+ (Not Deprecated 3.9)
+================================================================================
+
+Replace YOUR_PAIRING_CODE with your pairing code:
+
+git clone https://github.com/russhil/chaarfm.git chaarfm_worker && cd chaarfm_worker && bash SETUP_WITH_PYTHON3.10.sh && source venv_worker/bin/activate && python remote_worker.py --url https://chaarfm.onrender.com --code YOUR_PAIRING_CODE
+
+
+OR if bash script doesn't work, use this manual version:
+--------------------------------------------------------
+git clone https://github.com/russhil/chaarfm.git chaarfm_worker && cd chaarfm_worker && (command -v python3.13 || command -v python3.12 || command -v python3.11 || command -v python3.10 || echo python3) | head -1 | xargs -I {} {} -m venv venv_worker && source venv_worker/bin/activate && python --version && pip install --upgrade pip && pip install websockets requests certifi yt-dlp tensorflow tf-keras mutagen numpy librosa python-dotenv psycopg2-binary && pip install essentia --no-compile && python remote_worker.py --url https://chaarfm.onrender.com --code YOUR_PAIRING_CODE
+
+
+SIMPLE VERSION (if Python 3.10+ is already default):
+----------------------------------------------------
+git clone https://github.com/russhil/chaarfm.git chaarfm_worker && cd chaarfm_worker && python3 -m venv venv_worker && source venv_worker/bin/activate && python --version && pip install --upgrade pip && pip install websockets requests certifi yt-dlp tensorflow tf-keras mutagen numpy librosa python-dotenv psycopg2-binary && pip install essentia --no-compile && python remote_worker.py --url https://chaarfm.onrender.com --code YOUR_PAIRING_CODE
+
+
+================================================================================
+The script will automatically find Python 3.10+ and use it for the venv.
+If only Python 3.9 is available, install Python 3.10+ from python.org first.
+================================================================================
