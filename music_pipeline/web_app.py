@@ -296,61 +296,57 @@ class Coordinator:
                     await self.send_state(code, "stopped", "Missing genre name", "error")
                     return
 
-                await self.send_ui(code, f"Fetching tracks for genre: {genre}...", "info")
+                # Check for workers
+                workers = [w for w in session.get('workers', []) if w is not None]
+                if not workers:
+                    await self.send_ui(code, "No workers connected. Please start a worker first.", "error")
+                    await self.send_state(code, "stopped", "No workers available", "error")
+                    return
+
+                await self.send_ui(code, f"Requesting worker to fetch tracks for genre: {genre}...", "info")
 
                 # Compute slug and ensure schema
                 genre_slug = genre_to_slug(genre)
                 table_name = await asyncio.to_thread(ensure_genre_schema, genre_slug)
                 session['table_name'] = table_name
+                session['genre'] = genre
+                session['genre_requested_count'] = requested_count
+                session['genre_use_max'] = use_max
 
-                # Fetch universe with quality filtering
-                universe_tracks = await asyncio.to_thread(
-                    fetch_genre_universe,
-                    genre,
-                    requested_count if not use_max else None,
-                    None  # Use default quality_config
-                )
-                await self.send_ui(code, f"Found {len(universe_tracks)} tracks after quality filtering.", "info")
-
-                if not universe_tracks:
-                    await self.send_state(code, "complete", "No tracks found for this genre.", "warning")
-                    return
-
-                # Filter out already-ingested tracks
-                existing = await asyncio.to_thread(get_existing_for_genre, table_name)
-                available_tracks = []
-                for track in universe_tracks:
-                    youtube_url = track.get('youtube_url')
-                    if youtube_url:
-                        youtube_id = youtube_url.split('watch?v=')[-1].split('&')[0]
-                        if (youtube_id, None) not in existing:
-                            available_tracks.append(track)
-                    elif track.get('artist') and track.get('title'):
-                        if (None, (track['artist'], track['title'])) not in existing:
-                            available_tracks.append(track)
-
-                await self.send_ui(code, f"{len(available_tracks)} tracks are new.", "info")
-
-                if not available_tracks:
-                    await self.send_state(code, "complete", "No new tracks to process.", "warning")
-                    return
-
-                # If use_max, use all available; otherwise limit to requested_count
-                if not use_max and requested_count:
-                    available_tracks = available_tracks[:requested_count]
-
-                session['queue'] = [
-                    {
-                        "artist": track.get('artist'),
-                        "title": track.get('title'),
-                        "table_name": table_name,
-                        "youtube_url": track.get('youtube_url')
+                # Send fetch_genre job to first available worker
+                worker_ws = workers[0]
+                job_id = str(uuid.uuid4())
+                
+                # Track this as a special fetch job
+                if 'active_jobs' not in session:
+                    session['active_jobs'] = {}
+                worker_id = session['worker_ids'].get(id(worker_ws))
+                if worker_id:
+                    session['active_jobs'][worker_id] = {
+                        'id': job_id,
+                        'type': 'fetch_genre',
+                        'table_name': table_name,
+                        'genre': genre
                     }
-                    for track in available_tracks
-                ]
 
-                await self.send_ui(code, f"Queued {len(session['queue'])} tracks for genre '{genre}'.", "success")
-                await self.send_state(code, "running", f"Queued {len(session['queue'])} tracks", "info")
+                try:
+                    await worker_ws.send_json({
+                        "type": "job",
+                        "job_id": job_id,
+                        "payload": {
+                            "job_type": "fetch_genre",
+                            "genre": genre,
+                            "limit": requested_count if not use_max else None,
+                            "quality_config": None  # Use default
+                        }
+                    })
+                    await self.send_ui(code, f"Sent genre fetch request to worker...", "info")
+                    await self.send_state(code, "running", "Fetching genre tracks...", "info")
+                except Exception as e:
+                    await self.send_ui(code, f"Failed to send fetch request: {str(e)}", "error")
+                    await self.send_state(code, "stopped", "Failed to start fetch", "error")
+                    if worker_id:
+                        session['active_jobs'].pop(worker_id, None)
 
             else:
                 await self.send_ui(code, f"Unknown ingest mode: {mode}", "error")
@@ -481,6 +477,65 @@ class Coordinator:
         status = data.get('status')
         if status == 'success':
             result = data.get('data', {})
+            
+            # Check if this is a genre fetch result
+            if job_context and job_context.get('type') == 'fetch_genre':
+                tracks = result.get('tracks', [])
+                genre = job_context.get('genre')
+                table_name = job_context.get('table_name')
+                
+                await self.send_ui(code, f"Worker found {len(tracks)} tracks for genre '{genre}'.", "info")
+                
+                if not tracks:
+                    await self.send_state(code, "complete", "No tracks found for this genre.", "warning")
+                    await self.dispatch_next_job(code)
+                    return
+                
+                # Filter out already-ingested tracks
+                existing = await asyncio.to_thread(get_existing_for_genre, table_name)
+                available_tracks = []
+                for track in tracks:
+                    youtube_url = track.get('youtube_url')
+                    if youtube_url:
+                        youtube_id = youtube_url.split('watch?v=')[-1].split('&')[0]
+                        if (youtube_id, None) not in existing:
+                            available_tracks.append(track)
+                    elif track.get('artist') and track.get('title'):
+                        if (None, (track['artist'], track['title'])) not in existing:
+                            available_tracks.append(track)
+
+                await self.send_ui(code, f"{len(available_tracks)} tracks are new.", "info")
+
+                if not available_tracks:
+                    await self.send_state(code, "complete", "No new tracks to process.", "warning")
+                    await self.dispatch_next_job(code)
+                    return
+
+                # Apply limit if specified
+                requested_count = session.get('genre_requested_count')
+                use_max = session.get('genre_use_max', False)
+                if not use_max and requested_count:
+                    available_tracks = available_tracks[:requested_count]
+
+                # Queue tracks for download/vectorization
+                session['queue'] = [
+                    {
+                        "artist": track.get('artist'),
+                        "title": track.get('title'),
+                        "table_name": table_name,
+                        "youtube_url": track.get('youtube_url')
+                    }
+                    for track in available_tracks
+                ]
+
+                await self.send_ui(code, f"Queued {len(session['queue'])} tracks for download.", "success")
+                await self.send_state(code, "running", f"Queued {len(session['queue'])} tracks", "info")
+                
+                # Start processing the queue
+                await self.dispatch_next_job(code)
+                return
+            
+            # Regular download/vectorize result
             artist = result.get('artist')
             title = result.get('title')
             youtube_id = result.get('youtube_id')
@@ -511,7 +566,12 @@ class Coordinator:
                 else:
                     await self.send_ui(code, f"DB Error: {artist} - {title}", "error")
         else:
-            await self.send_ui(code, f"Worker Failed: {data.get('error')}", "error")
+            error_msg = data.get('error', 'Unknown error')
+            await self.send_ui(code, f"Worker Failed: {error_msg}", "error")
+            
+            # If it was a genre fetch that failed, update state
+            if job_context and job_context.get('type') == 'fetch_genre':
+                await self.send_state(code, "stopped", f"Genre fetch failed: {error_msg}", "error")
 
         # Dispatch next job(s) to available workers
         await self.dispatch_next_job(code)

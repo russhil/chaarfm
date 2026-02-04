@@ -78,6 +78,51 @@ async def run_worker_once(server_url, pairing_code):
                 if data.get("type") == "job":
                     job_id = data.get("job_id")
                     payload = data.get("payload", {})
+                    job_type = payload.get("job_type", "download")  # "download" or "fetch_genre"
+                    
+                    if job_type == "fetch_genre":
+                        # Handle genre universe fetching
+                        genre = payload.get("genre")
+                        limit = payload.get("limit")
+                        quality_config = payload.get("quality_config")
+                        
+                        logger.info(f"Received Genre Fetch Job: {genre}")
+                        
+                        try:
+                            # Import genre_universe functions
+                            # sys.path already includes project root (line 18)
+                            try:
+                                from genre_universe import fetch_genre_universe_youtube
+                            except ImportError as ie:
+                                logger.error(f"Failed to import genre_universe: {ie}")
+                                raise Exception(f"Missing dependency: {ie}. Install yt-dlp: pip install yt-dlp")
+                            
+                            logger.info(f"Fetching tracks for genre '{genre}' (limit={limit})...")
+                            tracks = fetch_genre_universe_youtube(genre, limit, quality_config)
+                            
+                            await websocket.send(json.dumps({
+                                "type": "result",
+                                "job_id": job_id,
+                                "status": "success",
+                                "data": {
+                                    "tracks": tracks,
+                                    "genre": genre
+                                }
+                            }))
+                            logger.info(f"Genre fetch successful: {len(tracks)} tracks found for '{genre}'")
+                        except Exception as e:
+                            logger.error(f"Genre fetch failed: {e}")
+                            import traceback
+                            traceback.print_exc()
+                            await websocket.send(json.dumps({
+                                "type": "result",
+                                "job_id": job_id,
+                                "status": "failed",
+                                "error": str(e)
+                            }))
+                        continue
+                    
+                    # Regular download job
                     artist = payload.get("artist")
                     title = payload.get("title")
                     youtube_url = payload.get("youtube_url")
