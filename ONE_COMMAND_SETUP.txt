@@ -4,7 +4,7 @@ ONE COMMAND SETUP - Clone, Install, Run Worker
 
 SINGLE COMMAND (replace YOUR_GIT_REPO_URL and YOUR_PAIRING_CODE):
 -------------------------------------------------------------------
-git clone YOUR_GIT_REPO_URL chaarfm_worker && cd chaarfm_worker && pip3 install websockets requests certifi yt-dlp tensorflow tf-keras mutagen numpy librosa python-dotenv psycopg2-binary essentia && python3 remote_worker.py --url https://chaarfm.onrender.com --code YOUR_PAIRING_CODE
+git clone YOUR_GIT_REPO_URL chaarfm_worker && cd chaarfm_worker && pip3 install websockets requests certifi yt-dlp tensorflow tf-keras mutagen numpy librosa python-dotenv psycopg2-binary && pip3 install essentia --no-compile && python3 remote_worker.py --url https://chaarfm.onrender.com --code YOUR_PAIRING_CODE
 
 
 EXAMPLE (if your repo is on GitHub):

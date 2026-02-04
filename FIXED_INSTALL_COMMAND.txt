@@ -1,0 +1,41 @@
+================================================================================
+FIXED INSTALLATION COMMAND - Handles Essentia Compatibility
+================================================================================
+
+The essentia package has Python 2 syntax that causes errors in Python 3.9+.
+Use this fixed installation command:
+
+OPTION 1: Install with --no-compile (Recommended)
+--------------------------------------------------
+pip3 install websockets requests certifi yt-dlp tensorflow tf-keras mutagen numpy librosa python-dotenv psycopg2-binary && pip3 install essentia --no-compile
+
+
+OPTION 2: Install essentia separately with workaround
+------------------------------------------------------
+pip3 install websockets requests certifi yt-dlp tensorflow tf-keras mutagen numpy librosa python-dotenv psycopg2-binary && pip3 install essentia --no-deps || pip3 install essentia --no-compile
+
+
+OPTION 3: Use conda for essentia (if conda available)
+-------------------------------------------------------
+pip3 install websockets requests certifi yt-dlp tensorflow tf-keras mutagen numpy librosa python-dotenv psycopg2-binary && conda install -c conda-forge essentia
+
+
+OPTION 4: Complete one-command setup with fix
+-----------------------------------------------
+git clone YOUR_GIT_REPO_URL chaarfm_worker && cd chaarfm_worker && pip3 install websockets requests certifi yt-dlp tensorflow tf-keras mutagen numpy librosa python-dotenv psycopg2-binary && pip3 install essentia --no-compile && python3 remote_worker.py --url https://chaarfm.onrender.com --code YOUR_PAIRING_CODE
+
+
+WHY THIS HAPPENS:
+-----------------
+Essentia package contains Python 2 syntax (print without parentheses) which
+fails to compile in Python 3.9+. Using --no-compile skips bytecode compilation
+and allows the package to work despite the syntax issues.
+
+
+ALTERNATIVE: Use Python 3.8
+----------------------------
+If the above doesn't work, Python 3.8 may handle essentia better:
+- Install Python 3.8
+- Use: python3.8 instead of python3
+
+================================================================================

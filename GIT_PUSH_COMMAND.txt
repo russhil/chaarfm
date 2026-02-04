@@ -1,0 +1,21 @@
+================================================================================
+GIT PUSH COMMAND
+================================================================================
+
+Run this command to push all committed changes:
+
+git push
+
+
+OR specify the remote and branch explicitly:
+
+git push origin main
+
+
+TO CHECK STATUS FIRST:
+-----------------------
+git status
+git log --oneline -3
+
+
+================================================================================
