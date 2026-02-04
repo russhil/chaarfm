@@ -184,6 +184,7 @@
                 <div class="mode-toggle">
                     <button type="button" class="mode-btn active" data-ingest="lastfm">Last.fm</button>
                     <button type="button" class="mode-btn" data-ingest="single">Single YouTube</button>
+                    <button type="button" class="mode-btn" data-ingest="genre">Genre</button>
                 </div>
             </div>
 
@@ -204,6 +205,19 @@
                 <label class="text-label" style="display:block; margin-bottom: 8px;">YouTube URL</label>
                 <input type="url" id="youtube-url" class="form-input" placeholder="https://www.youtube.com/watch?v=...">
                 <div class="hint">Send a single test track to the `vectors_test` collection.</div>
+            </div>
+
+            <div class="form-group" id="genre-config" style="display:none;">
+                <label class="text-label" style="display:block; margin-bottom: 8px;">Genre Name</label>
+                <input type="text" id="genre-name" class="form-input" placeholder="e.g. lo-fi hip hop, jazz, electronic">
+                <div class="hint">Fetches tracks from YouTube with quality filtering and diversity mix.</div>
+
+                <label class="text-label" style="display:block; margin: 16px 0 8px;">Max Tracks</label>
+                <div class="inline-input">
+                    <input type="number" id="genre-count" class="form-input" min="1" max="2000" value="500" disabled>
+                    <button type="button" id="genre-max-btn" class="max-btn" disabled>Use Max</button>
+                </div>
+                <div class="hint">Select how many tracks to ingest, or use Max for all found.</div>
             </div>
             
             <button id="start-remote-btn" class="btn-ingest" disabled>Waiting for Worker...</button>
@@ -244,9 +258,14 @@
         const maxBtn = document.getElementById('max-btn');
         const usernameInput = document.getElementById('username-remote');
         const youtubeInput = document.getElementById('youtube-url');
+        const genreInput = document.getElementById('genre-name');
+        const genreCountInput = document.getElementById('genre-count');
+        const genreMaxBtn = document.getElementById('genre-max-btn');
         const ingestModeButtons = document.querySelectorAll('.mode-btn');
         const lastfmConfig = document.getElementById('lastfm-config');
         const singleConfig = document.getElementById('single-config');
+        const genreConfig = document.getElementById('genre-config');
+        let genreUseMax = false;
 
         let ws = null;
         let currentCode = null;
@@ -281,14 +300,23 @@
         function updateControlStates() {
             const username = usernameInput.value.trim();
             const youtubeUrl = youtubeInput.value.trim();
+            const genreName = genreInput ? genreInput.value.trim() : '';
             const countValid = useMax || (parseInt(songCountInput.value, 10) > 0);
+            const genreCountValid = genreUseMax || (genreCountInput && parseInt(genreCountInput.value, 10) > 0);
             const lastfmReady = ingestMode !== 'lastfm' || (workerConnected && username && countValid);
             const youtubeReady = ingestMode !== 'single' || (workerConnected && youtubeUrl);
-            const ready = lastfmReady && youtubeReady;
+            const genreReady = ingestMode !== 'genre' || (workerConnected && genreName && genreCountValid);
+            const ready = lastfmReady && youtubeReady && genreReady;
 
             songCountInput.disabled = ingestMode !== 'lastfm' || useMax || !workerConnected || !username || sessionActive;
             maxBtn.disabled = ingestMode !== 'lastfm' || !workerConnected || !username || sessionActive;
             maxBtn.classList.toggle('active', useMax);
+
+            if (genreCountInput) {
+                genreCountInput.disabled = ingestMode !== 'genre' || genreUseMax || !workerConnected || !genreName || sessionActive;
+                genreMaxBtn.disabled = ingestMode !== 'genre' || !workerConnected || !genreName || sessionActive;
+                genreMaxBtn.classList.toggle('active', genreUseMax);
+            }
 
             startBtn.disabled = !ready || sessionActive;
             pauseBtn.disabled = !sessionActive;
@@ -326,8 +354,28 @@
         });
 
         maxBtn.addEventListener('click', toggleMax);
+        if (genreMaxBtn) {
+            genreMaxBtn.addEventListener('click', () => {
+                genreUseMax = !genreUseMax;
+                if (!genreUseMax && !genreCountInput.value) {
+                    genreCountInput.value = 500;
+                }
+                updateControlStates();
+            });
+        }
         usernameInput.addEventListener('input', updateControlStates);
         youtubeInput.addEventListener('input', updateControlStates);
+        if (genreInput) {
+            genreInput.addEventListener('input', updateControlStates);
+        }
+        if (genreCountInput) {
+            genreCountInput.addEventListener('input', () => {
+                if (parseInt(genreCountInput.value, 10) < 1) {
+                    genreCountInput.value = 1;
+                }
+                updateControlStates();
+            });
+        }
         songCountInput.addEventListener('input', () => {
             if (parseInt(songCountInput.value, 10) < 1) {
                 songCountInput.value = 1;
@@ -413,20 +461,33 @@
         startBtn.addEventListener('click', () => {
             const username = usernameInput.value.trim();
             const youtubeUrl = youtubeInput.value.trim();
+            const genreName = genreInput ? genreInput.value.trim() : '';
             const requestedCount = parseInt(songCountInput.value, 10);
+            const genreRequestedCount = genreCountInput ? parseInt(genreCountInput.value, 10) : null;
 
             if (ingestMode === 'lastfm' && !username) { alert("Enter username"); return; }
             if (ingestMode === 'single' && !youtubeUrl) { alert("Enter a YouTube URL"); return; }
+            if (ingestMode === 'genre' && !genreName) { alert("Enter genre name"); return; }
             
             if (ws) {
-                ws.send(JSON.stringify({
+                const payload = {
                     type: "start",
-                    username: username,
-                    mode: ingestMode,
-                    requestedCount: useMax ? null : requestedCount,
-                    useMax: useMax,
-                    youtubeUrl: youtubeUrl
-                }));
+                    mode: ingestMode
+                };
+                
+                if (ingestMode === 'lastfm') {
+                    payload.username = username;
+                    payload.requestedCount = useMax ? null : requestedCount;
+                    payload.useMax = useMax;
+                } else if (ingestMode === 'single') {
+                    payload.youtubeUrl = youtubeUrl;
+                } else if (ingestMode === 'genre') {
+                    payload.genre = genreName;
+                    payload.requestedCount = genreUseMax ? null : genreRequestedCount;
+                    payload.useMax = genreUseMax;
+                }
+                
+                ws.send(JSON.stringify(payload));
                 sessionActive = true;
                 isPaused = false;
                 appendLog("Start requested...", 'info');

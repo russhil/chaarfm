@@ -1,0 +1,22 @@
+================================================================================
+FIX CACHE AND BUILD - RUN THIS COMMAND
+================================================================================
+
+The PyInstaller cache has corrupted files with wrong permissions. Run this
+command to fix it and build:
+
+sudo rm -rf "/Users/russhil/Library/Application Support/pyinstaller" && \
+sudo mkdir -p "/Users/russhil/Library/Application Support/pyinstaller" && \
+sudo chown -R $(whoami) "/Users/russhil/Library/Application Support/pyinstaller" && \
+cd /Users/russhil/cursor/chaarfm && \
+source venv_worker/bin/activate && \
+pyinstaller build_worker.spec \
+    --distpath build_worker_macos/dist \
+    --workpath build_worker_macos/build \
+    --clean \
+    --noconfirm
+
+OR use the script:
+./fix_cache_and_build.sh
+
+================================================================================

@@ -1,7 +1,13 @@
-# Requirements for Remote Worker Laptop
-yt-dlp>=2023.10.13
-essentia-tensorflow
-numpy>=1.24.0
+# Requirements for standalone remote worker executable
 websockets>=11.0
 requests>=2.28.0
 certifi>=2023.0.0
+yt-dlp>=2023.0.0
+tensorflow>=2.13.0
+tf-keras>=2.13.0
+mutagen>=1.47.0
+numpy>=1.24.0
+librosa>=0.10.0
+python-dotenv>=1.0.0
+psycopg2-binary>=2.9.0
+essentia>=2.1b6.dev609

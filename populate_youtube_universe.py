@@ -119,27 +119,42 @@ def ensure_schema(username):
         
     return safe_table_name
 
+def normalize_track_key(artist, title):
+    """Normalize artist and title for comparison (case-insensitive, trimmed)."""
+    a = (artist or "").strip().lower()
+    t = (title or "").strip().lower()
+    return (a, t)
+
 def get_existing_tracks(table_name):
     """
-    Returns a set of (artist, title) tuples that are already in the DB.
+    Returns a set of normalized (artist, title) tuples and youtube_ids that are already in the DB.
+    Returns: (existing_tracks_set, existing_youtube_ids_set)
     """
     import psycopg2
     if not DATABASE_URL:
-        return set()
+        return set(), set()
 
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
-    existing = set()
+    existing_tracks = set()
+    existing_youtube_ids = set()
     try:
-        cur.execute(f"SELECT artist, title FROM {table_name}")
+        cur.execute(f"SELECT artist, title, youtube_id FROM {table_name}")
         for row in cur.fetchall():
-            existing.add((row[0], row[1]))
+            artist, title, youtube_id = row
+            # Normalize and add artist/title combination
+            if artist and title:
+                normalized = normalize_track_key(artist, title)
+                existing_tracks.add(normalized)
+            # Add youtube_id if present
+            if youtube_id:
+                existing_youtube_ids.add(youtube_id.strip().lower())
     except Exception as e:
         logger.error(f"Failed to fetch existing tracks: {e}")
     finally:
         cur.close()
         conn.close()
-    return existing
+    return existing_tracks, existing_youtube_ids
 
 def download_temp_youtube(artist, title):
     """
@@ -204,6 +219,9 @@ def download_temp_youtube_by_url(url):
     return None, None, None
 
 def store_entry(table_name, artist, title, youtube_id, vector):
+    """
+    Store entry with duplicate checking. Returns True if stored, False if duplicate or error.
+    """
     import psycopg2
     if not DATABASE_URL:
         logger.error("Database URL not set")
@@ -212,6 +230,31 @@ def store_entry(table_name, artist, title, youtube_id, vector):
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
     try:
+        # Check for duplicates before inserting
+        normalized_key = normalize_track_key(artist, title)
+        
+        # Check by normalized artist/title
+        cur.execute(f"""
+            SELECT id FROM {table_name} 
+            WHERE LOWER(TRIM(artist)) = %s AND LOWER(TRIM(title)) = %s
+        """, (normalized_key[0], normalized_key[1]))
+        
+        if cur.fetchone():
+            logger.info(f"Duplicate detected (artist/title): {artist} - {title}")
+            return False
+        
+        # Check by youtube_id if present
+        if youtube_id:
+            cur.execute(f"""
+                SELECT id FROM {table_name} 
+                WHERE youtube_id = %s
+            """, (youtube_id,))
+            
+            if cur.fetchone():
+                logger.info(f"Duplicate detected (youtube_id): {youtube_id}")
+                return False
+        
+        # Insert new entry
         query = f"""
         INSERT INTO {table_name} (artist, title, youtube_id, embedding, s3_url)
         VALUES (%s, %s, %s, %s, NULL)
@@ -219,6 +262,11 @@ def store_entry(table_name, artist, title, youtube_id, vector):
         cur.execute(query, (artist, title, youtube_id, vector))
         conn.commit()
         return True
+    except psycopg2.IntegrityError as e:
+        # Handle unique constraint violations
+        conn.rollback()
+        logger.info(f"Duplicate detected (DB constraint): {artist} - {title}")
+        return False
     except Exception as e:
         conn.rollback()
         logger.error(f"DB Insert failed: {e}")
@@ -361,10 +409,17 @@ def main():
         
     # 2. Get Target List
     universe_tracks = fetch_universe(username)
-    existing_tracks = get_existing_tracks(table_name)
+    existing_tracks_set, existing_youtube_ids = get_existing_tracks(table_name)
     
-    # Filter
-    targets = [t for t in universe_tracks if t not in existing_tracks]
+    # Filter using normalized comparison
+    targets = []
+    for artist, title in universe_tracks:
+        normalized = normalize_track_key(artist, title)
+        if normalized not in existing_tracks_set:
+            targets.append((artist, title))
+    
+    logger.info(f"Universe: {len(universe_tracks)} tracks")
+    logger.info(f"Existing: {len(existing_tracks_set)} tracks")
     logger.info(f"New tracks to process: {len(targets)}")
     
     if not targets:

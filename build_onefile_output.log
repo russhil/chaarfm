@@ -1,0 +1,3 @@
+=== Building Single-File Executable ===
+Clearing PyInstaller cache...
+./build_onefile.sh: line 11: /usr/bin/sudo: Operation not permitted

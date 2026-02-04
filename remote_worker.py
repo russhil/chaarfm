@@ -103,6 +103,42 @@ async def run_worker_once(server_url, pairing_code):
                             }))
                             continue
 
+                        # Post-download quality checks
+                        import os
+                        file_size_mb = os.path.getsize(filepath) / (1024 * 1024)
+                        min_size_mb = float(os.getenv('POST_DOWNLOAD_MIN_SIZE_MB', '0.5'))
+                        max_size_mb = float(os.getenv('POST_DOWNLOAD_MAX_SIZE_MB', '50.0'))
+                        
+                        if file_size_mb < min_size_mb or file_size_mb > max_size_mb:
+                            logger.warning(f"File size check failed: {file_size_mb:.2f}MB (allowed: {min_size_mb}-{max_size_mb}MB)")
+                            try:
+                                os.remove(filepath)  # Cleanup
+                            except:
+                                pass
+                            await websocket.send(json.dumps({
+                                "type": "result",
+                                "job_id": job_id,
+                                "status": "failed",
+                                "error": f"File size out of range: {file_size_mb:.2f}MB"
+                            }))
+                            continue
+
+                        # Optional: duration verification (if metadata available)
+                        if metadata and 'duration' in metadata:
+                            try:
+                                import mutagen
+                                audio_file = mutagen.File(filepath)
+                                if audio_file:
+                                    actual_duration = audio_file.info.length if hasattr(audio_file.info, 'length') else None
+                                    expected_duration = metadata.get('duration', 0)
+                                    if actual_duration and expected_duration:
+                                        duration_diff = abs(actual_duration - expected_duration)
+                                        if duration_diff > 10:  # More than 10 seconds difference
+                                            logger.warning(f"Duration mismatch: expected {expected_duration}s, got {actual_duration}s")
+                                            # Don't fail, just log - duration might vary slightly
+                            except Exception as e:
+                                logger.debug(f"Duration check skipped: {e}")
+
                         vector = vectorize_audio(filepath)
                         if os.path.exists(filepath):
                             os.remove(filepath)

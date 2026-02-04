@@ -141,7 +141,9 @@
         const urlParams = new URLSearchParams(window.location.search);
         const urlSessionId = urlParams.get('session_id');
         const urlName = urlParams.get('name');
-        const youtubeMode = urlParams.get('mode') === 'youtube';
+        const urlMode = urlParams.get('mode');
+        const youtubeMode = urlMode === 'youtube' || urlMode === 'genre';  // Genre mode also uses YouTube playback
+        const genreMode = urlMode === 'genre';
 
         if (urlSessionId) {
             // New session from OAuth - save it
@@ -166,7 +168,8 @@
             window.location.href = '/login'; // Redirect to login, not landing
         }
 
-        document.getElementById('user-badge').textContent = youtubeMode ? 'YOUTUBE_MODE' : (isGuest ? 'GUEST_MODE' : userName.toUpperCase());
+        const modeBadge = genreMode ? 'GENRE_MODE' : (youtubeMode ? 'YOUTUBE_MODE' : (isGuest ? 'GUEST_MODE' : userName.toUpperCase()));
+        document.getElementById('user-badge').textContent = modeBadge;
 
         const ADMIN_USERS = ['russhil'];
         if (ADMIN_USERS.includes(userName?.toLowerCase())) {

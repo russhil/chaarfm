@@ -262,7 +262,7 @@ async def remote_endpoint(websocket: WebSocket, code: str, client_type: str):
                     await coordinator.handle_worker_result(code, data)
                     
     except WebSocketDisconnect:
-        coordinator.disconnect(code, client_type)
+        coordinator.disconnect(code, client_type, websocket)
 
 @app.get("/v2", response_class=HTMLResponse)
 async def landing_v2(request: Request):
@@ -307,9 +307,18 @@ class YouTubeModeStartRequest(BaseModel):
 async def session_start(data: SessionStartRequest, request: Request):
     """Create playback session after mode pick. Requires prior login (session has user_id)."""
     user_id = request.session.get("user_id") or "guest"
-    youtube_mode = (data.mode or "classic").lower() == "youtube"
+    mode_str = (data.mode or "classic").lower()
+    youtube_mode = mode_str == "youtube"
+    genre_mode = mode_str == "genre"
     collection = (data.collection or "").strip()
-    if youtube_mode:
+    
+    if genre_mode:
+        # Genre mode: use genre collections, but still use youtube_mode=True since tracks have youtube_id
+        valid = set(user_db.get_genre_collections())
+        collection = collection if collection in valid else (user_db.get_genre_collections() or ["music_averaged"])[0] if user_db.get_genre_collections() else "music_averaged"
+        session_id = create_session(user_id, collection_name=collection, youtube_mode=True)
+        return {"status": "ok", "session_id": session_id, "collection": collection, "youtube_mode": True, "genre_mode": True}
+    elif youtube_mode:
         valid = set(user_db.get_youtube_collections()) | {"youtube_all"}
         collection = collection if collection in valid else (user_db.get_youtube_collections() or ["music_averaged"])[0] if user_db.get_youtube_collections() else "music_averaged"
     else:
@@ -331,11 +340,15 @@ async def youtube_mode_start(data: YouTubeModeStartRequest):
 
 @app.get("/api/collections")
 async def get_collections(mode: str = Query(None)):
-    """Get list of available collections. mode=classic (default) or mode=youtube."""
+    """Get list of available collections. mode=classic (default), mode=youtube, or mode=genre."""
     if mode == "youtube":
         cols = user_db.get_youtube_collections()
         cols.sort()
         return {"collections": cols, "youtube_all_value": "youtube_all", "mode": "youtube"}
+    elif mode == "genre":
+        cols = user_db.get_genre_collections()
+        cols.sort()
+        return {"collections": cols, "mode": "genre"}
     # Classic: all collections + merged
     cols = user_db.get_available_collections()
     if "music_averaged" not in cols:

@@ -1,0 +1,290 @@
+=== Building ChaarFM Remote Worker for macOS ===
+WARNING: The directory '/Users/russhil/Library/Caches/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Requirement already satisfied: pip in ./venv_worker/lib/python3.13/site-packages (26.0)
+WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x108ddd160>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known')': /simple/pip/
+WARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x108cfec10>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known')': /simple/pip/
+WARNING: Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x108cfee90>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known')': /simple/pip/
+WARNING: Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x108cff110>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known')': /simple/pip/
+WARNING: Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x108cff390>: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known')': /simple/pip/
+WARNING: The directory '/Users/russhil/Library/Caches/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Requirement already satisfied: pyinstaller in ./venv_worker/lib/python3.13/site-packages (6.18.0)
+Requirement already satisfied: altgraph in ./venv_worker/lib/python3.13/site-packages (from pyinstaller) (0.17.5)
+Requirement already satisfied: macholib>=1.8 in ./venv_worker/lib/python3.13/site-packages (from pyinstaller) (1.16.4)
+Requirement already satisfied: packaging>=22.0 in ./venv_worker/lib/python3.13/site-packages (from pyinstaller) (26.0)
+Requirement already satisfied: pyinstaller-hooks-contrib>=2025.9 in ./venv_worker/lib/python3.13/site-packages (from pyinstaller) (2026.0)
+Requirement already satisfied: setuptools>=42.0.0 in ./venv_worker/lib/python3.13/site-packages (from pyinstaller) (80.10.2)
+Installing dependencies...
+WARNING: The directory '/Users/russhil/Library/Caches/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Requirement already satisfied: websockets>=11.0 in ./venv_worker/lib/python3.13/site-packages (from -r requirements-worker.txt (line 2)) (16.0)
+Requirement already satisfied: requests>=2.28.0 in ./venv_worker/lib/python3.13/site-packages (from -r requirements-worker.txt (line 3)) (2.32.5)
+Requirement already satisfied: certifi>=2023.0.0 in ./venv_worker/lib/python3.13/site-packages (from -r requirements-worker.txt (line 4)) (2026.1.4)
+Requirement already satisfied: yt-dlp>=2023.0.0 in ./venv_worker/lib/python3.13/site-packages (from -r requirements-worker.txt (line 5)) (2026.2.4)
+Requirement already satisfied: tensorflow>=2.13.0 in ./venv_worker/lib/python3.13/site-packages (from -r requirements-worker.txt (line 6)) (2.20.0)
+Requirement already satisfied: tf-keras>=2.13.0 in ./venv_worker/lib/python3.13/site-packages (from -r requirements-worker.txt (line 7)) (2.20.1)
+Requirement already satisfied: mutagen>=1.47.0 in ./venv_worker/lib/python3.13/site-packages (from -r requirements-worker.txt (line 8)) (1.47.0)
+Requirement already satisfied: numpy>=1.24.0 in ./venv_worker/lib/python3.13/site-packages (from -r requirements-worker.txt (line 9)) (2.3.5)
+Requirement already satisfied: librosa>=0.10.0 in ./venv_worker/lib/python3.13/site-packages (from -r requirements-worker.txt (line 10)) (0.11.0)
+Requirement already satisfied: python-dotenv>=1.0.0 in ./venv_worker/lib/python3.13/site-packages (from -r requirements-worker.txt (line 11)) (1.2.1)
+Requirement already satisfied: psycopg2-binary>=2.9.0 in ./venv_worker/lib/python3.13/site-packages (from -r requirements-worker.txt (line 12)) (2.9.11)
+Requirement already satisfied: essentia>=2.1b6.dev609 in ./venv_worker/lib/python3.13/site-packages (from -r requirements-worker.txt (line 13)) (2.1b6.dev1389)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./venv_worker/lib/python3.13/site-packages (from requests>=2.28.0->-r requirements-worker.txt (line 3)) (3.4.4)
+Requirement already satisfied: idna<4,>=2.5 in ./venv_worker/lib/python3.13/site-packages (from requests>=2.28.0->-r requirements-worker.txt (line 3)) (3.11)
+Requirement already satisfied: urllib3<3,>=1.21.1 in ./venv_worker/lib/python3.13/site-packages (from requests>=2.28.0->-r requirements-worker.txt (line 3)) (2.6.3)
+Requirement already satisfied: absl-py>=1.0.0 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (2.4.0)
+Requirement already satisfied: astunparse>=1.6.0 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (1.6.3)
+Requirement already satisfied: flatbuffers>=24.3.25 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (25.12.19)
+Requirement already satisfied: gast!=0.5.0,!=0.5.1,!=0.5.2,>=0.2.1 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (0.7.0)
+Requirement already satisfied: google_pasta>=0.1.1 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (0.2.0)
+Requirement already satisfied: libclang>=13.0.0 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (18.1.1)
+Requirement already satisfied: opt_einsum>=2.3.2 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (3.4.0)
+Requirement already satisfied: packaging in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (26.0)
+Requirement already satisfied: protobuf>=5.28.0 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (6.33.5)
+Requirement already satisfied: setuptools in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (80.10.2)
+Requirement already satisfied: six>=1.12.0 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (1.17.0)
+Requirement already satisfied: termcolor>=1.1.0 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (3.3.0)
+Requirement already satisfied: typing_extensions>=3.6.6 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (4.15.0)
+Requirement already satisfied: wrapt>=1.11.0 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (2.1.1)
+Requirement already satisfied: grpcio<2.0,>=1.24.3 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (1.76.0)
+Requirement already satisfied: tensorboard~=2.20.0 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (2.20.0)
+Requirement already satisfied: keras>=3.10.0 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (3.13.2)
+Requirement already satisfied: h5py>=3.11.0 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (3.15.1)
+Requirement already satisfied: ml_dtypes<1.0.0,>=0.5.1 in ./venv_worker/lib/python3.13/site-packages (from tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (0.5.4)
+Requirement already satisfied: markdown>=2.6.8 in ./venv_worker/lib/python3.13/site-packages (from tensorboard~=2.20.0->tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (3.10.1)
+Requirement already satisfied: pillow in ./venv_worker/lib/python3.13/site-packages (from tensorboard~=2.20.0->tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (12.1.0)
+Requirement already satisfied: tensorboard-data-server<0.8.0,>=0.7.0 in ./venv_worker/lib/python3.13/site-packages (from tensorboard~=2.20.0->tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (0.7.2)
+Requirement already satisfied: werkzeug>=1.0.1 in ./venv_worker/lib/python3.13/site-packages (from tensorboard~=2.20.0->tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (3.1.5)
+Requirement already satisfied: audioread>=2.1.9 in ./venv_worker/lib/python3.13/site-packages (from librosa>=0.10.0->-r requirements-worker.txt (line 10)) (3.1.0)
+Requirement already satisfied: numba>=0.51.0 in ./venv_worker/lib/python3.13/site-packages (from librosa>=0.10.0->-r requirements-worker.txt (line 10)) (0.63.1)
+Requirement already satisfied: scipy>=1.6.0 in ./venv_worker/lib/python3.13/site-packages (from librosa>=0.10.0->-r requirements-worker.txt (line 10)) (1.17.0)
+Requirement already satisfied: scikit-learn>=1.1.0 in ./venv_worker/lib/python3.13/site-packages (from librosa>=0.10.0->-r requirements-worker.txt (line 10)) (1.8.0)
+Requirement already satisfied: joblib>=1.0 in ./venv_worker/lib/python3.13/site-packages (from librosa>=0.10.0->-r requirements-worker.txt (line 10)) (1.5.3)
+Requirement already satisfied: decorator>=4.3.0 in ./venv_worker/lib/python3.13/site-packages (from librosa>=0.10.0->-r requirements-worker.txt (line 10)) (5.2.1)
+Requirement already satisfied: soundfile>=0.12.1 in ./venv_worker/lib/python3.13/site-packages (from librosa>=0.10.0->-r requirements-worker.txt (line 10)) (0.13.1)
+Requirement already satisfied: pooch>=1.1 in ./venv_worker/lib/python3.13/site-packages (from librosa>=0.10.0->-r requirements-worker.txt (line 10)) (1.9.0)
+Requirement already satisfied: soxr>=0.3.2 in ./venv_worker/lib/python3.13/site-packages (from librosa>=0.10.0->-r requirements-worker.txt (line 10)) (1.0.0)
+Requirement already satisfied: lazy_loader>=0.1 in ./venv_worker/lib/python3.13/site-packages (from librosa>=0.10.0->-r requirements-worker.txt (line 10)) (0.4)
+Requirement already satisfied: msgpack>=1.0 in ./venv_worker/lib/python3.13/site-packages (from librosa>=0.10.0->-r requirements-worker.txt (line 10)) (1.1.2)
+Requirement already satisfied: standard-aifc in ./venv_worker/lib/python3.13/site-packages (from librosa>=0.10.0->-r requirements-worker.txt (line 10)) (3.13.0)
+Requirement already satisfied: standard-sunau in ./venv_worker/lib/python3.13/site-packages (from librosa>=0.10.0->-r requirements-worker.txt (line 10)) (3.13.0)
+Requirement already satisfied: pyyaml in ./venv_worker/lib/python3.13/site-packages (from essentia>=2.1b6.dev609->-r requirements-worker.txt (line 13)) (6.0.3)
+Requirement already satisfied: wheel<1.0,>=0.23.0 in ./venv_worker/lib/python3.13/site-packages (from astunparse>=1.6.0->tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (0.46.3)
+Requirement already satisfied: rich in ./venv_worker/lib/python3.13/site-packages (from keras>=3.10.0->tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (14.3.2)
+Requirement already satisfied: namex in ./venv_worker/lib/python3.13/site-packages (from keras>=3.10.0->tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (0.1.0)
+Requirement already satisfied: optree in ./venv_worker/lib/python3.13/site-packages (from keras>=3.10.0->tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (0.18.0)
+Requirement already satisfied: llvmlite<0.47,>=0.46.0dev0 in ./venv_worker/lib/python3.13/site-packages (from numba>=0.51.0->librosa>=0.10.0->-r requirements-worker.txt (line 10)) (0.46.0)
+Requirement already satisfied: platformdirs>=2.5.0 in ./venv_worker/lib/python3.13/site-packages (from pooch>=1.1->librosa>=0.10.0->-r requirements-worker.txt (line 10)) (4.5.1)
+Requirement already satisfied: threadpoolctl>=3.2.0 in ./venv_worker/lib/python3.13/site-packages (from scikit-learn>=1.1.0->librosa>=0.10.0->-r requirements-worker.txt (line 10)) (3.6.0)
+Requirement already satisfied: cffi>=1.0 in ./venv_worker/lib/python3.13/site-packages (from soundfile>=0.12.1->librosa>=0.10.0->-r requirements-worker.txt (line 10)) (2.0.0)
+Requirement already satisfied: pycparser in ./venv_worker/lib/python3.13/site-packages (from cffi>=1.0->soundfile>=0.12.1->librosa>=0.10.0->-r requirements-worker.txt (line 10)) (3.0)
+Requirement already satisfied: markupsafe>=2.1.1 in ./venv_worker/lib/python3.13/site-packages (from werkzeug>=1.0.1->tensorboard~=2.20.0->tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (3.0.3)
+Requirement already satisfied: markdown-it-py>=2.2.0 in ./venv_worker/lib/python3.13/site-packages (from rich->keras>=3.10.0->tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (4.0.0)
+Requirement already satisfied: pygments<3.0.0,>=2.13.0 in ./venv_worker/lib/python3.13/site-packages (from rich->keras>=3.10.0->tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (2.19.2)
+Requirement already satisfied: mdurl~=0.1 in ./venv_worker/lib/python3.13/site-packages (from markdown-it-py>=2.2.0->rich->keras>=3.10.0->tensorflow>=2.13.0->-r requirements-worker.txt (line 6)) (0.1.2)
+Requirement already satisfied: standard-chunk in ./venv_worker/lib/python3.13/site-packages (from standard-aifc->librosa>=0.10.0->-r requirements-worker.txt (line 10)) (3.13.0)
+Requirement already satisfied: audioop-lts in ./venv_worker/lib/python3.13/site-packages (from standard-aifc->librosa>=0.10.0->-r requirements-worker.txt (line 10)) (0.2.2)
+Building executable...
+41 INFO: PyInstaller: 6.18.0, contrib hooks: 2026.0
+41 INFO: Python: 3.13.5
+56 INFO: Platform: macOS-26.0-arm64-arm-64bit-Mach-O
+56 INFO: Python environment: /Users/russhil/cursor/chaarfm/venv_worker
+61 INFO: Removing temporary files and cleaning cache in /Users/russhil/Library/Application Support/pyinstaller
+14082 INFO: Module search paths (PYTHONPATH):
+['/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip',
+ '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13',
+ '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload',
+ '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages',
+ '/Users/russhil/cursor/chaarfm']
+15881 INFO: Appending 'binaries' from .spec
+15882 INFO: Appending 'datas' from .spec
+15882 INFO: checking Analysis
+15882 INFO: Building Analysis because Analysis-00.toc is non existent
+15882 INFO: Looking for Python shared library...
+15887 INFO: Using Python shared library: /Library/Frameworks/Python.framework/Versions/3.13/Python
+15887 INFO: Running Analysis Analysis-00.toc
+15887 INFO: Target bytecode optimization level: 0
+15887 INFO: Initializing module dependency graph...
+15888 INFO: Initializing module graph hook caches...
+15900 INFO: Analyzing modules for base_library.zip ...
+16786 INFO: Processing standard module hook 'hook-encodings.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+19082 INFO: Processing standard module hook 'hook-pickle.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+20679 INFO: Processing standard module hook 'hook-heapq.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+21245 INFO: Caching module dependency graph...
+21271 INFO: Analyzing /Users/russhil/cursor/chaarfm/remote_worker.py
+21427 INFO: Processing standard module hook 'hook-multiprocessing.util.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+21519 INFO: Processing standard module hook 'hook-xml.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+21814 INFO: Processing standard module hook 'hook-_ctypes.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+22040 INFO: Processing standard module hook 'hook-urllib3.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+22096 INFO: Processing pre-safe-import-module hook 'hook-backports.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/pre_safe_import_module'
+22097 INFO: SetuptoolsInfo: initializing cached setuptools info...
+22344 INFO: Setuptools: 'backports' appears to be a full setuptools-vendored copy - creating alias to 'setuptools._vendor.backports'!
+22349 INFO: Processing standard module hook 'hook-setuptools.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+22373 INFO: Processing standard module hook 'hook-platform.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+22391 INFO: Processing pre-safe-import-module hook 'hook-distutils.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/pre_safe_import_module'
+22420 INFO: Processing standard module hook 'hook-sysconfig.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+22428 INFO: Processing standard module hook 'hook-_osx_support.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+22430 INFO: Processing pre-safe-import-module hook 'hook-jaraco.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/pre_safe_import_module'
+22431 INFO: Setuptools: 'jaraco' appears to be a full setuptools-vendored copy - creating alias to 'setuptools._vendor.jaraco'!
+22436 INFO: Processing pre-safe-import-module hook 'hook-more_itertools.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/pre_safe_import_module'
+22437 INFO: Setuptools: 'more_itertools' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.more_itertools'!
+22510 INFO: Processing pre-safe-import-module hook 'hook-typing_extensions.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/pre_safe_import_module'
+22645 INFO: Processing pre-safe-import-module hook 'hook-packaging.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/pre_safe_import_module'
+22747 INFO: Processing standard module hook 'hook-setuptools._vendor.jaraco.text.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+22747 INFO: Processing pre-safe-import-module hook 'hook-importlib_resources.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/pre_safe_import_module'
+23052 INFO: Processing pre-safe-import-module hook 'hook-importlib_metadata.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/pre_safe_import_module'
+23052 INFO: Setuptools: 'importlib_metadata' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.importlib_metadata'!
+23066 INFO: Processing standard module hook 'hook-setuptools._vendor.importlib_metadata.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+23077 INFO: Processing pre-safe-import-module hook 'hook-zipp.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/pre_safe_import_module'
+23077 INFO: Setuptools: 'zipp' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.zipp'!
+23226 INFO: Processing pre-safe-import-module hook 'hook-tomli.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/pre_safe_import_module'
+23227 INFO: Setuptools: 'tomli' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.tomli'!
+23510 INFO: Processing pre-safe-import-module hook 'hook-wheel.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/pre_safe_import_module'
+23768 INFO: Processing standard module hook 'hook-charset_normalizer.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+23856 INFO: Processing standard module hook 'hook-certifi.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+23906 INFO: Processing standard module hook 'hook-websockets.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+24632 INFO: Processing standard module hook 'hook-difflib.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+24675 INFO: Processing standard module hook 'hook-numpy.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+26788 INFO: Processing standard module hook 'hook-psycopg2.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+26873 INFO: Processing standard module hook 'hook-yt_dlp.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/yt_dlp/__pyinstaller'
+46 WARNING: Failed to collect submodules for 'urllib3.contrib.emscripten' because importing 'urllib3.contrib.emscripten' raised: ModuleNotFoundError: No module named 'js'
+27278 WARNING: collect_data_files - skipping data collection for module 'curl_cffi' as it is not a package.
+27279 WARNING: collect_data_files - skipping data collection for module 'yt_dlp_ejs' as it is not a package.
+27403 INFO: Processing standard module hook 'hook-xml.etree.cElementTree.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+28032 INFO: Processing standard module hook 'hook-sqlite3.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+35151 INFO: Analyzing hidden import 'tensorflow'
+35151 INFO: Processing pre-safe-import-module hook 'hook-tensorflow.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/pre_safe_import_module'
+35163 INFO: Processing standard module hook 'hook-tensorflow.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+35165 INFO: hook-tensorflow: tensorflow dist name: tensorflow
+35165 INFO: hook-tensorflow: tensorflow version: 2.20.0
+4499 WARNING: Failed to collect submodules for 'keras.src.backend.torch' because importing 'keras.src.backend.torch' raised: ModuleNotFoundError: No module named 'torch'
+124369 WARNING: collect_dynamic_libs - skipping library collection for module 'tensorflow-plugins' as it is not a package.
+124969 INFO: Processing standard module hook 'hook-xml.dom.domreg.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+127541 INFO: Processing standard module hook 'hook-h5py.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+128756 INFO: Processing pre-safe-import-module hook 'hook-six.moves.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/pre_safe_import_module'
+132413 INFO: Processing standard module hook 'hook-scipy.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+132668 INFO: Processing standard module hook 'hook-pycparser.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+133237 INFO: Processing standard module hook 'hook-scipy.linalg.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+133305 INFO: Processing standard module hook 'hook-scipy.special._ufuncs.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+133942 INFO: Processing standard module hook 'hook-scipy.spatial._ckdtree.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+134289 INFO: Processing standard module hook 'hook-scipy.spatial.transform.rotation.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+134771 INFO: Processing standard module hook 'hook-scipy.stats._stats.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+135034 INFO: Processing standard module hook 'hook-scipy.sparse.csgraph.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+135473 INFO: Processing standard module hook 'hook-scipy.special._ellip_harm_2.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+135845 INFO: Processing standard module hook 'hook-PIL.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+135898 INFO: Processing standard module hook 'hook-PIL.Image.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+136225 INFO: Processing standard module hook 'hook-PIL.ImageFilter.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+138552 INFO: Processing standard module hook 'hook-pygments.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+141021 INFO: Processing standard module hook 'hook-sklearn.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+141172 INFO: Processing standard module hook 'hook-sklearn.utils.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+141455 INFO: Processing standard module hook 'hook-sklearn.externals.array_api_compat.numpy.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+141478 INFO: Processing standard module hook 'hook-sklearn.externals.array_api_compat.cupy.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+141484 INFO: Processing standard module hook 'hook-sklearn.externals.array_api_compat.torch.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+141501 INFO: Processing standard module hook 'hook-sklearn.externals.array_api_compat.dask.array.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+141613 INFO: Processing standard module hook 'hook-sklearn.metrics.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+147110 INFO: Processing standard module hook 'hook-sklearn.metrics.cluster.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+147165 INFO: Processing standard module hook 'hook-sklearn.metrics.pairwise.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+147250 INFO: Processing standard module hook 'hook-sklearn.cluster.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+147343 INFO: Processing standard module hook 'hook-sklearn.neighbors.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+147399 INFO: Processing standard module hook 'hook-sklearn.linear_model.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+150983 INFO: Processing standard module hook 'hook-grpc.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+153641 INFO: Analyzing hidden import 'librosa'
+153642 INFO: Processing standard module hook 'hook-librosa.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+153749 INFO: Analyzing hidden import 'librosa.core'
+153750 INFO: Analyzing hidden import 'librosa.feature'
+153750 INFO: Processing module hooks (post-graph stage)...
+155238 INFO: Processing standard module hook 'hook-numba.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+155250 INFO: Processing standard module hook 'hook-llvmlite.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+157352 INFO: Processing pre-safe-import-module hook 'hook-win32com.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/pre_safe_import_module'
+158363 INFO: Processing pre-safe-import-module hook 'hook-platformdirs.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/pre_safe_import_module'
+158368 INFO: Processing standard module hook 'hook-platformdirs.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+158430 INFO: Processing standard module hook 'hook-soundfile.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+158438 INFO: Processing pre-safe-import-module hook 'hook-gi.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/pre_safe_import_module'
+158657 INFO: Processing standard module hook 'hook-sklearn.tree.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+158691 WARNING: Hidden import "pycparser.lextab" not found!
+158691 WARNING: Hidden import "pycparser.yacctab" not found!
+158691 WARNING: Hidden import "mx.DateTime" not found!
+158715 WARNING: Hidden import "scipy.special._cdflib" not found!
+158877 INFO: Processing standard module hook 'hook-PIL.SpiderImagePlugin.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks'
+160050 INFO: Performing binary vs. data reclassification (402 entries)
+160349 INFO: Looking for ctypes DLLs
+160387 WARNING: Library libc.so.6 required via ctypes not found
+160415 WARNING: Library libc.so.6 required via ctypes not found
+160563 INFO: Analyzing run-time hooks ...
+160584 INFO: Including run-time hook 'pyi_rth_inspect.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/rthooks'
+160586 INFO: Including run-time hook 'pyi_rth_pkgutil.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/rthooks'
+160587 INFO: Including run-time hook 'pyi_rth_multiprocessing.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/rthooks'
+160588 INFO: Including run-time hook 'pyi_rth_setuptools.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/hooks/rthooks'
+160589 INFO: Including run-time hook 'pyi_rth_tensorflow.py' from '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/_pyinstaller_hooks_contrib/rthooks'
+160673 INFO: Creating base_library.zip...
+160700 INFO: Looking for dynamic libraries
+161584 INFO: Warnings written to /Users/russhil/cursor/chaarfm/build_worker_macos/build/build_worker/warn-build_worker.txt
+161815 INFO: Graph cross-reference written to /Users/russhil/cursor/chaarfm/build_worker_macos/build/build_worker/xref-build_worker.html
+162106 WARNING: Found one or more binaries with invalid or incompatible macOS SDK version:
+162106 WARNING:  * '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/essentia/.dylibs/libfftw3f.3.dylib', collected as 'essentia/.dylibs/libfftw3f.3.dylib/libfftw3f.3.dylib'; version: (0, 0, 0)
+162106 WARNING:  * '/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/essentia/.dylibs/libfftw3f.3.dylib', collected as 'essentia/.dylibs/libfftw3f.3.dylib'; version: (0, 0, 0)
+162106 WARNING: These binaries will likely cause issues with code-signing and hardened runtime!
+162186 INFO: checking PYZ
+162186 INFO: Building PYZ because PYZ-00.toc is non existent
+162186 INFO: Building PYZ (ZlibArchive) /Users/russhil/cursor/chaarfm/build_worker_macos/build/build_worker/PYZ-00.pyz
+166155 INFO: Building PYZ (ZlibArchive) /Users/russhil/cursor/chaarfm/build_worker_macos/build/build_worker/PYZ-00.pyz completed successfully.
+166210 INFO: EXE target arch: arm64
+166210 INFO: Code signing identity: None
+166218 INFO: checking PKG
+166218 INFO: Building PKG because PKG-00.toc is non existent
+166218 INFO: Building PKG (CArchive) chaarfm_worker.pkg
+Adding imports: ['yt_dlp.compat._legacy', 'yt_dlp.compat._deprecated', 'yt_dlp.utils._legacy', 'yt_dlp.utils._deprecated', 'Cryptodome', 'websockets', 'websockets.__main__', 'websockets.asyncio', 'websockets.asyncio.async_timeout', 'websockets.asyncio.client', 'websockets.asyncio.compatibility', 'websockets.asyncio.connection', 'websockets.asyncio.messages', 'websockets.asyncio.router', 'websockets.asyncio.server', 'websockets.auth', 'websockets.cli', 'websockets.client', 'websockets.connection', 'websockets.datastructures', 'websockets.exceptions', 'websockets.extensions', 'websockets.extensions.base', 'websockets.extensions.permessage_deflate', 'websockets.frames', 'websockets.headers', 'websockets.http', 'websockets.http11', 'websockets.imports', 'websockets.legacy', 'websockets.legacy.auth', 'websockets.legacy.client', 'websockets.legacy.exceptions', 'websockets.legacy.framing', 'websockets.legacy.handshake', 'websockets.legacy.http', 'websockets.legacy.protocol', 'websockets.legacy.server', 'websockets.protocol', 'websockets.proxy', 'websockets.server', 'websockets.speedups', 'websockets.streams', 'websockets.sync', 'websockets.sync.client', 'websockets.sync.connection', 'websockets.sync.messages', 'websockets.sync.router', 'websockets.sync.server', 'websockets.sync.utils', 'websockets.typing', 'websockets.uri', 'websockets.utils', 'websockets.version', 'requests', 'requests.__version__', 'requests._internal_utils', 'requests.adapters', 'requests.api', 'requests.auth', 'requests.certs', 'requests.compat', 'requests.cookies', 'requests.exceptions', 'requests.help', 'requests.hooks', 'requests.models', 'requests.packages', 'requests.sessions', 'requests.status_codes', 'requests.structures', 'requests.utils', 'urllib3', 'urllib3._base_connection', 'urllib3._collections', 'urllib3._request_methods', 'urllib3._version', 'urllib3.connection', 'urllib3.connectionpool', 'urllib3.contrib', 'urllib3.contrib.pyopenssl', 'urllib3.contrib.socks', 'urllib3.exceptions', 'urllib3.fields', 'urllib3.filepost', 'urllib3.http2', 'urllib3.http2.connection', 'urllib3.http2.probe', 'urllib3.poolmanager', 'urllib3.response', 'urllib3.util', 'urllib3.util.connection', 'urllib3.util.proxy', 'urllib3.util.request', 'urllib3.util.response', 'urllib3.util.retry', 'urllib3.util.ssl_', 'urllib3.util.ssl_match_hostname', 'urllib3.util.ssltransport', 'urllib3.util.timeout', 'urllib3.util.url', 'urllib3.util.util', 'urllib3.util.wait', 'mutagen', 'brotli', 'certifi', 'secretstorage', 'curl_cffi']
+Traceback (most recent call last):
+  File "/Users/russhil/cursor/chaarfm/venv_worker/bin/pyinstaller", line 6, in <module>
+    sys.exit(_console_script_run())
+             ~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/__main__.py", line 231, in _console_script_run
+    run()
+    ~~~^^
+  File "/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/__main__.py", line 215, in run
+    run_build(pyi_config, spec_file, **vars(args))
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/__main__.py", line 70, in run_build
+    PyInstaller.building.build_main.main(pyi_config, spec_file, **kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/building/build_main.py", line 1275, in main
+    build(specfile, distpath, workpath, clean_build)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/building/build_main.py", line 1213, in build
+    exec(code, spec_namespace)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "build_worker.spec", line 99, in <module>
+    exe = EXE(
+        pyz,
+    ...<17 lines>...
+        entitlements_file=None,
+    )
+  File "/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/building/api.py", line 656, in __init__
+    self.pkg = PKG(
+               ~~~^
+        toc=self.toc,
+        ^^^^^^^^^^^^^
+    ...<9 lines>...
+        entitlements_file=self.entitlements_file
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/building/api.py", line 252, in __init__
+    self.__postinit__()
+    ~~~~~~~~~~~~~~~~~^^
+  File "/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/building/datastruct.py", line 184, in __postinit__
+    self.assemble()
+    ~~~~~~~~~~~~~^^
+  File "/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/building/api.py", line 312, in assemble
+    src_name = process_collected_binary(
+        src_name,
+    ...<7 lines>...
+        strict_arch_validation=(typecode == 'EXTENSION'),
+    )
+  File "/Users/russhil/cursor/chaarfm/venv_worker/lib/python3.13/site-packages/PyInstaller/building/utils.py", line 199, in process_collected_binary
+    os.makedirs(cache_dir, exist_ok=True)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen os>", line 218, in makedirs
+  File "<frozen os>", line 218, in makedirs
+  File "<frozen os>", line 218, in makedirs
+  [Previous line repeated 1 more time]
+  File "<frozen os>", line 228, in makedirs
+PermissionError: [Errno 1] Operation not permitted: '/Users/russhil/Library/Application Support/pyinstaller'

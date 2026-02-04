@@ -1,0 +1,1227 @@
+2026-02-03 16:06:18,593 - INFO - Connecting to venve/ws/remote/venv/worker...
+2026-02-03 16:06:18,608 - ERROR - Connection Error: venve/ws/remote/venv/worker isn't a valid URI: scheme isn't ws or wss
+2026-02-03 16:13:12,107 - INFO - Connecting to wss://chaarfm.onrender.com/ws/remote/0000/worker...
+2026-02-03 16:13:13,825 - INFO - Connected! Waiting for jobs...
+2026-02-03 16:14:06,304 - INFO - Connecting to wss://chaarfm.onrender.com/ws/remote/2920/worker...
+2026-02-03 16:14:07,419 - INFO - Connected! Waiting for jobs...
+2026-02-03 16:14:18,816 - INFO - Received Job: Seedhe Maut - Tour Shit!
+2026-02-03 16:14:28,837 - INFO - Vectorization successful
+2026-02-03 16:14:29,267 - INFO - Received Job: Rawal - Baat Bangayi
+2026-02-03 16:14:38,383 - INFO - Vectorization successful
+2026-02-03 16:14:38,745 - INFO - Received Job: Frappe Ash - Raita
+2026-02-03 16:14:47,753 - INFO - Vectorization successful
+2026-02-03 16:14:48,307 - INFO - Received Job: Vasu Raina - farebi
+2026-02-03 16:14:58,682 - INFO - Vectorization successful
+2026-02-03 16:14:59,058 - INFO - Received Job: Chaar Diwaari - LOVESEXDHOKA!!!
+2026-02-03 16:15:06,774 - WARNING - Download failed for Chaar Diwaari - LOVESEXDHOKA!!!: [0;31mERROR:[0m Postprocessing: audio conversion failed: Exiting normally, received signal 2.
+2026-02-03 16:15:06,776 - WARNING - Download failed
+2026-02-03 16:29:16,874 - ERROR - Connection closed by server
+2026-02-03 17:22:35,446 - INFO - Connecting to wss://chaarfm.onrender.com/ws/remote/4080/worker...
+2026-02-03 17:22:36,612 - INFO - Connected! Waiting for jobs...
+2026-02-03 17:23:04,272 - INFO - Received Job: Rashid Ali - Kabhi Kabhi Aditi
+2026-02-03 17:23:08,138 - WARNING - Download failed for Rashid Ali - Kabhi Kabhi Aditi: [0;31mERROR:[0m unable to download video data: HTTP Error 403: Forbidden
+2026-02-03 17:23:08,141 - WARNING - Download failed
+2026-02-03 17:23:08,459 - INFO - Received Job: Karan Aujla - Boyfriend
+2026-02-03 17:23:13,226 - WARNING - Download failed for Karan Aujla - Boyfriend: [0;31mERROR:[0m unable to download video data: HTTP Error 403: Forbidden
+2026-02-03 17:23:13,229 - WARNING - Download failed
+2026-02-03 17:23:13,614 - INFO - Received Job: Dhanji - Peep the Tareeka - Remix
+2026-02-03 17:23:24,926 - WARNING - Download failed for Dhanji - Peep the Tareeka - Remix: [0;31mERROR:[0m unable to download video data: HTTP Error 403: Forbidden
+2026-02-03 17:23:24,928 - WARNING - Download failed
+2026-02-03 17:23:25,246 - INFO - Received Job: The Siege - 5 BAJE
+2026-02-03 17:23:28,884 - WARNING - Download failed for The Siege - 5 BAJE: [0;31mERROR:[0m unable to download video data: HTTP Error 403: Forbidden
+2026-02-03 17:23:28,885 - WARNING - Download failed
+2026-02-03 17:23:29,205 - INFO - Received Job: Karan Aujla - Softly
+2026-02-03 17:23:32,890 - WARNING - Download failed for Karan Aujla - Softly: [0;31mERROR:[0m unable to download video data: HTTP Error 403: Forbidden
+2026-02-03 17:23:32,893 - WARNING - Download failed
+2026-02-03 17:25:23,764 - INFO - Received Job: Divine - Kaam 25 - Sacred Games
+2026-02-03 17:25:27,474 - WARNING - Download failed for Divine - Kaam 25 - Sacred Games: [0;31mERROR:[0m unable to download video data: HTTP Error 403: Forbidden
+2026-02-03 17:25:27,476 - WARNING - Download failed
+2026-02-03 17:25:27,857 - INFO - Received Job: Ritviz - Chalo Chalein
+2026-02-03 17:25:31,027 - WARNING - Download failed for Ritviz - Chalo Chalein: [0;31mERROR:[0m unable to download video data: HTTP Error 403: Forbidden
+2026-02-03 17:25:31,028 - WARNING - Download failed
+2026-02-03 17:25:31,346 - INFO - Received Job: Steve Lacy - Dark Red
+2026-02-03 17:25:35,248 - WARNING - Download failed for Steve Lacy - Dark Red: [0;31mERROR:[0m unable to download video data: HTTP Error 403: Forbidden
+2026-02-03 17:25:35,250 - WARNING - Download failed
+2026-02-03 17:25:35,567 - INFO - Received Job: OG Lucifer - Suhana Din
+2026-02-03 17:25:38,878 - WARNING - Download failed for OG Lucifer - Suhana Din: [0;31mERROR:[0m unable to download video data: HTTP Error 403: Forbidden
+2026-02-03 17:25:38,882 - WARNING - Download failed
+2026-02-03 17:26:08,868 - INFO - Connecting to wss://chaarfm.onrender.com/ws/remote/9058/worker...
+2026-02-03 17:26:09,941 - INFO - Connected! Waiting for jobs...
+2026-02-03 17:26:27,172 - INFO - Received Job: Bruno Mars - Treasure
+2026-02-03 17:26:35,820 - INFO - Vectorization successful
+2026-02-03 17:26:36,188 - INFO - Received Job: OG Lucifer - Terey papa
+2026-02-03 17:26:45,471 - INFO - Vectorization successful
+2026-02-03 17:26:45,833 - INFO - Received Job: The Siege - Mujhko Jeene Do
+2026-02-03 17:26:55,623 - INFO - Vectorization successful
+2026-02-03 17:26:55,979 - INFO - Received Job: Tsumyoki - WANT IT ALL
+2026-02-03 17:27:04,441 - INFO - Vectorization successful
+2026-02-03 17:27:04,835 - INFO - Received Job: OG Lucifer - Violence
+2026-02-03 17:27:16,269 - INFO - Vectorization successful
+2026-02-03 17:27:16,607 - INFO - Received Job: Karan Aujla - MF Gabhru!
+2026-02-03 17:27:24,487 - INFO - Vectorization successful
+2026-02-03 17:27:24,854 - INFO - Received Job: Seedhe Maut - Rahat
+2026-02-03 17:27:33,643 - INFO - Vectorization successful
+2026-02-03 17:27:33,997 - INFO - Received Job: Seedhe Maut - Pancake
+2026-02-03 17:27:42,693 - INFO - Vectorization successful
+2026-02-03 17:27:43,229 - INFO - Received Job: King - KODAK
+2026-02-03 17:27:56,613 - INFO - Vectorization successful
+2026-02-03 17:27:56,951 - INFO - Received Job: BAGI MUNDA - Memphis Munde
+2026-02-03 17:28:05,005 - INFO - Vectorization successful
+2026-02-03 17:28:05,342 - INFO - Received Job: Saar Punch - Sabar Rakh
+2026-02-03 17:28:14,310 - INFO - Vectorization successful
+2026-02-03 17:28:14,648 - INFO - Received Job: Pritam - Abhi Kuch Dino Se
+2026-02-03 17:28:24,690 - INFO - Vectorization successful
+2026-02-03 17:28:25,026 - INFO - Received Job: Karan Aujla - I Really Do...
+2026-02-03 17:28:33,180 - INFO - Vectorization successful
+2026-02-03 17:28:33,577 - INFO - Received Job: Tsumyoki - Ek Do Ek
+2026-02-03 17:28:43,307 - INFO - Vectorization successful
+2026-02-03 17:28:43,677 - INFO - Received Job: The Local train - Choo Lo
+2026-02-03 17:28:52,323 - INFO - Vectorization successful
+2026-02-03 17:28:52,833 - INFO - Received Job: Panther - Galat Karam
+2026-02-03 17:29:04,278 - INFO - Vectorization successful
+2026-02-03 17:29:04,668 - INFO - Received Job: Seedhe Maut - Madira
+2026-02-03 17:29:11,763 - INFO - Vectorization successful
+2026-02-03 17:29:12,211 - INFO - Received Job: AP Dhillon - Distance
+2026-02-03 17:29:21,521 - INFO - Vectorization successful
+2026-02-03 17:29:21,901 - INFO - Received Job: The Siege - 5 BAJE
+2026-02-03 17:29:29,223 - INFO - Vectorization successful
+2026-02-03 17:29:29,576 - INFO - Received Job: AP Dhillon - Thodi Si Daaru
+2026-02-03 17:29:39,031 - INFO - Vectorization successful
+2026-02-03 17:29:39,374 - INFO - Received Job: Dhanji - KEH DO KI YE JHOOT HAI
+2026-02-03 17:29:49,969 - INFO - Vectorization successful
+2026-02-03 17:29:50,324 - INFO - Received Job: Rawal - Tabla Faad!
+2026-02-03 17:29:59,220 - INFO - Vectorization successful
+2026-02-03 17:29:59,607 - INFO - Received Job: Karan Aujla - Softly
+2026-02-03 17:30:06,499 - INFO - Vectorization successful
+2026-02-03 17:30:06,840 - INFO - Received Job: Rawal - Bhundfaad
+2026-02-03 17:30:14,283 - INFO - Vectorization successful
+2026-02-03 17:30:14,649 - INFO - Received Job: Baggh-e SMG - 2SEXY
+2026-02-03 17:30:23,636 - INFO - Vectorization successful
+2026-02-03 17:49:18,648 - ERROR - Connection closed by server
+2026-02-04 01:28:47,427 - INFO - Connecting to wss://chaarfm.onrender.com/ws/remote/1721/worker...
+2026-02-04 01:28:48,968 - INFO - Connected! Waiting for jobs...
+2026-02-04 01:29:03,472 - INFO - Received Job: Chaar Diwaari - Thehra
+2026-02-04 01:29:11,770 - INFO - Vectorization successful
+2026-02-04 01:29:12,128 - INFO - Received Job: Jxggi - What We Do
+2026-02-04 01:29:22,084 - INFO - Vectorization successful
+2026-02-04 01:29:22,494 - INFO - Received Job: Vasu Raina - aag
+2026-02-04 01:29:43,622 - INFO - Vectorization successful
+2026-02-04 01:29:44,020 - INFO - Received Job: The Siege - Ek Din
+2026-02-04 01:29:59,182 - INFO - Vectorization successful
+2026-02-04 01:29:59,610 - INFO - Received Job: Seedhe Maut - RED
+2026-02-04 01:32:10,686 - INFO - Connecting to wss://chaarfm.onrender.com/ws/remote/5624/worker...
+2026-02-04 01:32:12,188 - INFO - Connected! Waiting for jobs...
+2026-02-04 01:32:34,361 - INFO - Received Job: YashRaj - Kaayda / Faayda
+2026-02-04 01:32:43,693 - INFO - Vectorization successful
+2026-02-04 01:32:44,346 - INFO - Received Job: The Siege - CBSC
+2026-02-04 01:32:49,918 - INFO - Vectorization successful
+2026-02-04 01:32:50,386 - INFO - Received Job: Dhanji - 4424
+2026-02-04 01:32:56,867 - INFO - Vectorization successful
+2026-02-04 01:32:57,300 - INFO - Received Job: Seedhe Maut - MP3
+2026-02-04 01:33:04,171 - INFO - Vectorization successful
+2026-02-04 01:33:04,717 - INFO - Received Job: Saar Punch - Kaloli
+2026-02-04 01:33:11,985 - INFO - Vectorization successful
+2026-02-04 01:33:12,453 - INFO - Received Job: Divine - Kaam 25 - Sacred Games
+2026-02-04 01:33:19,766 - INFO - Vectorization successful
+2026-02-04 01:33:20,171 - INFO - Received Job: King - F*CK WHAT THEY SAY
+2026-02-04 01:33:30,873 - INFO - Vectorization successful
+2026-02-04 01:33:31,300 - INFO - Received Job: The Siege - Deeware
+2026-02-04 01:33:38,798 - INFO - Vectorization successful
+2026-02-04 01:33:39,226 - INFO - Received Job: Sabat Batin - Gal Sun
+2026-02-04 01:33:47,060 - INFO - Vectorization successful
+2026-02-04 01:33:47,479 - INFO - Received Job: Karun - Mrignaini
+2026-02-04 01:33:53,283 - INFO - Vectorization successful
+2026-02-04 01:33:53,702 - INFO - Received Job: Ali Zafar - Voh Dekhnay Mein
+2026-02-04 01:34:02,549 - INFO - Vectorization successful
+2026-02-04 01:34:02,974 - INFO - Received Job: LIFAFA - Nikamma
+2026-02-04 01:34:12,601 - INFO - Vectorization successful
+2026-02-04 01:34:13,027 - INFO - Received Job: Divine - Triple OG
+2026-02-04 01:34:21,419 - INFO - Vectorization successful
+2026-02-04 01:34:21,934 - INFO - Received Job: Saar Punch - Maykhana
+2026-02-04 01:34:32,447 - INFO - Vectorization successful
+2026-02-04 01:34:32,868 - INFO - Received Job: Lord Huron - The Night We Met
+2026-02-04 01:34:40,683 - INFO - Vectorization successful
+2026-02-04 01:34:41,111 - INFO - Received Job: Arpit Bala - Chuppi
+2026-02-04 01:34:49,818 - INFO - Vectorization successful
+2026-02-04 01:34:50,245 - INFO - Received Job: SHASHXNK - Haseena
+2026-02-04 01:34:57,409 - INFO - Vectorization successful
+2026-02-04 01:34:57,850 - INFO - Received Job: YashRaj - IDENTITY THEFT.
+2026-02-04 01:35:07,101 - INFO - Vectorization successful
+2026-02-04 01:35:07,555 - INFO - Received Job: Arpit Bala - Champakali
+2026-02-04 01:35:13,898 - INFO - Vectorization successful
+2026-02-04 01:35:14,430 - INFO - Received Job: Dhanji - JAYANTI
+2026-02-04 01:35:23,286 - INFO - Vectorization successful
+2026-02-04 01:35:23,736 - INFO - Received Job: KSHMR - Bhussi
+2026-02-04 01:35:33,403 - INFO - Vectorization successful
+2026-02-04 01:35:33,889 - INFO - Received Job: Rawal - Moohfatt
+2026-02-04 01:35:46,313 - INFO - Vectorization successful
+2026-02-04 01:35:46,771 - INFO - Received Job: AP Dhillon - Old Money
+2026-02-04 01:35:53,817 - INFO - Vectorization successful
+2026-02-04 01:35:54,430 - INFO - Received Job: Steve Lacy - Dark Red
+2026-02-04 01:36:04,092 - INFO - Vectorization successful
+2026-02-04 01:36:04,523 - INFO - Received Job: Dhanji - Peep the Tareeka - Remix
+2026-02-04 01:36:14,603 - INFO - Vectorization successful
+2026-02-04 01:36:15,040 - INFO - Received Job: Osho Jain - Dekha Hi Nahi
+2026-02-04 01:36:26,079 - INFO - Vectorization successful
+2026-02-04 01:36:26,497 - INFO - Received Job: Ritviz - Chalo Chalein
+2026-02-04 01:36:36,576 - INFO - Vectorization successful
+2026-02-04 01:36:37,022 - INFO - Received Job: Seedhe Maut - Cha Chi
+2026-02-04 01:36:45,432 - INFO - Vectorization successful
+2026-02-04 01:36:45,866 - INFO - Received Job: Karan Aujla - Boyfriend
+2026-02-04 01:36:52,833 - INFO - Vectorization successful
+2026-02-04 01:36:53,306 - INFO - Received Job: Chaar Diwaari - LOVESEXDHOKA!!!
+2026-02-04 01:37:03,257 - INFO - Vectorization successful
+2026-02-04 01:37:03,685 - INFO - Received Job: Lucky Ali - Safarnama
+2026-02-04 01:37:13,779 - INFO - Vectorization successful
+2026-02-04 01:37:14,325 - INFO - Received Job: Karan Aujla - For A Reason
+2026-02-04 01:37:23,649 - INFO - Vectorization successful
+2026-02-04 01:37:24,220 - INFO - Received Job: Rawal - Bombay Sapphire
+2026-02-04 01:37:33,859 - INFO - Vectorization successful
+2026-02-04 01:37:34,434 - INFO - Received Job: EsDeeKid - 4 Raws
+2026-02-04 01:37:41,493 - INFO - Vectorization successful
+2026-02-04 01:37:41,916 - INFO - Received Job: Karun - Heeriye
+2026-02-04 01:37:51,575 - INFO - Vectorization successful
+2026-02-04 01:37:52,018 - INFO - Received Job: MC Amrit - NAKHRE
+2026-02-04 01:38:02,129 - INFO - Vectorization successful
+2026-02-04 01:38:02,557 - INFO - Received Job: Gorillaz - Dirty Harry (feat. Bootie Brown)
+2026-02-04 01:38:11,187 - INFO - Vectorization successful
+2026-02-04 01:38:11,711 - INFO - Received Job: Dox - Superstar
+2026-02-04 01:38:19,811 - INFO - Vectorization successful
+2026-02-04 01:38:20,266 - INFO - Received Job: Atif Aslam - Hona Tha Pyar
+2026-02-04 01:38:28,741 - INFO - Vectorization successful
+2026-02-04 01:38:29,172 - INFO - Received Job: Seedhe Maut - SHUTDOWN
+2026-02-04 01:38:40,957 - INFO - Vectorization successful
+2026-02-04 01:38:41,411 - INFO - Received Job: Seedhe Maut - Bure Din
+2026-02-04 01:38:50,761 - INFO - Vectorization successful
+2026-02-04 01:38:51,241 - INFO - Received Job: Raftaar - BAAWE
+2026-02-04 01:38:58,295 - INFO - Vectorization successful
+2026-02-04 01:38:58,706 - INFO - Received Job: Rashid Ali - Kabhi Kabhi Aditi
+2026-02-04 01:39:06,709 - INFO - Vectorization successful
+2026-02-04 01:39:07,327 - INFO - Received Job: Seedhe Maut - RED
+2026-02-04 01:39:19,137 - INFO - Vectorization successful
+2026-02-04 01:39:19,566 - INFO - Received Job: Pritam - Ye Tune Kya Kiya
+2026-02-04 01:39:29,685 - INFO - Vectorization successful
+2026-02-04 01:39:30,102 - INFO - Received Job: Bhaskar - Dalli
+2026-02-04 01:39:31,561 - WARNING - Download failed for Bhaskar - Dalli: list index out of range
+2026-02-04 01:39:31,561 - WARNING - Download failed
+2026-02-04 01:39:31,948 - INFO - Received Job: Frappe Ash - Ishqa Da Jahaan
+2026-02-04 01:39:41,162 - INFO - Vectorization successful
+2026-02-04 01:39:41,582 - INFO - Received Job: Seedhe Maut - Maar Kaat
+2026-02-04 01:39:46,626 - INFO - Vectorization successful
+2026-02-04 01:39:47,031 - INFO - Received Job: The Siege - 3 Cheez
+2026-02-04 01:39:53,142 - INFO - Vectorization successful
+2026-02-04 01:39:53,600 - INFO - Received Job: AP Dhillon - Dil Nu
+2026-02-04 01:40:02,058 - INFO - Vectorization successful
+2026-02-04 01:40:02,472 - INFO - Received Job: Nanku - Kaafizyada
+2026-02-04 01:40:10,331 - INFO - Vectorization successful
+2026-02-04 01:40:10,765 - INFO - Received Job: Hardbone Boy - Nadi
+2026-02-04 01:40:20,298 - INFO - Vectorization successful
+2026-02-04 01:40:20,736 - INFO - Received Job: Rawal - Meri Zindagi
+2026-02-04 01:40:27,696 - INFO - Vectorization successful
+2026-02-04 01:40:28,131 - INFO - Received Job: Sona Mohapatra - Ambarsariya
+2026-02-04 01:40:36,765 - INFO - Vectorization successful
+2026-02-04 01:40:37,213 - INFO - Received Job: Farhan Khan - Cigarette
+2026-02-04 01:40:45,442 - INFO - Vectorization successful
+2026-02-04 01:40:45,906 - INFO - Received Job: Karan Aujla - Wavy
+2026-02-04 01:40:52,766 - INFO - Vectorization successful
+2026-02-04 01:40:53,212 - INFO - Received Job: BAGI MUNDA - Deewana
+2026-02-04 01:41:01,768 - INFO - Vectorization successful
+2026-02-04 01:41:02,225 - INFO - Received Job: MC Amrit - Adidas
+2026-02-04 01:41:08,553 - INFO - Vectorization successful
+2026-02-04 01:41:08,971 - INFO - Received Job: Chaar Diwaari - Banda Kaam Ka
+2026-02-04 01:41:17,911 - INFO - Vectorization successful
+2026-02-04 01:41:18,358 - INFO - Received Job: Arctic Monkeys - I Wanna Be Yours
+2026-02-04 01:41:26,266 - INFO - Vectorization successful
+2026-02-04 01:41:26,690 - INFO - Received Job: Pritam - Ajj Din Chadheya
+2026-02-04 01:41:36,410 - INFO - Vectorization successful
+2026-02-04 01:41:36,814 - INFO - Received Job: OG Lucifer - Suhana Din
+2026-02-04 01:41:47,070 - INFO - Vectorization successful
+2026-02-04 01:41:47,477 - INFO - Received Job: Pritam - Tum Se Hi
+2026-02-04 01:41:58,715 - INFO - Vectorization successful
+2026-02-04 01:41:59,128 - INFO - Received Job: BAGI MUNDA - HOOD FAME
+2026-02-04 01:42:08,659 - INFO - Vectorization successful
+2026-02-04 01:42:09,098 - INFO - Received Job: Guru Randhawa - Sirra
+2026-02-04 01:42:15,632 - INFO - Vectorization successful
+2026-02-04 01:42:16,053 - INFO - Received Job: J. Cole - Change
+2026-02-04 01:42:26,983 - INFO - Vectorization successful
+2026-02-04 01:42:27,394 - INFO - Received Job: Frappe Ash - SHARMEELI
+2026-02-04 01:42:33,411 - INFO - Vectorization successful
+2026-02-04 01:42:33,819 - INFO - Received Job: Arpit Bala - Kaise Manaye
+2026-02-04 01:42:41,016 - INFO - Vectorization successful
+2026-02-04 01:47:13,173 - ERROR - Connection closed by server
+2026-02-04 01:50:13,483 - INFO - Connecting to wss://chaarfm.onrender.com/ws/remote/8707/worker...
+2026-02-04 01:50:14,876 - INFO - Connected! Waiting for jobs...
+2026-02-04 01:53:43,917 - INFO - Received Job: YashRaj - Custom Fabric
+2026-02-04 01:53:51,543 - INFO - Vectorization successful
+2026-02-04 01:53:51,998 - INFO - Received Job: AP Dhillon - Majhail
+2026-02-04 01:54:05,167 - INFO - Vectorization successful
+2026-02-04 01:54:05,571 - INFO - Received Job: The Neighbourhood - Daddy Issues
+2026-02-04 01:54:16,979 - INFO - Vectorization successful
+2026-02-04 01:54:17,378 - INFO - Received Job: Panther - You Don't Want Your Nails Done
+2026-02-04 01:54:26,747 - INFO - Vectorization successful
+2026-02-04 01:54:27,153 - INFO - Received Job: Vasu Raina - hayat
+2026-02-04 01:54:42,327 - INFO - Vectorization successful
+2026-02-04 01:54:43,106 - INFO - Received Job: Lucky Ali - Teri Yaadein
+2026-02-04 01:54:54,415 - INFO - Vectorization successful
+2026-02-04 01:54:54,817 - INFO - Received Job: Frappe Ash - Apni Wali
+2026-02-04 01:55:03,596 - INFO - Vectorization successful
+2026-02-04 01:55:04,087 - INFO - Received Job: Stéphane Pompougnac - Better Days (feat. Tiger Lily)
+2026-02-04 01:55:05,325 - WARNING - Download failed for Stéphane Pompougnac - Better Days (feat. Tiger Lily): list index out of range
+2026-02-04 01:55:05,325 - WARNING - Download failed
+2026-02-04 01:55:05,848 - INFO - Received Job: Amit Trivedi - Iktara
+2026-02-04 01:55:14,921 - INFO - Vectorization successful
+2026-02-04 01:55:15,341 - INFO - Received Job: Boozoo Bajou - Keep Going
+2026-02-04 01:55:27,234 - INFO - Vectorization successful
+2026-02-04 01:55:27,630 - INFO - Received Job: Sukha - GODFATHER
+2026-02-04 01:55:34,886 - INFO - Vectorization successful
+2026-02-04 01:55:35,282 - INFO - Received Job: Shubh - You and Me
+2026-02-04 01:55:42,254 - INFO - Vectorization successful
+2026-02-04 01:55:42,857 - INFO - Received Job: Rouge Rouge - Oui !
+2026-02-04 01:55:53,050 - INFO - Vectorization successful
+2026-02-04 01:55:53,467 - INFO - Received Job: Amit Trivedi - Shauq
+2026-02-04 01:56:02,017 - INFO - Vectorization successful
+2026-02-04 01:56:02,411 - INFO - Received Job: Vishal-Shekhar - Tujhe Bhula Diya
+2026-02-04 01:56:12,609 - INFO - Vectorization successful
+2026-02-04 01:56:13,012 - INFO - Received Job: Sonder - Care
+2026-02-04 01:56:20,730 - INFO - Vectorization successful
+2026-02-04 01:56:21,141 - INFO - Received Job: Bilal Saeed - Adi Adi Raat
+2026-02-04 01:56:29,070 - INFO - Vectorization successful
+2026-02-04 01:56:29,523 - INFO - Received Job: Arijit Singh - Tujhe Kitna Chahne Lage
+2026-02-04 01:56:38,759 - INFO - Vectorization successful
+2026-02-04 01:56:39,167 - INFO - Received Job: Mohit Chauhan - Sheher Mein
+2026-02-04 01:56:49,303 - INFO - Vectorization successful
+2026-02-04 01:56:49,785 - INFO - Received Job: Rodney Hunter - Interlude
+2026-02-04 01:56:58,964 - INFO - Vectorization successful
+2026-02-04 01:56:59,381 - INFO - Received Job: Deep Dive Corp. - Bali Hi
+2026-02-04 01:57:14,619 - INFO - Vectorization successful
+2026-02-04 01:57:15,015 - INFO - Received Job: EsDeeKid - Century
+2026-02-04 01:57:20,259 - INFO - Vectorization successful
+2026-02-04 01:57:20,653 - INFO - Received Job: Tyler, The Creator - BEST INTEREST
+2026-02-04 01:57:27,136 - INFO - Vectorization successful
+2026-02-04 01:57:27,551 - INFO - Received Job: Brent Faiyaz - Rehab (Winter In Paris)
+2026-02-04 01:57:36,175 - INFO - Vectorization successful
+2026-02-04 01:57:36,595 - INFO - Received Job: The Neighbourhood - The Beach
+2026-02-04 01:57:44,452 - INFO - Vectorization successful
+2026-02-04 01:57:44,966 - INFO - Received Job: Farhan Khan - Aankhon Ne Maara
+2026-02-04 01:57:53,763 - INFO - Vectorization successful
+2026-02-04 01:57:54,274 - INFO - Received Job: Talha Anjum - Two Tone
+2026-02-04 01:58:02,605 - INFO - Vectorization successful
+2026-02-04 01:58:03,033 - INFO - Received Job: Anjan Dutt - Tumi Na Thakle
+2026-02-04 01:58:13,320 - INFO - Vectorization successful
+2026-02-04 01:58:13,723 - INFO - Received Job: Chaar Diwaari - Bhool Ja (feat. rohanyv)
+2026-02-04 01:58:21,872 - INFO - Vectorization successful
+2026-02-04 01:58:22,271 - INFO - Received Job: King - Love And Pride
+2026-02-04 01:58:30,601 - INFO - Vectorization successful
+2026-02-04 01:58:31,045 - INFO - Received Job: Sonder - Nobody But You
+2026-02-04 01:58:39,443 - INFO - Vectorization successful
+2026-02-04 01:58:39,839 - INFO - Received Job: Frank Ocean - Self Control
+2026-02-04 01:58:50,330 - INFO - Vectorization successful
+2026-02-04 01:58:50,740 - INFO - Received Job: Fotty Seven - Banjo
+2026-02-04 01:58:57,772 - INFO - Vectorization successful
+2026-02-04 01:58:58,182 - INFO - Received Job: Kr$na - Prarthana
+2026-02-04 01:59:05,977 - INFO - Vectorization successful
+2026-02-04 01:59:06,381 - INFO - Received Job: Anuv Jain - ALAG AASMAAN (a song on the ukulele)
+2026-02-04 01:59:13,901 - INFO - Vectorization successful
+2026-02-04 01:59:14,348 - INFO - Received Job: Diljit Dosanjh - Lemonade
+2026-02-04 01:59:20,630 - INFO - Vectorization successful
+2026-02-04 01:59:21,043 - INFO - Received Job: The Pursuetist House - Speak Up
+2026-02-04 01:59:30,581 - INFO - Vectorization successful
+2026-02-04 01:59:30,994 - INFO - Received Job: Chaar Diwaari - Enjaay
+2026-02-04 01:59:39,234 - INFO - Vectorization successful
+2026-02-04 01:59:39,625 - INFO - Received Job: Dhanji - IN EVENT OF CHANGE, MONEY & NOTERIETY
+2026-02-04 01:59:52,957 - INFO - Vectorization successful
+2026-02-04 01:59:53,368 - INFO - Received Job: Gunda - Ek Zubani Tere Naam
+2026-02-04 02:00:02,221 - INFO - Vectorization successful
+2026-02-04 02:00:02,620 - INFO - Received Job: Lucky Ali - Kabhi Aisa Lagta Hai
+2026-02-04 02:00:17,494 - INFO - Vectorization successful
+2026-02-04 02:00:17,932 - INFO - Received Job: Vishal-Shekhar - Chammak Challo
+2026-02-04 02:00:25,809 - INFO - Vectorization successful
+2026-02-04 02:00:26,199 - INFO - Received Job: HARNOOR - Chan Vekhya
+2026-02-04 02:00:33,948 - INFO - Vectorization successful
+2026-02-04 02:00:34,381 - INFO - Received Job: Prateek Kuhad - 100 Words
+2026-02-04 02:00:43,033 - INFO - Vectorization successful
+2026-02-04 02:00:43,451 - INFO - Received Job: LIFAFA - Din Raat
+2026-02-04 02:00:54,945 - INFO - Vectorization successful
+2026-02-04 02:00:55,378 - INFO - Received Job: Kanye West - Dark Fantasy
+2026-02-04 02:01:08,962 - INFO - Vectorization successful
+2026-02-04 02:01:09,356 - INFO - Received Job: AP Dhillon - Bora Bora (feat. Ayra Starr)
+2026-02-04 02:01:16,423 - INFO - Vectorization successful
+2026-02-04 02:01:16,844 - INFO - Received Job: LIFAFA - Laash
+2026-02-04 02:01:31,276 - INFO - Vectorization successful
+2026-02-04 02:01:31,676 - INFO - Received Job: Tsumyoki - all over again
+2026-02-04 02:01:41,358 - INFO - Vectorization successful
+2026-02-04 02:01:41,761 - INFO - Received Job: Shreyas - A Verse Everyday
+2026-02-04 02:01:48,516 - INFO - Vectorization successful
+2026-02-04 02:01:48,906 - INFO - Received Job: akshath - Kya Ho Gaya
+2026-02-04 02:01:57,245 - INFO - Vectorization successful
+2026-02-04 02:01:57,703 - INFO - Received Job: Talwiinder - Kammo Ji
+2026-02-04 02:02:04,474 - INFO - Vectorization successful
+2026-02-04 02:02:04,877 - INFO - Received Job: Saar Punch - Kaloli - Saar Punch X Burrah X Bharg ft. Gagan Arora
+2026-02-04 02:02:12,414 - INFO - Vectorization successful
+2026-02-04 02:02:12,890 - INFO - Received Job: The Siege - Sundays
+2026-02-04 02:02:22,545 - INFO - Vectorization successful
+2026-02-04 02:02:22,980 - INFO - Received Job: Tame Impala - Nangs
+2026-02-04 02:02:30,024 - INFO - Vectorization successful
+2026-02-04 02:02:30,410 - INFO - Received Job: Tyler, The Creator - Darling, I (feat. Teezo Touchdown)
+2026-02-04 02:02:40,578 - INFO - Vectorization successful
+2026-02-04 02:02:41,059 - INFO - Received Job: Tame Impala - One More Hour
+2026-02-04 02:02:54,148 - INFO - Vectorization successful
+2026-02-04 02:02:54,560 - INFO - Received Job: Chaar Diwaari - VIOLENCE
+2026-02-04 02:03:03,449 - INFO - Vectorization successful
+2026-02-04 02:03:03,879 - INFO - Received Job: prabh deep - Khat
+2026-02-04 02:03:12,635 - INFO - Vectorization successful
+2026-02-04 02:03:13,055 - INFO - Received Job: Yo Yo Honey Singh - Yaar Naa Miley (From "Kick")
+2026-02-04 02:03:21,611 - INFO - Vectorization successful
+2026-02-04 02:03:22,030 - INFO - Received Job: Rouge Rouge - L' Amour
+2026-02-04 02:03:35,016 - INFO - Vectorization successful
+2026-02-04 02:03:35,438 - INFO - Received Job: Baggh-e SMG - STIFF KIN
+2026-02-04 02:03:43,533 - INFO - Vectorization successful
+2026-02-04 02:03:43,927 - INFO - Received Job: Sharry Mann - Shakti Water
+2026-02-04 02:03:51,745 - INFO - Vectorization successful
+2026-02-04 02:03:52,148 - INFO - Received Job: Darzi - Nazar
+2026-02-04 02:04:02,557 - INFO - Vectorization successful
+2026-02-04 02:04:02,948 - INFO - Received Job: Bilal Saeed - Adhi Adhi Raat
+2026-02-04 02:04:11,557 - INFO - Vectorization successful
+2026-02-04 02:04:11,954 - INFO - Received Job: Divine - 100 Million
+2026-02-04 02:04:21,461 - INFO - Vectorization successful
+2026-02-04 02:04:21,893 - INFO - Received Job: Mohit Chauhan - Dooriyan
+2026-02-04 02:04:33,054 - INFO - Vectorization successful
+2026-02-04 02:04:33,439 - INFO - Received Job: akshath - Tu Hi Wajah
+2026-02-04 02:04:40,151 - INFO - Vectorization successful
+2026-02-04 02:04:40,563 - INFO - Received Job: Khayek - Apharan
+2026-02-04 02:04:52,242 - INFO - Vectorization successful
+2026-02-04 02:04:52,718 - INFO - Received Job: Steve Lacy - C U Girl
+2026-02-04 02:04:58,495 - INFO - Vectorization successful
+2026-02-04 02:04:58,898 - INFO - Received Job: Atif Aslam - Pehli Nazar Mein
+2026-02-04 02:05:07,985 - INFO - Vectorization successful
+2026-02-04 02:05:08,402 - INFO - Received Job: Hardbone Boy - Sambhal Ke Chal
+2026-02-04 02:05:15,044 - INFO - Vectorization successful
+2026-02-04 02:05:15,479 - INFO - Received Job: Kali Uchis - Hasta Cuando
+2026-02-04 02:05:22,245 - INFO - Vectorization successful
+2026-02-04 02:05:25,935 - ERROR - Connection closed by server
+2026-02-04 08:48:53,157 - INFO - Connecting to wss://chaarfm.onrender.com/ws/remote/2374/worker...
+2026-02-04 08:48:54,427 - INFO - Connected! Waiting for jobs...
+2026-02-04 08:50:52,865 - INFO - Received Job: Frappe Ash - Paise Ke Liye
+2026-02-04 08:51:02,728 - INFO - Vectorization successful
+2026-02-04 08:51:03,176 - INFO - Received Job: Bhaskar - All Again
+2026-02-04 08:51:13,928 - INFO - Vectorization successful
+2026-02-04 08:51:14,393 - INFO - Received Job: King - Carry On
+2026-02-04 08:51:22,980 - INFO - Vectorization successful
+2026-02-04 08:51:23,341 - INFO - Received Job: Mohit Chauhan - Tum Ho
+2026-02-04 08:51:34,336 - INFO - Vectorization successful
+2026-02-04 08:51:34,801 - INFO - Received Job: Sachin-Jigar - Maana Ke Hum Yaar Nahin
+2026-02-04 08:51:47,606 - INFO - Vectorization successful
+2026-02-04 08:51:47,995 - INFO - Received Job: Tsumyoki - idk
+2026-02-04 08:51:56,621 - INFO - Vectorization successful
+2026-02-04 08:51:56,997 - INFO - Received Job: Drake - The Motto
+2026-02-04 08:52:05,938 - INFO - Vectorization successful
+2026-02-04 08:52:06,306 - INFO - Received Job: Sachin-Jigar - Aaj Ki Raat (From "Stree 2")
+2026-02-04 08:52:15,384 - INFO - Vectorization successful
+2026-02-04 08:52:15,776 - INFO - Received Job: Frank Ocean - Pyramids
+2026-02-04 08:52:32,639 - INFO - Vectorization successful
+2026-02-04 08:52:33,004 - INFO - Received Job: Mc Stan - Haath Varthi
+2026-02-04 08:52:42,027 - INFO - Vectorization successful
+2026-02-04 08:52:42,625 - INFO - Received Job: Nickodemus - Los Tarantos
+2026-02-04 08:52:59,792 - INFO - Vectorization successful
+2026-02-04 08:53:00,274 - INFO - Received Job: Billy Joel - Vienna
+2026-02-04 08:53:09,886 - INFO - Vectorization successful
+2026-02-04 08:53:10,312 - INFO - Received Job: Dhanji - 22 Wale Bande
+2026-02-04 08:53:18,722 - INFO - Vectorization successful
+2026-02-04 08:53:19,204 - INFO - Received Job: Nickodemus - Calle Sol
+2026-02-04 08:53:28,775 - INFO - Vectorization successful
+2026-02-04 08:53:29,128 - INFO - Received Job: Dream Note - Dil
+2026-02-04 08:53:38,061 - INFO - Vectorization successful
+2026-02-04 08:53:38,514 - INFO - Received Job: Arctic Monkeys - Old Yellow Bricks
+2026-02-04 08:53:45,919 - INFO - Vectorization successful
+2026-02-04 08:53:46,269 - INFO - Received Job: Tame Impala - Reality in Motion
+2026-02-04 08:53:55,557 - INFO - Vectorization successful
+2026-02-04 08:53:55,916 - INFO - Received Job: Raftaar - TRAP PRAA
+2026-02-04 08:54:05,198 - INFO - Vectorization successful
+2026-02-04 08:54:05,551 - INFO - Received Job: A.R. Rahman - Param Sundari
+2026-02-04 08:54:12,759 - INFO - Vectorization successful
+2026-02-04 08:54:13,129 - INFO - Received Job: The Pursuetist House - Jawaab (feat. tricksingh & Dishaan)
+2026-02-04 08:54:21,151 - INFO - Vectorization successful
+2026-02-04 08:54:21,602 - INFO - Received Job: Shreyas - Kaapsacha Kaalij
+2026-02-04 08:54:27,273 - INFO - Vectorization successful
+2026-02-04 08:54:27,670 - INFO - Received Job: Karuan - The Holy Is Under The Light
+2026-02-04 08:54:38,552 - INFO - Vectorization successful
+2026-02-04 08:54:38,913 - INFO - Received Job: Shubh - Dior
+2026-02-04 08:54:46,425 - INFO - Vectorization successful
+2026-02-04 08:54:46,806 - INFO - Received Job: Drake - Too Good
+2026-02-04 08:54:55,557 - INFO - Vectorization successful
+2026-02-04 08:54:55,921 - INFO - Received Job: EsDeeKid - Ferragamo
+2026-02-04 08:55:03,316 - INFO - Vectorization successful
+2026-02-04 08:55:03,716 - INFO - Received Job: Kr$na - Roll Up
+2026-02-04 08:55:12,977 - INFO - Vectorization successful
+2026-02-04 08:55:13,367 - INFO - Received Job: Nanku - Titlee
+2026-02-04 08:55:20,396 - INFO - Vectorization successful
+2026-02-04 08:55:20,759 - INFO - Received Job: YashRaj - VN1 (SEEKH)
+2026-02-04 08:55:28,643 - INFO - Vectorization successful
+2026-02-04 08:55:28,996 - INFO - Received Job: Kr$na - Saza-E-Maut
+2026-02-04 08:55:37,322 - INFO - Vectorization successful
+2026-02-04 08:55:37,699 - INFO - Received Job: Dhanji - MULAQAT
+2026-02-04 08:55:45,891 - INFO - Vectorization successful
+2026-02-04 08:55:46,251 - INFO - Received Job: Baggh-e SMG - OVERSEAS
+2026-02-04 08:55:55,462 - INFO - Vectorization successful
+2026-02-04 08:55:55,832 - INFO - Received Job: Miguel - Quickie
+2026-02-04 08:56:05,839 - INFO - Vectorization successful
+2026-02-04 08:56:06,214 - INFO - Received Job: Diljit Dosanjh - Hass Hass
+2026-02-04 08:56:13,222 - INFO - Vectorization successful
+2026-02-04 08:56:13,591 - INFO - Received Job: Nanku - Aajkal
+2026-02-04 08:56:18,916 - INFO - Vectorization successful
+2026-02-04 08:56:19,282 - INFO - Received Job: Jazzy B - Kaun Nachdi (Sada Desi Fix)
+2026-02-04 08:56:29,127 - INFO - Vectorization successful
+2026-02-04 08:56:29,498 - INFO - Received Job: MC Amrit - Tuco Salamanca (feat. Inferno)
+2026-02-04 08:56:30,535 - WARNING - Download failed for MC Amrit - Tuco Salamanca (feat. Inferno): list index out of range
+2026-02-04 08:56:30,536 - WARNING - Download failed
+2026-02-04 08:56:30,869 - INFO - Received Job: Farhan Khan - Masoom
+2026-02-04 08:56:39,150 - INFO - Vectorization successful
+2026-02-04 08:56:39,549 - INFO - Received Job: Anjan Dutt - Sabai Keno
+2026-02-04 08:56:51,652 - INFO - Vectorization successful
+2026-02-04 08:56:52,017 - INFO - Received Job: Shubh - One Love
+2026-02-04 08:57:00,173 - INFO - Vectorization successful
+2026-02-04 08:57:00,561 - INFO - Received Job: Daniel Caesar - Do You Like Me?
+2026-02-04 08:57:11,623 - INFO - Vectorization successful
+2026-02-04 08:57:11,986 - INFO - Received Job: MC Amrit - Drunken Master
+2026-02-04 08:57:19,619 - INFO - Vectorization successful
+2026-02-04 08:57:20,009 - INFO - Received Job: Guru Randhawa - Morni Banke (From "Badhaai Ho")
+2026-02-04 08:57:27,521 - INFO - Vectorization successful
+2026-02-04 08:57:27,894 - INFO - Received Job: Panther - Tennis Lesson
+2026-02-04 08:57:35,501 - INFO - Vectorization successful
+2026-02-04 08:57:35,866 - INFO - Received Job: Boozoo Bajou - Second To None
+2026-02-04 08:57:49,078 - INFO - Vectorization successful
+2026-02-04 08:57:49,497 - INFO - Received Job: Vishal-Shekhar - Radha
+2026-02-04 08:58:03,102 - INFO - Vectorization successful
+2026-02-04 08:58:03,622 - INFO - Received Job: Raftaar - Chora Baba Ka
+2026-02-04 08:58:12,744 - INFO - Vectorization successful
+2026-02-04 08:58:13,103 - INFO - Received Job: Miguel - Come Through and Chill (feat. J. Cole & Salaam Remi)
+2026-02-04 08:58:26,626 - INFO - Vectorization successful
+2026-02-04 08:58:26,991 - INFO - Received Job: Hardbone Boy - Hatasha.
+2026-02-04 08:58:35,532 - INFO - Vectorization successful
+2026-02-04 08:58:35,886 - INFO - Received Job: Karan Aujla - Jee Ni Lagda
+2026-02-04 08:58:42,844 - INFO - Vectorization successful
+2026-02-04 08:58:43,244 - INFO - Received Job: Sidhu Moose Wala - NEVER FOLD
+2026-02-04 08:58:51,690 - INFO - Vectorization successful
+2026-02-04 08:58:52,061 - INFO - Received Job: Sachin-Jigar - Jeena Jeena
+2026-02-04 08:59:01,114 - INFO - Vectorization successful
+2026-02-04 08:59:01,468 - INFO - Received Job: Diljit Dosanjh - Patiala Peg
+2026-02-04 08:59:09,062 - INFO - Vectorization successful
+2026-02-04 08:59:09,473 - INFO - Received Job: Arctic Monkeys - The View from the Afternoon
+2026-02-04 08:59:18,029 - INFO - Vectorization successful
+2026-02-04 08:59:18,386 - INFO - Received Job: Bhaskar - Bassline
+2026-02-04 08:59:30,107 - INFO - Vectorization successful
+2026-02-04 08:59:30,493 - INFO - Received Job: Bali - Jump
+2026-02-04 08:59:37,405 - INFO - Vectorization successful
+2026-02-04 08:59:37,794 - INFO - Received Job: Nickodemus - Give the Drummer Some
+2026-02-04 08:59:49,784 - INFO - Vectorization successful
+2026-02-04 08:59:50,149 - INFO - Received Job: The Weeknd - Save Your Tears
+2026-02-04 08:59:59,162 - INFO - Vectorization successful
+2026-02-04 08:59:59,538 - INFO - Received Job: The Local train - Vaaqif
+2026-02-04 09:00:12,760 - INFO - Vectorization successful
+2026-02-04 09:00:13,118 - INFO - Received Job: Shubh - Elevated
+2026-02-04 09:00:21,321 - INFO - Vectorization successful
+2026-02-04 09:00:21,674 - INFO - Received Job: Arpit Bala - Gulabo
+2026-02-04 09:00:31,691 - INFO - Vectorization successful
+2026-02-04 09:00:32,065 - INFO - Received Job: Parmish Verma - Gaal Ni Kadni
+2026-02-04 09:00:42,989 - INFO - Vectorization successful
+2026-02-04 09:00:43,374 - INFO - Received Job: Sachin-Jigar - Dance Basanti
+2026-02-04 09:00:53,332 - INFO - Vectorization successful
+2026-02-04 09:00:53,782 - INFO - Received Job: Tame Impala - Solitude Is Bliss
+2026-02-04 09:01:02,642 - INFO - Vectorization successful
+2026-02-04 09:01:03,027 - INFO - Received Job: Brent Faiyaz - Dead Man Walking
+2026-02-04 09:01:13,689 - INFO - Vectorization successful
+2026-02-04 09:01:14,196 - INFO - Received Job: Anuv Jain - MAULA
+2026-02-04 09:01:25,095 - INFO - Vectorization successful
+2026-02-04 09:01:25,464 - INFO - Received Job: Sachin-Jigar - Pardesiya - From "Param Sundari"
+2026-02-04 09:01:36,477 - INFO - Vectorization successful
+2026-02-04 09:01:36,829 - INFO - Received Job: Atif Aslam - Aadat - From "Kalyug"
+2026-02-04 09:01:47,822 - INFO - Vectorization successful
+2026-02-04 09:01:48,186 - INFO - Received Job: YashRaj - Matlabi (Interlude)
+2026-02-04 09:01:54,871 - INFO - Vectorization successful
+2026-02-04 09:01:55,252 - INFO - Received Job: Dream Note - Kahaani 2.0
+2026-02-04 09:02:03,788 - INFO - Vectorization successful
+2026-02-04 09:02:04,207 - INFO - Received Job: Nanku - Sarphira
+2026-02-04 09:02:12,841 - INFO - Vectorization successful
+2026-02-04 09:02:13,269 - INFO - Received Job: The Weeknd - Reminder
+2026-02-04 09:02:22,175 - INFO - Vectorization successful
+2026-02-04 09:02:22,592 - INFO - Received Job: Lucky Ali - Kitni Haseen Zindagi
+2026-02-04 09:02:31,911 - INFO - Vectorization successful
+2026-02-04 09:02:32,286 - INFO - Received Job: Amit Trivedi - Zinda
+2026-02-04 09:02:42,591 - INFO - Vectorization successful
+2026-02-04 09:02:43,027 - INFO - Received Job: Hasan Raheem & Abdullah Kasumbi - Hasan Raheem - Wishes ft Talwiinder
+2026-02-04 09:02:51,727 - INFO - Vectorization successful
+2026-02-04 09:02:52,186 - INFO - Received Job: Tame Impala - Love/Paranoia
+2026-02-04 09:03:01,078 - INFO - Vectorization successful
+2026-02-04 09:03:01,446 - INFO - Received Job: Kendrick Lamar - LOVE. FEAT. ZACARI.
+2026-02-04 09:03:10,767 - INFO - Vectorization successful
+2026-02-04 09:03:11,122 - INFO - Received Job: PARTYNEXTDOOR - Come and See Me (feat. Drake)
+2026-02-04 09:03:18,863 - INFO - Vectorization successful
+2026-02-04 09:03:19,322 - INFO - Received Job: Parmish Verma - 4 Yaar
+2026-02-04 09:03:28,344 - INFO - Vectorization successful
+2026-02-04 09:03:28,710 - INFO - Received Job: Mohit Chauhan - Tum Se Hi
+2026-02-04 09:03:39,717 - INFO - Vectorization successful
+2026-02-04 09:03:40,111 - INFO - Received Job: Mohit Chauhan - Haawa Haawa
+2026-02-04 09:03:53,413 - INFO - Vectorization successful
+2026-02-04 09:03:53,813 - INFO - Received Job: Nanku - Kamikaze
+2026-02-04 09:04:02,393 - INFO - Vectorization successful
+2026-02-04 09:04:04,265 - ERROR - Connection closed by server
+2026-02-04 09:17:32,607 - INFO - Connecting to wss://chaarfm.onrender.com/ws/remote/2673/worker...
+2026-02-04 09:17:33,853 - INFO - Connected! Waiting for jobs...
+2026-02-04 09:19:12,749 - INFO - Received Job: Kali Uchis - Gotta Get Up - Interlude
+2026-02-04 09:19:21,887 - INFO - Vectorization successful
+2026-02-04 09:19:22,259 - INFO - Received Job: Pritam - Channa Mereya
+2026-02-04 09:19:34,026 - INFO - Vectorization successful
+2026-02-04 09:19:34,426 - INFO - Received Job: Vasu Raina - Iss Tarah
+2026-02-04 09:19:44,811 - INFO - Vectorization successful
+2026-02-04 09:19:45,261 - INFO - Received Job: Shubh - Supreme
+2026-02-04 09:19:53,230 - INFO - Vectorization successful
+2026-02-04 09:19:53,785 - INFO - Received Job: Parmish Verma - Zindagi
+2026-02-04 09:20:02,203 - INFO - Vectorization successful
+2026-02-04 09:20:02,555 - INFO - Received Job: Arijit Singh - Satranga (From "ANIMAL")
+2026-02-04 09:20:11,827 - INFO - Vectorization successful
+2026-02-04 09:20:12,184 - INFO - Received Job: LIFAFA - Mann Ki Baat
+2026-02-04 09:20:21,240 - INFO - Vectorization successful
+2026-02-04 09:20:21,752 - INFO - Received Job: Prateek Kuhad - Cold/Mess
+2026-02-04 09:20:32,479 - INFO - Vectorization successful
+2026-02-04 09:20:32,827 - INFO - Received Job: Karma - 8 Bar Freestyle
+2026-02-04 09:20:42,996 - INFO - Vectorization successful
+2026-02-04 09:20:43,386 - INFO - Received Job: Bali - Sad Gaana
+2026-02-04 09:20:51,095 - INFO - Vectorization successful
+2026-02-04 09:20:51,539 - INFO - Received Job: Fotty Seven - Haath Toh Laga
+2026-02-04 09:21:00,788 - INFO - Vectorization successful
+2026-02-04 09:21:01,162 - INFO - Received Job: Arijit Singh - Aasan Nahin Yahan
+2026-02-04 09:21:09,091 - INFO - Vectorization successful
+2026-02-04 09:21:09,442 - INFO - Received Job: Kali Uchis - Melting
+2026-02-04 09:21:18,839 - INFO - Vectorization successful
+2026-02-04 09:21:19,218 - INFO - Received Job: Imran Khan - Ni Nachleh
+2026-02-04 09:21:28,002 - INFO - Vectorization successful
+2026-02-04 09:21:28,353 - INFO - Received Job: Yo Yo Honey Singh - Sunny Sunny
+2026-02-04 09:21:39,320 - INFO - Vectorization successful
+2026-02-04 09:21:39,668 - INFO - Received Job: Kanye West - Devil in a New Dress
+2026-02-04 09:21:52,642 - INFO - Vectorization successful
+2026-02-04 09:21:53,053 - INFO - Received Job: Karuan - The Holy Is Under A Line
+2026-02-04 09:22:05,007 - INFO - Vectorization successful
+2026-02-04 09:22:05,463 - INFO - Received Job: Sukha - ROLL WITH ME
+2026-02-04 09:22:12,311 - INFO - Vectorization successful
+2026-02-04 09:22:12,802 - INFO - Received Job: Rodney Hunter - Electric Lady (´2 elektrische bidde´ Madrid De Los Austrias mix)
+2026-02-04 09:22:28,400 - INFO - Vectorization successful
+2026-02-04 09:22:28,777 - INFO - Received Job: De-Phazz - Happiness
+2026-02-04 09:22:39,189 - INFO - Vectorization successful
+2026-02-04 09:22:39,577 - INFO - Received Job: Nanku, Natiq - Mor
+2026-02-04 09:22:51,330 - INFO - Vectorization successful
+2026-02-04 09:22:51,707 - INFO - Received Job: Ritviz - Raahi
+2026-02-04 09:23:03,294 - INFO - Vectorization successful
+2026-02-04 09:23:03,709 - INFO - Received Job: wolf.cryman - Aisa Kaise
+2026-02-04 09:23:13,269 - INFO - Vectorization successful
+2026-02-04 09:23:13,640 - INFO - Received Job: Bharg - Haathi Chiti
+2026-02-04 09:23:22,537 - INFO - Vectorization successful
+2026-02-04 09:23:22,889 - INFO - Received Job: Sonder - Searchin
+2026-02-04 09:23:34,081 - INFO - Vectorization successful
+2026-02-04 09:23:34,435 - INFO - Received Job: Drake - Over
+2026-02-04 09:23:44,330 - INFO - Vectorization successful
+2026-02-04 09:23:44,689 - INFO - Received Job: Mo' Horizons - Salto Angel
+2026-02-04 09:23:58,716 - INFO - Vectorization successful
+2026-02-04 09:23:59,090 - INFO - Received Job: Tame Impala - Eventually
+2026-02-04 09:24:10,542 - INFO - Vectorization successful
+2026-02-04 09:24:10,898 - INFO - Received Job: Arijit Singh - Sooraj Dooba Hain (From "Roy")
+2026-02-04 09:24:20,823 - INFO - Vectorization successful
+2026-02-04 09:24:21,258 - INFO - Received Job: Anjan Dutt - Tumi Na Thakile
+2026-02-04 09:24:33,413 - INFO - Vectorization successful
+2026-02-04 09:24:34,892 - INFO - Received Job: Coldplay - Speed of Sound
+2026-02-04 09:24:44,697 - INFO - Vectorization successful
+2026-02-04 09:24:45,067 - INFO - Received Job: Rouge Rouge - Decide Toi
+2026-02-04 09:24:57,093 - INFO - Vectorization successful
+2026-02-04 09:24:57,492 - INFO - Received Job: Mo' Horizons - Superworld
+2026-02-04 09:25:13,788 - INFO - Vectorization successful
+2026-02-04 09:25:14,276 - INFO - Received Job: Bali - Flex
+2026-02-04 09:25:25,728 - INFO - Vectorization successful
+2026-02-04 09:25:26,097 - INFO - Received Job: BAGI MUNDA - Nazariya
+2026-02-04 09:25:33,186 - INFO - Vectorization successful
+2026-02-04 09:25:33,683 - INFO - Received Job: Saar Punch - Big Ass (Skit)
+2026-02-04 09:25:34,775 - WARNING - Download failed for Saar Punch - Big Ass (Skit): list index out of range
+2026-02-04 09:25:34,775 - WARNING - Download failed
+2026-02-04 09:25:35,187 - INFO - Received Job: OG Lucifer - 1st Year
+2026-02-04 09:25:36,597 - WARNING - Download failed for OG Lucifer - 1st Year: list index out of range
+2026-02-04 09:25:36,597 - WARNING - Download failed
+2026-02-04 09:25:36,923 - INFO - Received Job: Brent Faiyaz - Poison
+2026-02-04 09:25:44,890 - INFO - Vectorization successful
+2026-02-04 09:25:45,239 - INFO - Received Job: Sharry Mann - Zindagi
+2026-02-04 09:25:56,064 - INFO - Vectorization successful
+2026-02-04 09:25:56,410 - INFO - Received Job: Khayek - Yahan Pe
+2026-02-04 09:26:05,899 - INFO - Vectorization successful
+2026-02-04 09:26:06,251 - INFO - Received Job: MC Amrit - Khaki (Intro)
+2026-02-04 09:26:14,287 - INFO - Vectorization successful
+2026-02-04 09:26:14,658 - INFO - Received Job: Vishal-Shekhar - Sheila Ki Jawani
+2026-02-04 09:26:28,303 - INFO - Vectorization successful
+2026-02-04 09:26:28,673 - INFO - Received Job: Mo' Horizons - Hit the Road Jack
+2026-02-04 09:26:41,038 - INFO - Vectorization successful
+2026-02-04 09:26:41,439 - INFO - Received Job: Seedhe Maut - Asal G
+2026-02-04 09:26:51,396 - INFO - Vectorization successful
+2026-02-04 09:26:51,747 - INFO - Received Job: Talwiinder - Gallan 4
+2026-02-04 09:27:00,176 - INFO - Vectorization successful
+2026-02-04 09:27:00,536 - INFO - Received Job: Kanye West - Monster
+2026-02-04 09:27:14,540 - INFO - Vectorization successful
+2026-02-04 09:27:14,890 - INFO - Received Job: Tanishk Bagchi - Saiyaara Reprise - Female
+2026-02-04 09:27:23,325 - INFO - Vectorization successful
+2026-02-04 09:27:23,718 - INFO - Received Job: Mc Stan - 307
+2026-02-04 09:27:31,662 - INFO - Vectorization successful
+2026-02-04 09:27:32,107 - INFO - Received Job: Anuv Jain - Baarishein
+2026-02-04 09:27:39,505 - INFO - Vectorization successful
+2026-02-04 09:27:39,877 - INFO - Received Job: Amrinder Gill - That Girl
+2026-02-04 09:27:49,237 - INFO - Vectorization successful
+2026-02-04 09:27:49,238 - INFO - Keepalive ping sent (keeps server awake)
+2026-02-04 09:27:49,635 - INFO - Received Job: Bhaskar - Shadows
+2026-02-04 09:27:59,704 - INFO - Vectorization successful
+2026-02-04 09:28:00,073 - INFO - Received Job: Amit Trivedi - Suno Aisha
+2026-02-04 09:28:12,382 - INFO - Vectorization successful
+2026-02-04 09:28:12,837 - INFO - Received Job: BAGI MUNDA - Tadpan
+2026-02-04 09:28:21,246 - INFO - Vectorization successful
+2026-02-04 09:28:21,722 - INFO - Received Job: Solange - Things I Imagined
+2026-02-04 09:28:32,010 - INFO - Vectorization successful
+2026-02-04 09:28:32,406 - INFO - Received Job: Taba Chake - In Waadiyon Mein
+2026-02-04 09:28:43,353 - INFO - Vectorization successful
+2026-02-04 09:28:43,756 - INFO - Received Job: Frappe Ash - Drifting
+2026-02-04 09:28:53,210 - INFO - Vectorization successful
+2026-02-04 09:28:53,745 - INFO - Received Job: Anjan Dutt - Brishti
+2026-02-04 09:29:05,918 - INFO - Vectorization successful
+2026-02-04 09:29:06,352 - INFO - Received Job: Bhaskar - Hold On
+2026-02-04 09:29:17,843 - INFO - Vectorization successful
+2026-02-04 09:29:18,231 - INFO - Received Job: Tyler, The Creator - Like Him (feat. Lola Young)
+2026-02-04 09:29:28,281 - INFO - Vectorization successful
+2026-02-04 09:29:28,632 - INFO - Received Job: Chaar Diwaari - BAROOD
+2026-02-04 09:29:36,871 - INFO - Vectorization successful
+2026-02-04 09:29:37,238 - INFO - Received Job: Kali Uchis - Love Between...
+2026-02-04 09:29:52,056 - INFO - Vectorization successful
+2026-02-04 09:29:52,416 - INFO - Received Job: Sonder - Mad Riches
+2026-02-04 09:30:00,348 - INFO - Vectorization successful
+2026-02-04 09:30:00,699 - INFO - Received Job: Sachin-Jigar - Tere Vaaste (From "Zara Hatke Zara Bachke")
+2026-02-04 09:30:07,988 - INFO - Vectorization successful
+2026-02-04 09:30:08,379 - INFO - Received Job: Karuan - Chocolate Distance (feat. Metin Yilmaz Kendal)
+2026-02-04 09:30:24,321 - INFO - Vectorization successful
+2026-02-04 09:30:24,692 - INFO - Received Job: The Weeknd - Wicked Games
+2026-02-04 09:30:35,715 - INFO - Vectorization successful
+2026-02-04 09:30:36,126 - INFO - Received Job: Shankar-Ehsaan-Loy - Kal Ho Naa Ho
+2026-02-04 09:30:47,938 - INFO - Vectorization successful
+2026-02-04 09:30:48,335 - INFO - Received Job: Frappe Ash - JAANA MAI
+2026-02-04 09:30:58,629 - INFO - Vectorization successful
+2026-02-04 09:30:59,000 - INFO - Received Job: Bhaskar - Infinito Particular - Bhaskar Remix
+2026-02-04 09:31:07,896 - INFO - Vectorization successful
+2026-02-04 09:31:08,248 - INFO - Received Job: Nanku, Natiq - Sochna
+2026-02-04 09:31:17,670 - INFO - Vectorization successful
+2026-02-04 09:31:18,102 - INFO - Received Job: Boozoo Bajou - Under My Sensi (Thievery Corporation mix)
+2026-02-04 09:31:31,604 - INFO - Vectorization successful
+2026-02-04 09:31:32,000 - INFO - Received Job: Lucky Ali - Jheel Pe Jaise
+2026-02-04 09:31:43,792 - INFO - Vectorization successful
+2026-02-04 09:31:44,403 - INFO - Received Job: Karuan - Dunya
+2026-02-04 09:31:56,827 - INFO - Vectorization successful
+2026-02-04 09:31:57,186 - INFO - Received Job: Raman Negi - Maqbool
+2026-02-04 09:32:04,662 - INFO - Vectorization successful
+2026-02-04 09:32:05,018 - INFO - Received Job: Khayek - Delhi Night
+2026-02-04 09:32:13,603 - INFO - Vectorization successful
+2026-02-04 09:32:14,045 - INFO - Received Job: PARTYNEXTDOOR - CN TOWER
+2026-02-04 09:32:23,129 - INFO - Vectorization successful
+2026-02-04 09:32:23,537 - INFO - Received Job: Rawal - Lagaan
+2026-02-04 09:32:32,717 - INFO - Vectorization successful
+2026-02-04 09:32:33,258 - INFO - Received Job: Tyler, The Creator - I THINK
+2026-02-04 09:32:43,344 - INFO - Vectorization successful
+2026-02-04 09:32:43,697 - INFO - Received Job: Kr$na - NGL
+2026-02-04 09:32:54,309 - INFO - Vectorization successful
+2026-02-04 09:32:54,686 - INFO - Received Job: Jazzy B - Gaddi
+2026-02-04 09:33:08,993 - INFO - Vectorization successful
+2026-02-04 09:33:09,448 - INFO - Received Job: Bruno Mars - That's What I Like
+2026-02-04 09:33:19,256 - INFO - Vectorization successful
+2026-02-04 09:33:19,624 - INFO - Received Job: Drake - God's Plan
+2026-02-04 09:33:28,456 - INFO - Vectorization successful
+2026-02-04 09:33:28,804 - INFO - Received Job: Stéphane Pompougnac - Fog Edit Version
+2026-02-04 09:33:36,874 - INFO - Vectorization successful
+2026-02-04 09:33:37,222 - INFO - Received Job: Frank Ocean - Godspeed
+2026-02-04 09:33:45,228 - INFO - Vectorization successful
+2026-02-04 09:33:45,576 - INFO - Received Job: Steve Lacy - Ryd
+2026-02-04 09:33:52,584 - INFO - Vectorization successful
+2026-02-04 09:33:52,932 - INFO - Received Job: Baggh-e SMG - Black Whip
+2026-02-04 09:33:59,644 - INFO - Vectorization successful
+2026-02-04 09:33:59,998 - INFO - Received Job: Anuv Jain - BAARISHEIN (ACOUSTIC)
+2026-02-04 09:34:08,225 - INFO - Vectorization successful
+2026-02-04 09:34:08,649 - INFO - Received Job: Shreyas - Guess Who Entered the Zone
+2026-02-04 09:34:15,465 - INFO - Vectorization successful
+2026-02-04 09:34:15,838 - INFO - Received Job: Amrinder Gill - Kafka
+2026-02-04 09:34:23,517 - INFO - Vectorization successful
+2026-02-04 09:34:23,880 - INFO - Received Job: The Siege - Started Off Poor
+2026-02-04 09:34:33,748 - INFO - Vectorization successful
+2026-02-04 09:34:34,258 - INFO - Received Job: The Neighbourhood - Nervous
+2026-02-04 09:34:44,130 - INFO - Vectorization successful
+2026-02-04 09:34:44,482 - INFO - Received Job: Karma - sprinter
+2026-02-04 09:34:56,274 - INFO - Vectorization successful
+2026-02-04 09:34:56,631 - INFO - Received Job: Farhan Khan - Alif aur Tarana - Skit 3
+2026-02-04 09:35:02,602 - INFO - Vectorization successful
+2026-02-04 09:35:02,959 - INFO - Received Job: Daniel Caesar - Superpowers
+2026-02-04 09:35:10,947 - INFO - Vectorization successful
+2026-02-04 09:35:11,331 - INFO - Received Job: Prateek Kuhad - Kasoor
+2026-02-04 09:35:20,475 - INFO - Vectorization successful
+2026-02-04 09:35:20,824 - INFO - Received Job: Frank Ocean - Super Rich Kids
+2026-02-04 09:35:33,515 - INFO - Vectorization successful
+2026-02-04 09:35:33,870 - INFO - Received Job: Panther - Estoy Bien
+2026-02-04 09:35:44,186 - INFO - Vectorization successful
+2026-02-04 09:35:44,594 - INFO - Received Job: Kr$na - Buss Down
+2026-02-04 09:35:52,433 - INFO - Vectorization successful
+2026-02-04 09:35:52,853 - INFO - Received Job: Karuan - Nothing Is Over
+2026-02-04 09:36:06,600 - INFO - Vectorization successful
+2026-02-04 09:36:07,000 - INFO - Received Job: Karuan - chocolate distance (feat metin yilmaz kendal)
+2026-02-04 09:36:17,119 - INFO - Vectorization successful
+2026-02-04 09:36:17,499 - INFO - Received Job: Bali - Kalesh
+2026-02-04 09:36:24,310 - INFO - Vectorization successful
+2026-02-04 09:36:24,669 - INFO - Received Job: Steve Lacy - 2gether (Enterlude)
+2026-02-04 09:36:26,096 - WARNING - Download failed for Steve Lacy - 2gether (Enterlude): list index out of range
+2026-02-04 09:36:26,096 - WARNING - Download failed
+2026-02-04 09:36:26,474 - INFO - Received Job: Frappe Ash - Karein Kya
+2026-02-04 09:36:34,548 - INFO - Vectorization successful
+2026-02-04 09:36:34,918 - INFO - Received Job: Vishal-Shekhar - Kukkad
+2026-02-04 09:36:47,910 - INFO - Vectorization successful
+2026-02-04 09:36:48,277 - INFO - Received Job: Karan Aujla - Winning Speech
+2026-02-04 09:36:58,038 - INFO - Vectorization successful
+2026-02-04 09:36:58,395 - INFO - Received Job: Gunda - Kalakaar
+2026-02-04 09:37:06,781 - INFO - Vectorization successful
+2026-02-04 09:37:07,127 - INFO - Received Job: Rodney Hunter - No Stoppin
+2026-02-04 09:37:20,436 - INFO - Vectorization successful
+2026-02-04 09:37:20,795 - INFO - Received Job: Nickodemus - Cleopatra in New York (feat. Carol C)
+2026-02-04 09:37:34,452 - INFO - Vectorization successful
+2026-02-04 09:37:34,817 - INFO - Received Job: The Neighbourhood - Scary Love
+2026-02-04 09:37:43,094 - INFO - Vectorization successful
+2026-02-04 09:37:43,447 - INFO - Received Job: EsDeeKid - 5am
+2026-02-04 09:37:49,813 - INFO - Vectorization successful
+2026-02-04 09:37:50,158 - INFO - Received Job: Khayek - Buri Baat
+2026-02-04 09:37:59,050 - INFO - Vectorization successful
+2026-02-04 09:37:59,052 - INFO - Keepalive ping sent (keeps server awake)
+2026-02-04 09:37:59,408 - INFO - Received Job: Parmish Verma - Off Limits
+2026-02-04 09:38:06,407 - INFO - Vectorization successful
+2026-02-04 09:38:06,766 - INFO - Received Job: Seedhe Maut - Akatsuki
+2026-02-04 09:38:14,026 - INFO - Vectorization successful
+2026-02-04 09:38:14,396 - INFO - Received Job: Dhanji - WHAT WOULD THE CREDIT DEPARTMENT DO?
+2026-02-04 09:38:29,077 - INFO - Vectorization successful
+2026-02-04 09:38:29,456 - INFO - Received Job: The Local train - Yeh Zindagi Hai - Demo
+2026-02-04 09:38:39,418 - INFO - Vectorization successful
+2026-02-04 09:38:39,786 - INFO - Received Job: Steve Lacy - Give You the World
+2026-02-04 09:38:51,725 - INFO - Vectorization successful
+2026-02-04 09:38:52,091 - INFO - Received Job: Kali Uchis - Endlessly
+2026-02-04 09:39:01,120 - INFO - Vectorization successful
+2026-02-04 09:39:01,523 - INFO - Received Job: Kanye West - POWER
+2026-02-04 09:39:12,936 - INFO - Vectorization successful
+2026-02-04 09:39:13,293 - INFO - Received Job: Frappe Ash - Jo Bhi Ho
+2026-02-04 09:39:21,505 - INFO - Vectorization successful
+2026-02-04 09:39:21,888 - INFO - Received Job: Amrinder Gill - Ocean Eyes
+2026-02-04 09:39:30,189 - INFO - Vectorization successful
+2026-02-04 09:39:30,537 - INFO - Received Job: Talwiinder - Tera Saath
+2026-02-04 09:39:39,800 - INFO - Vectorization successful
+2026-02-04 09:39:40,149 - INFO - Received Job: Sajid-Wajid - Surili Akhiyon Wale - Duet
+2026-02-04 09:39:51,953 - INFO - Vectorization successful
+2026-02-04 09:39:52,303 - INFO - Received Job: King - The Right One
+2026-02-04 09:40:00,626 - INFO - Vectorization successful
+2026-02-04 09:40:01,011 - INFO - Received Job: Coldplay - Warning Sign
+2026-02-04 09:40:13,159 - INFO - Vectorization successful
+2026-02-04 09:40:13,524 - INFO - Received Job: Chaar Diwaari - Chaar Diwaari - MERA SAMAN KAHAN HAI? (Official Video) | TERI MAIYAT KE GAANE EP
+2026-02-04 09:40:22,821 - INFO - Vectorization successful
+2026-02-04 09:40:23,225 - INFO - Received Job: The Weeknd - After Hours
+2026-02-04 09:40:36,093 - INFO - Vectorization successful
+2026-02-04 09:40:36,496 - INFO - Received Job: Raman Negi - Badshah Zero
+2026-02-04 09:40:47,480 - INFO - Vectorization successful
+2026-02-04 09:40:47,831 - INFO - Received Job: Darzi - Bhabhi Hunter
+2026-02-04 09:40:56,078 - INFO - Vectorization successful
+2026-02-04 09:40:56,430 - INFO - Received Job: MC Amrit - Malayi
+2026-02-04 09:41:05,837 - INFO - Vectorization successful
+2026-02-04 09:41:06,204 - INFO - Received Job: The Local train - Mizaaj
+2026-02-04 09:41:16,631 - INFO - Vectorization successful
+2026-02-04 09:41:17,009 - INFO - Received Job: Savneet Singh - Khoya Tha
+2026-02-04 09:41:30,377 - INFO - Vectorization successful
+2026-02-04 09:41:30,763 - INFO - Received Job: Kanye West - Father Stretch My Hands Pt. 1
+2026-02-04 09:41:37,158 - INFO - Vectorization successful
+2026-02-04 09:41:37,511 - INFO - Received Job: SHASHXNK - Saturday (feat. Vash Rover)
+2026-02-04 09:41:44,328 - INFO - Vectorization successful
+2026-02-04 09:41:44,695 - INFO - Received Job: Sidhu Moose Wala - Levels
+2026-02-04 09:41:54,256 - INFO - Vectorization successful
+2026-02-04 09:41:54,613 - INFO - Received Job: SHASHXNK - Mohini
+2026-02-04 09:42:01,583 - INFO - Vectorization successful
+2026-02-04 09:42:02,009 - INFO - Received Job: Karma - Look Up Dere - mixed
+2026-02-04 09:42:11,636 - INFO - Vectorization successful
+2026-02-04 09:42:11,996 - INFO - Received Job: Sonder - Lovely
+2026-02-04 09:42:23,803 - INFO - Vectorization successful
+2026-02-04 09:42:24,330 - INFO - Received Job: Shreyas - Paristhiti Extended
+2026-02-04 09:42:32,671 - INFO - Vectorization successful
+2026-02-04 09:42:33,036 - INFO - Received Job: Divine - Kohinoor
+2026-02-04 09:42:43,104 - INFO - Vectorization successful
+2026-02-04 09:42:43,680 - INFO - Received Job: Rebel 7 - Dhappa!
+2026-02-04 09:42:51,717 - INFO - Vectorization successful
+2026-02-04 09:42:52,118 - INFO - Received Job: AP Dhillon - Excuses
+2026-02-04 09:43:01,146 - INFO - Vectorization successful
+2026-02-04 09:43:01,563 - INFO - Received Job: The Local train - Dil Mere
+2026-02-04 09:43:12,266 - INFO - Vectorization successful
+2026-02-04 09:43:12,616 - INFO - Received Job: Drake - Teenage Fever
+2026-02-04 09:43:22,421 - INFO - Vectorization successful
+2026-02-04 09:43:22,819 - INFO - Received Job: Amit Trivedi - Uyi Amma - From "Azaad"
+2026-02-04 09:43:33,412 - INFO - Vectorization successful
+2026-02-04 09:43:33,766 - INFO - Received Job: Sabat Batin - Ve Sajna
+2026-02-04 09:43:41,045 - INFO - Vectorization successful
+2026-02-04 09:43:41,404 - INFO - Received Job: Pritam - Shayad
+2026-02-04 09:43:50,599 - INFO - Vectorization successful
+2026-02-04 09:43:50,998 - INFO - Received Job: Saar Punch - Saar Punch X Tarun - Kuchh Bhi
+2026-02-04 09:43:59,310 - INFO - Vectorization successful
+2026-02-04 09:43:59,671 - INFO - Received Job: Frank Ocean - Chanel
+2026-02-04 09:44:09,206 - INFO - Vectorization successful
+2026-02-04 09:44:09,578 - INFO - Received Job: Karan Aujla - Admirin' You (feat. Preston Pablo)
+2026-02-04 09:44:18,340 - INFO - Vectorization successful
+2026-02-04 09:44:18,729 - INFO - Received Job: Gunda - Raat dhal Chuki wahan
+2026-02-04 09:44:27,268 - INFO - Vectorization successful
+2026-02-04 09:44:27,615 - INFO - Received Job: Saar Punch - Vish
+2026-02-04 09:44:38,241 - INFO - Vectorization successful
+2026-02-04 09:44:38,609 - INFO - Received Job: AP Dhillon - Saada Pyaar
+2026-02-04 09:44:48,671 - INFO - Vectorization successful
+2026-02-04 09:44:49,034 - INFO - Received Job: Mohit Chauhan - Rang Lageya
+2026-02-04 09:44:57,223 - INFO - Vectorization successful
+2026-02-04 09:44:57,583 - INFO - Received Job: EsDeeKid - Palaces
+2026-02-04 09:45:13,112 - INFO - Vectorization successful
+2026-02-04 09:45:13,472 - INFO - Received Job: Dream Note - KHU
+2026-02-04 09:45:30,587 - INFO - Vectorization successful
+2026-02-04 09:45:30,954 - INFO - Received Job: LIFAFA - Ek Nagma एक नगमा
+2026-02-04 09:45:45,719 - INFO - Vectorization successful
+2026-02-04 09:45:46,074 - INFO - Received Job: Rawal - Bounce
+2026-02-04 09:45:51,911 - INFO - Vectorization successful
+2026-02-04 09:45:52,326 - INFO - Received Job: Darzi - 800 Din
+2026-02-04 09:46:15,757 - INFO - Vectorization successful
+2026-02-04 09:46:16,203 - INFO - Received Job: Ritviz - Liggi
+2026-02-04 09:46:26,930 - INFO - Vectorization successful
+2026-02-04 09:46:27,474 - INFO - Received Job: Steve Lacy - Basement Jack
+2026-02-04 09:46:37,620 - INFO - Vectorization successful
+2026-02-04 09:46:38,013 - INFO - Received Job: Kendrick Lamar - Backseat Freestyle
+2026-02-04 09:46:48,559 - INFO - Vectorization successful
+2026-02-04 09:46:48,977 - INFO - Received Job: Stéphane Pompougnac - Latin Cha Cha
+2026-02-04 09:47:03,527 - INFO - Vectorization successful
+2026-02-04 09:47:03,899 - INFO - Received Job: Seedhe Maut - 11K
+2026-02-04 09:47:13,259 - INFO - Vectorization successful
+2026-02-04 09:47:13,611 - INFO - Received Job: Bharg - Ghagra (From "Crew")
+2026-02-04 09:47:24,052 - INFO - Vectorization successful
+2026-02-04 09:47:24,404 - INFO - Received Job: Amit Trivedi - Qaafirana
+2026-02-04 09:47:37,110 - INFO - Vectorization successful
+2026-02-04 09:47:37,515 - INFO - Received Job: Sachin-Jigar - Aayi Nai (From "Stree 2")
+2026-02-04 09:47:45,129 - INFO - Vectorization successful
+2026-02-04 09:47:45,483 - INFO - Received Job: Sukha - ARMED
+2026-02-04 09:47:53,232 - INFO - Vectorization successful
+2026-02-04 09:47:53,721 - INFO - Received Job: Diljit Dosanjh - Tension
+2026-02-04 09:48:04,475 - INFO - Vectorization successful
+2026-02-04 09:48:04,853 - INFO - Received Job: Sukha - DASS JATTA
+2026-02-04 09:48:16,825 - INFO - Vectorization successful
+2026-02-04 09:48:16,829 - INFO - Keepalive ping sent (keeps server awake)
+2026-02-04 09:48:17,225 - INFO - Received Job: Drake - Marvins Room
+2026-02-04 09:48:35,259 - INFO - Vectorization successful
+2026-02-04 09:48:35,611 - INFO - Received Job: Anjan Dutt - 2441139 - Bela Bose
+2026-02-04 09:48:55,397 - INFO - Vectorization successful
+2026-02-04 09:48:55,750 - INFO - Received Job: Bilal Saeed - BTDT (Been There Done That)
+2026-02-04 09:49:07,729 - INFO - Vectorization successful
+2026-02-04 09:49:08,117 - INFO - Received Job: Bhaskar - This City
+2026-02-04 09:49:23,378 - INFO - Vectorization successful
+2026-02-04 09:49:23,848 - INFO - Received Job: Anjan Dutt - Chyapta Golap
+2026-02-04 09:49:37,669 - INFO - Vectorization successful
+2026-02-04 09:49:38,049 - INFO - Received Job: Daniel Caesar - We Find Love
+2026-02-04 09:49:50,469 - INFO - Vectorization successful
+2026-02-04 09:49:50,844 - INFO - Received Job: Anuv Jain - MISHRI
+2026-02-04 09:50:02,848 - INFO - Vectorization successful
+2026-02-04 09:50:03,244 - INFO - Received Job: Tanishk Bagchi - Sawarne Lage
+2026-02-04 09:50:13,541 - INFO - Vectorization successful
+2026-02-04 09:50:13,888 - INFO - Received Job: King - Maan Meri Jaan (Afterlife)
+2026-02-04 09:50:24,537 - INFO - Vectorization successful
+2026-02-04 09:50:24,894 - INFO - Received Job: Shreyas - too fucked too brave so I suit up
+2026-02-04 09:50:27,445 - WARNING - Download failed for Shreyas - too fucked too brave so I suit up: [0;31mERROR:[0m [youtube] k-SFtqfm1_4: Sign in to confirm your age. This video may be inappropriate for some users. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+2026-02-04 09:50:27,446 - WARNING - Download failed
+2026-02-04 09:50:27,782 - INFO - Received Job: Kendrick Lamar - LOYALTY. FEAT. RIHANNA.
+2026-02-04 09:50:37,508 - INFO - Vectorization successful
+2026-02-04 09:50:37,861 - INFO - Received Job: Nanku, Natiq - BOP
+2026-02-04 09:50:46,926 - INFO - Vectorization successful
+2026-02-04 09:50:47,272 - INFO - Received Job: De-Phazz - Jazz Music
+2026-02-04 09:50:56,030 - INFO - Vectorization successful
+2026-02-04 09:50:56,469 - INFO - Received Job: akshath - Gumshuda
+2026-02-04 09:51:07,399 - INFO - Vectorization successful
+2026-02-04 09:51:07,748 - INFO - Received Job: Khayek - Khoon Ki Holi
+2026-02-04 09:52:26,838 - INFO - Vectorization successful
+2026-02-04 09:52:26,841 - WARNING - Connection closed: received 1011 (internal error) keepalive ping timeout; then sent 1011 (internal error) keepalive ping timeout. Reconnecting in 2s...
+2026-02-04 09:52:28,842 - INFO - Connecting to wss://chaarfm.onrender.com/ws/remote/2673/worker...
+2026-02-04 09:52:29,876 - INFO - Connected! Waiting for jobs...
+2026-02-04 09:52:29,877 - INFO - Received Job: Diljit Dosanjh - Do You Know
+2026-02-04 09:52:38,914 - INFO - Vectorization successful
+2026-02-04 09:52:39,290 - INFO - Received Job: Bhaskar - The Hook - Radio Edit
+2026-02-04 09:52:49,551 - INFO - Vectorization successful
+2026-02-04 09:52:49,913 - INFO - Received Job: Bruno Mars - The Lazy Song
+2026-02-04 09:52:57,555 - INFO - Vectorization successful
+2026-02-04 09:52:57,915 - INFO - Received Job: Darzi - Gehra
+2026-02-04 09:53:10,940 - INFO - Vectorization successful
+2026-02-04 09:53:11,296 - INFO - Received Job: Arijit Singh - Qaafirana
+2026-02-04 09:53:23,740 - INFO - Vectorization successful
+2026-02-04 09:53:24,302 - INFO - Received Job: Vishal-Shekhar - Ishq Bulaava
+2026-02-04 09:53:35,480 - INFO - Vectorization successful
+2026-02-04 09:53:35,827 - INFO - Received Job: Nanku - 5mins
+2026-02-04 09:53:45,446 - INFO - Vectorization successful
+2026-02-04 09:53:45,825 - INFO - Received Job: Amrinder Gill - Adore
+2026-02-04 09:53:53,738 - INFO - Vectorization successful
+2026-02-04 09:53:54,206 - INFO - Received Job: Daniel Caesar - Always
+2026-02-04 09:54:04,075 - INFO - Vectorization successful
+2026-02-04 09:54:04,460 - INFO - Received Job: Karan Aujla - HIM.
+2026-02-04 09:54:13,407 - INFO - Vectorization successful
+2026-02-04 09:54:13,759 - INFO - Received Job: Khayek - Dharma
+2026-02-04 09:54:27,748 - INFO - Vectorization successful
+2026-02-04 09:54:28,113 - INFO - Received Job: Bruno Mars - Smokin Out The Window
+2026-02-04 09:54:41,302 - INFO - Vectorization successful
+2026-02-04 09:54:41,655 - INFO - Received Job: Pritam - Balam Pichkari
+2026-02-04 09:54:56,423 - INFO - Vectorization successful
+2026-02-04 09:54:56,812 - INFO - Received Job: King - GOAT SHIT
+2026-02-04 09:55:11,511 - INFO - Vectorization successful
+2026-02-04 09:55:11,895 - INFO - Received Job: Guru Randhawa - High Rated Gabru (From "High Rated Gabru")
+2026-02-04 09:55:23,383 - INFO - Vectorization successful
+2026-02-04 09:55:23,739 - INFO - Received Job: The Neighbourhood - Reflections
+2026-02-04 09:55:30,040 - WARNING - Download failed for The Neighbourhood - Reflections: [0;31mERROR:[0m Postprocessing: audio conversion failed: Conversion failed!
+2026-02-04 09:55:30,040 - WARNING - Download failed
+2026-02-04 09:55:30,365 - INFO - Received Job: Kr$na - Kaha Tak
+2026-02-04 09:55:42,625 - INFO - Vectorization successful
+2026-02-04 09:55:43,010 - INFO - Received Job: BAGI MUNDA - Animal
+2026-02-04 09:55:53,066 - INFO - Vectorization successful
+2026-02-04 09:55:53,595 - INFO - Received Job: Vishal-Shekhar - Nashe Si Chadh Gayi
+2026-02-04 09:56:05,342 - INFO - Vectorization successful
+2026-02-04 09:56:05,693 - INFO - Received Job: Vishal-Shekhar - Vele
+2026-02-04 09:56:16,875 - INFO - Vectorization successful
+2026-02-04 09:56:17,286 - INFO - Received Job: Drake - One Dance
+2026-02-04 09:56:25,337 - INFO - Vectorization successful
+2026-02-04 09:56:25,688 - INFO - Received Job: The Neighbourhood - Devil's Advocate
+2026-02-04 09:56:35,881 - INFO - Vectorization successful
+2026-02-04 09:56:36,228 - INFO - Received Job: Prateek Kuhad - Co2
+2026-02-04 09:56:45,587 - INFO - Vectorization successful
+2026-02-04 09:56:45,952 - INFO - Received Job: Divine - Sher Aaya Sher
+2026-02-04 09:56:52,964 - INFO - Vectorization successful
+2026-02-04 09:56:53,597 - INFO - Received Job: Nanku - Dhishkyaun!
+2026-02-04 09:57:02,573 - INFO - Vectorization successful
+2026-02-04 09:57:02,927 - INFO - Received Job: Bhaskar - For You
+2026-02-04 09:57:15,755 - INFO - Vectorization successful
+2026-02-04 09:57:16,133 - INFO - Received Job: Imran Khan - Pata Chalgea
+2026-02-04 09:57:25,908 - INFO - Vectorization successful
+2026-02-04 09:57:26,258 - INFO - Received Job: Drake - Nonstop
+2026-02-04 09:57:37,350 - INFO - Vectorization successful
+2026-02-04 09:57:37,698 - INFO - Received Job: Seedhe Maut - I Don't Miss That Life
+2026-02-04 09:57:46,223 - INFO - Vectorization successful
+2026-02-04 09:57:46,603 - INFO - Received Job: The Weeknd - I Feel It Coming
+2026-02-04 09:57:57,559 - INFO - Vectorization successful
+2026-02-04 09:57:57,938 - INFO - Received Job: Diljit Dosanjh - Sauda Khara Khara - From "Good Newwz"
+2026-02-04 09:58:11,772 - INFO - Vectorization successful
+2026-02-04 09:58:12,164 - INFO - Received Job: Hasan Raheem & Abdullah Kasumbi - Aisay Kaisay (feat. Abdullah Kasumbi)
+2026-02-04 09:58:24,406 - INFO - Vectorization successful
+2026-02-04 09:58:24,814 - INFO - Received Job: SHASHXNK - Saturday
+2026-02-04 09:58:31,284 - INFO - Vectorization successful
+2026-02-04 09:58:31,693 - INFO - Received Job: SZA - Love Galore (feat. Travis Scott)
+2026-02-04 09:58:42,231 - INFO - Vectorization successful
+2026-02-04 09:58:42,821 - INFO - Received Job: Divine - Shake It Up
+2026-02-04 09:58:55,370 - INFO - Vectorization successful
+2026-02-04 09:58:55,733 - INFO - Received Job: Panther - On the Lam
+2026-02-04 09:59:05,552 - INFO - Vectorization successful
+2026-02-04 09:59:05,900 - INFO - Received Job: Kendrick Lamar - HUMBLE.
+2026-02-04 09:59:14,414 - INFO - Vectorization successful
+2026-02-04 09:59:14,809 - INFO - Received Job: Navjot Ahuja - Dhun
+2026-02-04 09:59:26,031 - INFO - Vectorization successful
+2026-02-04 09:59:26,393 - INFO - Received Job: Gunda - Aawargi
+2026-02-04 09:59:38,595 - INFO - Vectorization successful
+2026-02-04 09:59:39,036 - INFO - Received Job: Yo Yo Honey Singh - Dheere Dheere
+2026-02-04 09:59:50,853 - INFO - Vectorization successful
+2026-02-04 09:59:51,202 - INFO - Received Job: Mohit Chauhan - Masakali (from "Delhi-6")
+2026-02-04 10:00:01,286 - INFO - Vectorization successful
+2026-02-04 10:00:01,706 - INFO - Received Job: Shankar-Ehsaan-Loy - Tere Naina
+2026-02-04 10:00:12,827 - INFO - Vectorization successful
+2026-02-04 10:00:13,173 - INFO - Received Job: prabh deep - Amar
+2026-02-04 10:00:25,285 - INFO - Vectorization successful
+2026-02-04 10:00:25,640 - INFO - Received Job: Talwiinder - Dil Mera
+2026-02-04 10:00:33,573 - INFO - Vectorization successful
+2026-02-04 10:00:34,109 - INFO - Received Job: akshath - Khoya
+2026-02-04 10:00:43,850 - INFO - Vectorization successful
+2026-02-04 10:00:44,373 - INFO - Received Job: A.R. Rahman - Jai Ho
+2026-02-04 10:00:55,837 - INFO - Vectorization successful
+2026-02-04 10:00:56,200 - INFO - Received Job: Imran Khan - Qott Ghusian Da
+2026-02-04 10:01:05,492 - INFO - Vectorization successful
+2026-02-04 10:01:05,867 - INFO - Received Job: Lucky Ali - Ek Pal Ka Jeena
+2026-02-04 10:01:27,785 - INFO - Vectorization successful
+2026-02-04 10:01:28,154 - INFO - Received Job: Ritviz - Udd Gaye
+2026-02-04 10:01:36,925 - INFO - Vectorization successful
+2026-02-04 10:01:37,271 - INFO - Received Job: Bruno Mars - Marry You
+2026-02-04 10:01:47,497 - INFO - Vectorization successful
+2026-02-04 10:01:47,915 - INFO - Received Job: BAGI MUNDA - AAMAD / CHILDREN OF THE GHETTO
+2026-02-04 10:02:00,356 - INFO - Vectorization successful
+2026-02-04 10:02:00,725 - INFO - Received Job: Tame Impala - 'Cause I'm a Man
+2026-02-04 10:02:03,283 - WARNING - Download failed for Tame Impala - 'Cause I'm a Man: [0;31mERROR:[0m [youtube] f3Fq0h3cQE8: Requested format is not available. Use --list-formats for a list of available formats
+2026-02-04 10:02:03,283 - WARNING - Download failed
+2026-02-04 10:02:03,607 - INFO - Received Job: Shreyas - Savay Ghaan
+2026-02-04 10:02:09,192 - INFO - Vectorization successful
+2026-02-04 10:02:09,546 - INFO - Received Job: Hasan Raheem & Abdullah Kasumbi - Hasan Raheem - Wishes ft Talwiinder | Prod by Umair (Official Music Video)
+2026-02-04 10:02:17,112 - INFO - Vectorization successful
+2026-02-04 10:02:17,484 - INFO - Received Job: The Local train - Aaoge Tum Kabhi
+2026-02-04 10:02:28,005 - INFO - Vectorization successful
+2026-02-04 10:02:28,358 - INFO - Received Job: Sidhu Moose Wala - Sohne Lagde
+2026-02-04 10:02:36,974 - INFO - Vectorization successful
+2026-02-04 10:02:37,330 - INFO - Received Job: Vasu Raina - laila
+2026-02-04 10:02:45,089 - INFO - Vectorization successful
+2026-02-04 10:02:45,093 - INFO - Keepalive ping sent (keeps server awake)
+2026-02-04 10:02:45,503 - INFO - Received Job: Sharry Mann - Vadda Bai
+2026-02-04 10:02:58,273 - INFO - Vectorization successful
+2026-02-04 10:02:58,625 - INFO - Received Job: The Weeknd - Party Monster
+2026-02-04 10:03:09,750 - INFO - Vectorization successful
+2026-02-04 10:03:10,111 - INFO - Received Job: Arctic Monkeys - Teddy Picker
+2026-02-04 10:03:18,030 - INFO - Vectorization successful
+2026-02-04 10:03:18,439 - INFO - Received Job: OG Lucifer - Ishaaro Ki Zubaan
+2026-02-04 10:03:28,762 - INFO - Vectorization successful
+2026-02-04 10:03:29,133 - INFO - Received Job: wolf.cryman - Jina Abhi Baaki Hai
+2026-02-04 10:03:37,533 - INFO - Vectorization successful
+2026-02-04 10:03:37,918 - INFO - Received Job: Garry Sandhu - Hauli Hauli
+2026-02-04 10:03:46,503 - INFO - Vectorization successful
+2026-02-04 10:03:46,869 - INFO - Received Job: Steve Lacy - Buttons
+2026-02-04 10:03:56,680 - INFO - Vectorization successful
+2026-02-04 10:03:57,083 - INFO - Received Job: Anjan Dutt - Calcium
+2026-02-04 10:04:10,280 - INFO - Vectorization successful
+2026-02-04 10:04:10,722 - INFO - Received Job: The Neighbourhood - Baby Came Home 2 / Valentines
+2026-02-04 10:04:24,246 - INFO - Vectorization successful
+2026-02-04 10:04:24,598 - INFO - Received Job: Bali - Lathi Charge
+2026-02-04 10:04:33,533 - INFO - Vectorization successful
+2026-02-04 10:04:34,195 - INFO - Received Job: Tanishk Bagchi - Najaa (From "Sooryavanshi")
+2026-02-04 10:04:42,802 - INFO - Vectorization successful
+2026-02-04 10:04:43,193 - INFO - Received Job: Bhaskar - Não Sei Parar
+2026-02-04 10:04:52,896 - INFO - Vectorization successful
+2026-02-04 10:04:53,411 - INFO - Received Job: Jazzy B - Romeo
+2026-02-04 10:05:03,783 - INFO - Vectorization successful
+2026-02-04 10:05:04,289 - INFO - Received Job: Kali Uchis - Muñekita (with El Alfa & JT)
+2026-02-04 10:05:14,413 - INFO - Vectorization successful
+2026-02-04 10:05:14,838 - INFO - Received Job: Vasu Raina - Chalo
+2026-02-04 10:05:26,692 - INFO - Vectorization successful
+2026-02-04 10:05:27,078 - INFO - Received Job: Amit Trivedi - Daryaa
+2026-02-04 10:05:39,730 - INFO - Vectorization successful
+2026-02-04 10:05:40,093 - INFO - Received Job: Frappe Ash - PTSD
+2026-02-04 10:05:50,802 - INFO - Vectorization successful
+2026-02-04 10:05:51,219 - INFO - Received Job: Khayek - Maar Denge
+2026-02-04 10:05:59,120 - INFO - Vectorization successful
+2026-02-04 10:05:59,508 - INFO - Received Job: Shankar-Ehsaan-Loy - Ishq Di Baajiyaan
+2026-02-04 10:06:12,024 - INFO - Vectorization successful
+2026-02-04 10:06:12,383 - INFO - Received Job: Karan Aujla - Tauba Tauba (From "Bad Newz")
+2026-02-04 10:06:24,860 - INFO - Vectorization successful
+2026-02-04 10:06:25,276 - INFO - Received Job: Saar Punch - BOJHA//BINNESS
+2026-02-04 10:06:37,673 - INFO - Vectorization successful
+2026-02-04 10:06:38,042 - INFO - Received Job: Mo' Horizons - Cha Cha Cha
+2026-02-04 10:06:53,916 - INFO - Vectorization successful
+2026-02-04 10:06:54,333 - INFO - Received Job: Ikka - Dhoop Chhaon
+2026-02-04 10:07:03,496 - INFO - Vectorization successful
+2026-02-04 10:07:03,935 - INFO - Received Job: Ikka - Ambulance
+2026-02-04 10:07:14,433 - INFO - Vectorization successful
+2026-02-04 10:07:14,876 - INFO - Received Job: Bharg - Darta Hu Mai
+2026-02-04 10:07:25,084 - INFO - Vectorization successful
+2026-02-04 10:07:25,484 - INFO - Received Job: Frappe Ash - Surma
+2026-02-04 10:07:37,542 - INFO - Vectorization successful
+2026-02-04 10:07:37,909 - INFO - Received Job: Solange - Cranes in the Sky
+2026-02-04 10:07:48,824 - INFO - Vectorization successful
+2026-02-04 10:07:49,176 - INFO - Received Job: Deep Dive Corp. - Deep Dive - Original Mix
+2026-02-04 10:08:22,487 - WARNING - Download failed for Deep Dive Corp. - Deep Dive - Original Mix: [0;31mERROR:[0m [download] Got error: HTTPSConnectionPool(host='rr2---sn-o3o-jj0s.googlevideo.com', port=443): Read timed out.
+2026-02-04 10:08:22,487 - WARNING - Download failed
+2026-02-04 10:08:22,812 - INFO - Received Job: Farhan Khan - Godfather
+2026-02-04 10:08:36,065 - INFO - Vectorization successful
+2026-02-04 10:08:36,414 - INFO - Received Job: Shreyas - Paristithi
+2026-02-04 10:08:42,925 - INFO - Vectorization successful
+2026-02-04 10:08:43,427 - INFO - Received Job: Rodney Hunter - Work That Body
+2026-02-04 10:08:58,842 - INFO - Vectorization successful
+2026-02-04 10:08:59,195 - INFO - Received Job: Hardbone Boy - Deeपक फिरीverse
+2026-02-04 10:09:00,298 - WARNING - Download failed for Hardbone Boy - Deeपक फिरीverse: list index out of range
+2026-02-04 10:09:00,298 - WARNING - Download failed
+2026-02-04 10:09:00,647 - INFO - Received Job: A.R. Rahman - Tum Tak
+2026-02-04 10:09:12,581 - INFO - Vectorization successful
+2026-02-04 10:09:12,946 - INFO - Received Job: Kanye West - Through the Wire
+2026-02-04 10:09:22,433 - INFO - Vectorization successful
+2026-02-04 10:09:22,874 - INFO - Received Job: Kendrick Lamar - Wesley's Theory
+2026-02-04 10:09:34,107 - INFO - Vectorization successful
+2026-02-04 10:09:34,472 - INFO - Received Job: prabh deep - FLY
+2026-02-04 10:09:47,052 - INFO - Vectorization successful
+2026-02-04 10:09:47,439 - INFO - Received Job: Tanishk Bagchi - Saiyaara (From "Saiyaara")
+2026-02-04 10:10:02,344 - INFO - Vectorization successful
+2026-02-04 10:10:02,702 - INFO - Received Job: Arijit Singh - Main Tera Boyfriend (From "Raabta")
+2026-02-04 10:10:14,582 - INFO - Vectorization successful
+2026-02-04 10:10:14,931 - INFO - Received Job: OG Lucifer - Puch Toh Le
+2026-02-04 10:10:25,481 - INFO - Vectorization successful
+2026-02-04 10:10:25,828 - INFO - Received Job: BAGI MUNDA - Nayagaon
+2026-02-04 10:10:39,012 - INFO - Vectorization successful
+2026-02-04 10:10:39,378 - INFO - Received Job: Prateek Kuhad - Kahaan Ho Tum
+2026-02-04 10:10:47,559 - INFO - Vectorization successful
+2026-02-04 10:10:47,978 - INFO - Received Job: Mithoon - Mausam
+2026-02-04 10:11:02,263 - INFO - Vectorization successful
+2026-02-04 10:11:02,702 - INFO - Received Job: Bhaskar - Touch Me
+2026-02-04 10:11:13,146 - INFO - Vectorization successful
+2026-02-04 10:11:13,519 - INFO - Received Job: YashRaj - Raakh
+2026-02-04 10:11:21,875 - INFO - Vectorization successful
+2026-02-04 10:11:22,231 - INFO - Received Job: Garry Sandhu - Sip Sip 2.0 (From "Street Dancer 3D")
+2026-02-04 10:11:37,035 - INFO - Vectorization successful
+2026-02-04 10:11:37,388 - INFO - Received Job: The Weeknd - Save Your Tears (with Ariana Grande) (Remix)
+2026-02-04 10:11:47,119 - INFO - Vectorization successful
+2026-02-04 10:11:47,497 - INFO - Received Job: Arijit Singh - Zaalima
+2026-02-04 10:11:59,702 - INFO - Vectorization successful
+2026-02-04 10:12:00,079 - INFO - Received Job: Salim–Sulaiman - Dance Pe Chance
+2026-02-04 10:12:11,257 - INFO - Vectorization successful
+2026-02-04 10:12:11,671 - INFO - Received Job: Coldplay - The Scientist
+2026-02-04 10:12:24,475 - INFO - Vectorization successful
+2026-02-04 10:12:24,838 - INFO - Received Job: MC Amrit - Vroom
+2026-02-04 10:12:33,226 - INFO - Vectorization successful
+2026-02-04 10:12:33,600 - INFO - Received Job: Nanku, Natiq - SOJA
+2026-02-04 10:12:42,332 - INFO - Vectorization successful
+2026-02-04 10:12:42,946 - INFO - Received Job: Amit Trivedi - Gulaabo
+2026-02-04 10:12:55,487 - INFO - Vectorization successful
+2026-02-04 10:12:55,876 - INFO - Received Job: Karuan - A Sweet Way Out
+2026-02-04 10:13:08,393 - INFO - Vectorization successful
+2026-02-04 10:13:08,397 - INFO - Keepalive ping sent (keeps server awake)
+2026-02-04 10:13:08,744 - INFO - Received Job: King - Teri Ho Na Saki
+2026-02-04 10:13:18,788 - INFO - Vectorization successful
+2026-02-04 10:13:19,136 - INFO - Received Job: Tsumyoki - Falling Down
+2026-02-04 10:13:31,560 - INFO - Vectorization successful
+2026-02-04 10:13:31,926 - INFO - Received Job: Amit Trivedi - Manja
+2026-02-04 10:13:43,996 - INFO - Vectorization successful
+2026-02-04 10:13:44,377 - INFO - Received Job: Garry Sandhu - Rabb Jane
+2026-02-04 10:13:53,804 - INFO - Vectorization successful
+2026-02-04 10:13:54,324 - INFO - Received Job: Baggh-e SMG - C.R.E.A.M POSSE
+2026-02-04 10:14:04,269 - INFO - Vectorization successful
+2026-02-04 10:14:04,640 - INFO - Received Job: Sukha - 21 QUESTIONS
+2026-02-04 10:14:10,875 - INFO - Vectorization successful
+2026-02-04 10:14:11,220 - INFO - Received Job: Yo Yo Honey Singh - Aankhon Aankhon
+2026-02-04 10:14:20,636 - INFO - Vectorization successful
+2026-02-04 10:14:21,026 - INFO - Received Job: Kendrick Lamar - PRIDE.
+2026-02-04 10:14:31,661 - INFO - Vectorization successful
+2026-02-04 10:14:32,084 - INFO - Received Job: wolf.cryman - Sapno ki machine
+2026-02-04 10:14:43,230 - INFO - Vectorization successful
+2026-02-04 10:14:43,611 - INFO - Received Job: Vishal-Shekhar - The Disco Song
+2026-02-04 10:14:56,206 - INFO - Vectorization successful
+2026-02-04 10:14:56,696 - INFO - Received Job: SHASHXNK - Morphine
+2026-02-04 10:15:07,847 - INFO - Vectorization successful
+2026-02-04 10:15:08,229 - INFO - Received Job: Hardbone Boy - ADRENALINE
+2026-02-04 10:15:17,681 - INFO - Vectorization successful
+2026-02-04 10:15:18,104 - INFO - Received Job: Nanku - Velocity
+2026-02-04 10:15:26,695 - INFO - Vectorization successful
+2026-02-04 10:15:27,071 - INFO - Received Job: Pritam - Kabira
+2026-02-04 10:15:38,632 - INFO - Vectorization successful
+2026-02-04 10:15:39,071 - INFO - Received Job: YashRaj - Naadaani
+2026-02-04 10:15:48,379 - INFO - Vectorization successful
+2026-02-04 10:15:49,246 - INFO - Received Job: Talwiinder - Bach Ke
+2026-02-04 10:15:57,695 - INFO - Vectorization successful
+2026-02-04 10:15:58,058 - INFO - Received Job: Dream Note - Kahaani
+2026-02-04 10:16:07,053 - INFO - Vectorization successful
+2026-02-04 10:16:07,499 - INFO - Received Job: Pritam - Mauja Hi Mauja
+2026-02-04 10:16:22,861 - INFO - Vectorization successful
+2026-02-04 10:16:23,224 - INFO - Received Job: Rawal - Sunehri Zindagi
+2026-02-04 10:16:32,876 - INFO - Vectorization successful
+2026-02-04 10:16:33,277 - INFO - Received Job: Arijit Singh - Tose Naina (From "Mickey Virus)
+2026-02-04 10:16:43,852 - INFO - Vectorization successful
+2026-02-04 10:16:44,284 - INFO - Received Job: Bharg - Pisstake Freestyle
+2026-02-04 10:17:03,562 - INFO - Vectorization successful
+2026-02-04 10:17:04,168 - INFO - Received Job: Hasan Raheem & Abdullah Kasumbi - Hasan Raheem - Wishes ft Talwiinder | Prod by Umair (Official Lyric Video)
+2026-02-04 10:17:16,339 - INFO - Vectorization successful
+2026-02-04 10:17:16,732 - INFO - Received Job: Ritviz - Pran
+2026-02-04 10:17:29,571 - INFO - Vectorization successful
+2026-02-04 10:17:29,949 - INFO - Received Job: Raftaar - JASHAN-E-HIP-HOP
+2026-02-04 10:17:40,354 - INFO - Vectorization successful
+2026-02-04 10:17:40,826 - INFO - Received Job: Diljit Dosanjh - Born to Shine
+2026-02-04 10:17:53,323 - INFO - Vectorization successful
+2026-02-04 10:17:53,774 - INFO - Received Job: Yo Yo Honey Singh - One Bottle Down
+2026-02-04 10:18:18,372 - INFO - Vectorization successful
+2026-02-04 10:18:19,003 - INFO - Received Job: Arpit Bala - Daraaz Mein - Instrumental Version
+2026-02-04 10:18:30,855 - INFO - Vectorization successful
+2026-02-04 10:18:31,203 - INFO - Received Job: Mc Stan - Tadipaar
+2026-02-04 10:18:49,956 - INFO - Vectorization successful

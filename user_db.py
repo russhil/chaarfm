@@ -174,10 +174,26 @@ def get_youtube_collections() -> List[str]:
                 FROM information_schema.tables 
                 WHERE table_schema = 'public' 
                 AND table_name LIKE 'vectors_%'
+                AND table_name NOT LIKE 'vectors_genre_%'
             """)).fetchall()
             return [row[0] for row in public_tables]
     except Exception as e:
         print(f"Error fetching YouTube collections: {e}")
+        return []
+
+def get_genre_collections() -> List[str]:
+    """Get only genre-based collections (public vectors_genre_* tables). Used for Genre mode."""
+    try:
+        with engine.connect() as conn:
+            public_tables = conn.execute(text("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name LIKE 'vectors_genre_%'
+            """)).fetchall()
+            return [row[0] for row in public_tables]
+    except Exception as e:
+        print(f"Error fetching genre collections: {e}")
         return []
 
 def get_admin_stats() -> Dict:

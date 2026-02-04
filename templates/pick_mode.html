@@ -90,6 +90,9 @@
                 <button type="button" class="mode-option yt" data-mode="youtube" id="btn-mode-youtube">
                     <i class="fab fa-youtube"></i> YOUTUBE
                 </button>
+                <button type="button" class="mode-option" data-mode="genre" id="btn-mode-genre" style="border-color: #00ff88;">
+                    <i class="fas fa-music"></i> GENRE
+                </button>
             </div>
         </div>
 
@@ -113,11 +116,13 @@
         const btnStart = document.getElementById('btn-start');
         const btnModeClassic = document.getElementById('btn-mode-classic');
         const btnModeYoutube = document.getElementById('btn-mode-youtube');
+        const btnModeGenre = document.getElementById('btn-mode-genre');
 
         function setMode(mode) {
             currentMode = mode;
             btnModeClassic.classList.toggle('active', mode === 'classic');
             btnModeYoutube.classList.toggle('active', mode === 'youtube');
+            btnModeGenre.classList.toggle('active', mode === 'genre');
             loadCollections();
         }
 
@@ -125,7 +130,12 @@
             collectionSelect.innerHTML = '<option value="">Loading...</option>';
             btnStart.disabled = true;
             try {
-                const url = currentMode === 'youtube' ? '/api/collections?mode=youtube' : '/api/collections';
+                let url = '/api/collections';
+                if (currentMode === 'youtube') {
+                    url = '/api/collections?mode=youtube';
+                } else if (currentMode === 'genre') {
+                    url = '/api/collections?mode=genre';
+                }
                 const res = await fetch(url);
                 const data = await res.json();
                 collectionSelect.innerHTML = '';
@@ -146,7 +156,14 @@
                 (data.collections || []).forEach(col => {
                     const opt = document.createElement('option');
                     opt.value = col;
-                    opt.textContent = col.replace(/_/g, ' ').toUpperCase();
+                    // Format genre collection names nicely (remove vectors_genre_ prefix)
+                    let displayName = col.replace(/^vectors_genre_/, '').replace(/_/g, ' ');
+                    if (currentMode === 'genre') {
+                        displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+                    } else {
+                        displayName = displayName.toUpperCase();
+                    }
+                    opt.textContent = displayName;
                     collectionSelect.appendChild(opt);
                 });
                 if (collectionSelect.options.length) {
@@ -162,6 +179,7 @@
 
         btnModeClassic.addEventListener('click', () => setMode('classic'));
         btnModeYoutube.addEventListener('click', () => setMode('youtube'));
+        btnModeGenre.addEventListener('click', () => setMode('genre'));
 
         btnStart.addEventListener('click', async () => {
             const collection = collectionSelect.value;
@@ -179,7 +197,13 @@
                 if (data.session_id) {
                     localStorage.setItem('chaar_session', data.session_id);
                     localStorage.setItem('chaar_user', '{{ user_id }}');
-                    window.location.href = '/player' + (data.youtube_mode ? '?mode=youtube' : '');
+                    let playerUrl = '/player';
+                    if (data.genre_mode) {
+                        playerUrl += '?mode=genre';
+                    } else if (data.youtube_mode) {
+                        playerUrl += '?mode=youtube';
+                    }
+                    window.location.href = playerUrl;
                 } else {
                     throw new Error(data.detail || 'Failed to start');
                 }
