@@ -152,22 +152,23 @@ def fetch_genre_universe_youtube(genre: str, limit: Optional[int] = None, qualit
     all_candidates = []
     
     # Try to find playlists or search results
-    ydl_opts = {
+    # First, use extract_flat to get a list of videos quickly
+    ydl_opts_flat = {
         'quiet': True,
         'no_warnings': True,
-        'extract_flat': True,  # Don't download, just get metadata
-        'default_search': 'ytsearch',  # Search mode
-        'noplaylist': False,  # Allow playlists
+        'extract_flat': True,
+        'default_search': 'ytsearch',
+        'noplaylist': False,
     }
     
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        with yt_dlp.YoutubeDL(ydl_opts_flat) as ydl_flat:
             # Try first search query
             search_query = search_queries[0]
             logger.info(f"Searching YouTube for: {search_query}")
             
-            # Extract info (this returns search results or playlist entries)
-            info = ydl.extract_info(search_query, download=False)
+            # Extract flat info (just IDs and basic info)
+            info = ydl_flat.extract_info(search_query, download=False)
             
             entries = []
             if 'entries' in info:
@@ -175,39 +176,74 @@ def fetch_genre_universe_youtube(genre: str, limit: Optional[int] = None, qualit
             elif info:
                 entries = [info]
             
-            # Now extract full metadata for each entry (requires another call per video)
-            for entry in entries[:500]:  # Limit initial fetch to avoid too many requests
-                video_id = entry.get('id') or entry.get('url', '').split('watch?v=')[-1].split('&')[0]
-                if not video_id:
-                    continue
-                
-                video_url = f"https://www.youtube.com/watch?v={video_id}"
-                
-                # Extract full metadata (views, likes, etc.)
-                try:
-                    video_info = ydl.extract_info(video_url, download=False)
-                    view_count = video_info.get('view_count', 0) or 0
-                    like_count = video_info.get('like_count', 0) or 0
-                    duration = video_info.get('duration', 0) or 0
-                    title = video_info.get('title', '')
-                    artist = video_info.get('artist') or video_info.get('uploader', '')
+            logger.info(f"Found {len(entries)} initial results")
+            
+            # Limit to reasonable number to avoid too many API calls
+            max_entries = min(limit * 3 if limit else 100, len(entries), 200)
+            entries = entries[:max_entries]
+        
+        # Now extract full metadata for each entry (without extract_flat)
+        ydl_opts_full = {
+            'quiet': True,
+            'no_warnings': True,
+        }
+        
+            with yt_dlp.YoutubeDL(ydl_opts_full) as ydl:
+                for entry in entries:
+                    video_id = entry.get('id') or entry.get('url', '').split('watch?v=')[-1].split('&')[0]
+                    if not video_id:
+                        continue
                     
-                    # Calculate like ratio
-                    like_ratio = (like_count / view_count) if view_count > 0 else 0
+                    video_url = f"https://www.youtube.com/watch?v={video_id}"
                     
-                    all_candidates.append({
-                        'youtube_url': video_url,
-                        'youtube_id': video_id,
-                        'view_count': view_count,
-                        'like_count': like_count,
-                        'like_ratio': like_ratio,
-                        'duration': duration,
-                        'title': title,
-                        'artist': artist
-                    })
-                except Exception as e:
-                    logger.debug(f"Failed to extract metadata for {video_id}: {e}")
-                    continue
+                    # Extract full metadata (views, likes, etc.)
+                    try:
+                        # Use extract_info without extract_flat to get full metadata
+                        video_info = ydl.extract_info(video_url, download=False)
+                        view_count = video_info.get('view_count') or 0
+                        like_count = video_info.get('like_count') or 0
+                        duration = video_info.get('duration') or 0
+                        title = video_info.get('title', '') or entry.get('title', '')
+                        artist = video_info.get('artist') or video_info.get('uploader', '') or entry.get('uploader', '')
+                        
+                        # If metadata is missing, try to get from entry
+                        if not view_count and entry.get('view_count'):
+                            view_count = entry.get('view_count', 0)
+                        if not duration and entry.get('duration'):
+                            duration = entry.get('duration', 0)
+                        
+                        # Calculate like ratio
+                        like_ratio = (like_count / view_count) if view_count > 0 else 0
+                        
+                        # Log if we're missing critical metadata
+                        if view_count == 0 or duration == 0:
+                            logger.debug(f"Missing metadata for {video_id}: views={view_count}, duration={duration}")
+                        
+                        all_candidates.append({
+                            'youtube_url': video_url,
+                            'youtube_id': video_id,
+                            'view_count': view_count,
+                            'like_count': like_count,
+                            'like_ratio': like_ratio,
+                            'duration': duration,
+                            'title': title,
+                            'artist': artist
+                        })
+                    except Exception as e:
+                        logger.debug(f"Failed to extract metadata for {video_id}: {e}")
+                        # Still add the track with minimal info if we have the URL
+                        if video_id:
+                            all_candidates.append({
+                                'youtube_url': video_url,
+                                'youtube_id': video_id,
+                                'view_count': 0,
+                                'like_count': 0,
+                                'like_ratio': 0,
+                                'duration': 0,
+                                'title': entry.get('title', ''),
+                                'artist': entry.get('uploader', '')
+                            })
+                        continue
                     
     except Exception as e:
         logger.error(f"Failed to search YouTube for genre {genre}: {e}")
@@ -219,14 +255,52 @@ def fetch_genre_universe_youtube(genre: str, limit: Optional[int] = None, qualit
     
     # Apply quality filters
     filtered = []
+    rejected_reasons = defaultdict(int)
+    
     for candidate in all_candidates:
-        if (candidate['view_count'] >= config['min_views'] and
-            candidate['like_count'] >= config['min_likes'] and
-            candidate['like_ratio'] >= config['min_like_ratio'] and
-            config['min_duration'] <= candidate['duration'] <= config['max_duration']):
+        reasons = []
+        
+        # Check each filter and collect reasons for rejection
+        if candidate['view_count'] < config['min_views']:
+            reasons.append(f"views={candidate['view_count']}<{config['min_views']}")
+        if candidate['like_count'] < config['min_likes']:
+            reasons.append(f"likes={candidate['like_count']}<{config['min_likes']}")
+        if candidate['like_ratio'] < config['min_like_ratio']:
+            reasons.append(f"ratio={candidate['like_ratio']:.4f}<{config['min_like_ratio']}")
+        if candidate['duration'] < config['min_duration']:
+            reasons.append(f"duration={candidate['duration']}<{config['min_duration']}")
+        if candidate['duration'] > config['max_duration']:
+            reasons.append(f"duration={candidate['duration']}>{config['max_duration']}")
+        
+        if not reasons:
             filtered.append(candidate)
+        else:
+            # Log first few rejections for debugging
+            if len(rejected_reasons) < 3:
+                logger.debug(f"Rejected '{candidate.get('title', 'Unknown')}': {', '.join(reasons)}")
+            rejected_reasons[reasons[0]] += 1
     
     logger.info(f"Quality filtering: {len(all_candidates)} -> {len(filtered)} candidates")
+    if rejected_reasons:
+        logger.info(f"Rejection reasons: {dict(rejected_reasons)}")
+    
+    # If all candidates were filtered out, try with relaxed thresholds
+    if not filtered and all_candidates:
+        logger.warning(f"All {len(all_candidates)} candidates filtered. Trying relaxed thresholds...")
+        relaxed_config = config.copy()
+        relaxed_config['min_views'] = max(100, relaxed_config['min_views'] // 10)  # 10x more lenient
+        relaxed_config['min_likes'] = max(1, relaxed_config['min_likes'] // 10)
+        relaxed_config['min_like_ratio'] = relaxed_config['min_like_ratio'] / 10
+        
+        for candidate in all_candidates:
+            if (candidate['view_count'] >= relaxed_config['min_views'] and
+                candidate['like_count'] >= relaxed_config['min_likes'] and
+                candidate['like_ratio'] >= relaxed_config['min_like_ratio'] and
+                relaxed_config['min_duration'] <= candidate['duration'] <= relaxed_config['max_duration']):
+                filtered.append(candidate)
+        
+        if filtered:
+            logger.info(f"Relaxed filtering found {len(filtered)} candidates")
     
     if not filtered:
         return []
