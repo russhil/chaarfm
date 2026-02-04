@@ -57,11 +57,18 @@ class Coordinator:
         session = self.sessions.get(code)
         if session and session['ui']:
             try:
+                # Include worker count in state message for UI detection
+                worker_count = len(session.get('workers', []))
+                state_message = message or ""
+                if worker_count > 0 and "worker" not in (state_message or "").lower():
+                    state_message = f"{worker_count} worker(s) connected. {state_message}".strip()
+                
                 await session['ui'].send_json({
                     "type": "state",
                     "status": status,
-                    "message": message,
-                    "level": level
+                    "message": state_message,
+                    "level": level,
+                    "worker_count": worker_count  # Add explicit worker count
                 })
             except:
                 session['ui'] = None

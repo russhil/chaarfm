@@ -398,13 +398,38 @@
                 const data = JSON.parse(event.data);
                 if (data.type === 'log') {
                     appendLog(data.message, data.level);
-                    if (data.message.includes("Worker Connected")) {
+                    // Check for worker connection in various message formats
+                    if (data.message.includes("Worker Connected") || 
+                        data.message.includes("worker") && data.message.includes("connected") ||
+                        data.message.match(/\d+\s+worker.*connected/i)) {
                         workerConnected = true;
                         document.getElementById('pairing-code').style.borderColor = "#00ff88";
                         updateControlStates();
                     }
+                    // Check for worker disconnection
+                    if (data.message.includes("Worker Disconnected") || 
+                        data.message.includes("disconnected") && data.message.includes("worker")) {
+                        // Don't set to false immediately - might be multiple workers
+                        // Only set false if message says "All workers disconnected"
+                        if (data.message.includes("All workers disconnected") || data.message.includes("0 remaining")) {
+                            workerConnected = false;
+                            document.getElementById('pairing-code').style.borderColor = "";
+                            updateControlStates();
+                        }
+                    }
                 } else if (data.type === 'state') {
                     handleStateMessage(data);
+                    // Also check state message for worker connection info
+                    if (data.message && (data.message.includes("worker") || data.message.includes("Worker"))) {
+                        if (data.message.includes("connected") || data.message.match(/\d+\s+worker/)) {
+                            workerConnected = true;
+                            document.getElementById('pairing-code').style.borderColor = "#00ff88";
+                            updateControlStates();
+                        } else if (data.message.includes("Waiting for Worker") || data.message.includes("disconnected")) {
+                            workerConnected = false;
+                            updateControlStates();
+                        }
+                    }
                 }
             };
 
@@ -441,6 +466,36 @@
         }
         
         function handleStateMessage(data) {
+            // Check for worker connection status in state messages
+            // First check explicit worker_count field
+            if (data.worker_count !== undefined) {
+                workerConnected = data.worker_count > 0;
+                if (workerConnected) {
+                    document.getElementById('pairing-code').style.borderColor = "#00ff88";
+                } else {
+                    document.getElementById('pairing-code').style.borderColor = "";
+                }
+            } else if (data.message) {
+                // Fallback: Check if workers are connected from message
+                const workerMatch = data.message.match(/(\d+)\s+worker/i);
+                if (workerMatch) {
+                    const workerCount = parseInt(workerMatch[1], 10);
+                    if (workerCount > 0) {
+                        workerConnected = true;
+                        document.getElementById('pairing-code').style.borderColor = "#00ff88";
+                    } else {
+                        workerConnected = false;
+                        document.getElementById('pairing-code').style.borderColor = "";
+                    }
+                } else if (data.message.includes("Waiting for Worker") || data.message.includes("All workers disconnected")) {
+                    workerConnected = false;
+                    document.getElementById('pairing-code').style.borderColor = "";
+                } else if (data.message.includes("worker") && data.message.includes("connected")) {
+                    workerConnected = true;
+                    document.getElementById('pairing-code').style.borderColor = "#00ff88";
+                }
+            }
+            
             if (data.status === 'paused') {
                 isPaused = true;
             } else if (data.status === 'running') {
@@ -450,6 +505,8 @@
                 sessionActive = false;
                 isPaused = false;
             }
+            
+            updateControlStates();
 
             if (data.message) {
                 appendLog(data.message, data.level || 'info');
