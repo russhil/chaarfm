@@ -60,6 +60,32 @@ def init_db():
             )
         '''))
         
+        # Schema Migration for OAuth
+        try:
+            conn.execute(text("ALTER TABLE users ADD COLUMN email TEXT"))
+        except Exception:
+            pass
+            
+        try:
+            conn.execute(text("ALTER TABLE users ADD COLUMN provider TEXT DEFAULT 'local'"))
+        except Exception:
+            pass
+
+        try:
+            conn.execute(text("ALTER TABLE users ADD COLUMN google_id TEXT"))
+        except Exception:
+            pass
+
+        try:
+            conn.execute(text("ALTER TABLE users ADD COLUMN picture TEXT"))
+        except Exception:
+            pass
+
+        try:
+            conn.execute(text("ALTER TABLE users ADD COLUMN name TEXT"))
+        except Exception:
+            pass
+        
         conn.execute(text('''
             CREATE TABLE IF NOT EXISTS cluster_affinity (
                 user_id TEXT,
@@ -344,6 +370,30 @@ def clear_user_history(user_id: str, hours: Optional[int] = None) -> Dict:
             conn.commit()
             return {"status": "ok", "message": "Full history reset"}
     print("Database schema verified.")
+
+def get_or_create_google_user(email: str, google_id: str) -> Dict:
+    """Get existing user by email or create a new one via Google OAuth."""
+    with engine.connect() as conn:
+        # 1. Check if user exists by email
+        row = conn.execute(text("SELECT * FROM users WHERE email = :email"), {"email": email}).mappings().fetchone()
+        
+        if row:
+            return dict(row)
+            
+        # 2. Create new user
+        # Use email as the ID for Google users
+        user_id = email
+        now = datetime.now().isoformat()
+        
+        # Insert
+        conn.execute(text('''
+            INSERT INTO users (id, email, provider, created_at, is_guest, password_hash)
+            VALUES (:id, :email, 'google', :date, 0, '')
+        '''), {"id": user_id, "email": email, "date": now})
+        
+        conn.commit()
+        
+        return {"id": user_id, "email": email, "provider": "google", "is_guest": False}
 
 def verify_user(user_id: str, password: str) -> Optional[Dict]:
     if user_id == 'guest': return {"id": "guest", "is_guest": True}
