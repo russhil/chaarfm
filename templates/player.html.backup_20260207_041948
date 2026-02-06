@@ -206,7 +206,6 @@
         let ytPlayer = null;
         let ytReady = false;
         let progressInterval = null;
-        let isFirstTrack = true;  // NEW: Track if this is first track after load (prevents auto-play)
 
         // YouTube Player Initialization with Enhanced Seeking Support
         if (youtubeMode) {
@@ -772,17 +771,9 @@
                     if (ytPlayer && ytPlayer.loadVideoById) {
                         document.getElementById('youtube-container').style.display = 'block';
                         document.getElementById('album-icon').style.display = 'none';
-                        
-                        // OPTIMIZATION: Cue video instead of loading for first track (prevents auto-play)
-                        if (isFirstTrack) {
-                            ytPlayer.cueVideoById(data.youtube_id);  // Cue without playing
-                            updatePlayButton(false);
-                            statusEl.innerText = "Ready to Play - Press Play";
-                        } else {
-                            ytPlayer.loadVideoById(data.youtube_id);  // Load and auto-play
-                            updatePlayButton(true);
-                            startYTProgressLoop();
-                        }
+                        ytPlayer.loadVideoById(data.youtube_id);
+                        updatePlayButton(true);
+                        startYTProgressLoop();
                     } else {
                         setTimeout(doLoadYT, 200);
                     }
@@ -792,27 +783,13 @@
                 document.getElementById('youtube-container').style.display = 'none';
                 document.getElementById('album-icon').style.display = 'flex';
                 audio.src = data.url;
-                
-                // OPTIMIZATION: Only auto-play if not first track
-                if (isFirstTrack) {
-                    audio.load();  // Preload but don't play
+                audio.play().then(() => updatePlayButton(true)).catch(e => {
+                    console.error("Autoplay error:", e);
+                    statusEl.innerText = "Ready to Play";
                     updatePlayButton(false);
-                    statusEl.innerText = "Ready to Play - Press Play";
-                } else {
-                    audio.play().then(() => updatePlayButton(true)).catch(e => {
-                        console.error("Autoplay error:", e);
-                        statusEl.innerText = "Ready to Play";
-                        updatePlayButton(false);
-                    });
-                }
+                });
             } else if (youtubeMode && !data.youtube_id) {
                 statusEl.innerText = "No YouTube track - try another collection";
-            }
-            
-            // Reset first track flag after first load
-            if (isFirstTrack) {
-                isFirstTrack = false;
-                console.log('🎵 First track loaded - waiting for user to press Play');
             }
         }
 
@@ -967,13 +944,11 @@
             }
         });
 
-        titleEl.innerText = "Loading...";
-        statusEl.innerText = "Initializing session";
-        reasoningEl.innerText = "> PREPARING_FIRST_TRACK";
+        titleEl.innerText = "System Ready.";
+        statusEl.innerText = "Awaiting Input";
         
         console.log('🎵 ChaarFM Player initialized with enhanced seeking support');
         console.log('🎹 Keyboard shortcuts: Space (play/pause), ←/→ (±10s), ↑/↓ (±30s), N (next), P (prev), / (search)');
-        console.log('⏸️ First track will NOT auto-play - user must press Play button');
         
         // Debug function for testing seeking
         window.testSeeking = function() {

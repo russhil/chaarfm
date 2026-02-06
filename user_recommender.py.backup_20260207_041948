@@ -39,10 +39,6 @@ class ClusterManager:
         self.centroids = {} # cid -> vec
         self.initialized = False
         
-        # NEW: Pre-computed neighborhood cache for fast validation
-        self.neighborhood_cache = {}  # track_id -> (neighbor_count, avg_similarity)
-        self.neighborhood_threshold = 0.85
-        
     def fit(self):
         if not self.track_map: return
         ids = list(self.track_map.keys())
@@ -61,65 +57,6 @@ class ClusterManager:
             self.clusters[lbl].append(ids[idx])
             
         self.initialized = True
-        
-        # NEW: Pre-compute neighborhoods during clustering (one-time cost)
-        print("[ALGO] Pre-computing neighborhood metadata...")
-        self._precompute_neighborhoods()
-    
-    def _precompute_neighborhoods(self):
-        """
-        Pre-compute neighborhood density for all tracks at initialization.
-        This is a one-time O(n²) operation that replaces 298 individual O(n) scans.
-        Uses vectorized operations for performance.
-        """
-        import time
-        start = time.time()
-        
-        track_ids = list(self.track_map.keys())
-        vectors = np.array([self.track_map[tid]['vector'] for tid in track_ids])
-        
-        # Batch compute similarity matrix using chunking to avoid memory issues
-        chunk_size = 500
-        total_tracks = len(track_ids)
-        
-        for i in range(0, total_tracks, chunk_size):
-            chunk_end = min(i + chunk_size, total_tracks)
-            chunk_ids = track_ids[i:chunk_end]
-            chunk_vecs = vectors[i:chunk_end]
-            
-            # Compute similarities for this chunk against all tracks
-            # similarity_matrix shape: (chunk_size, total_tracks)
-            norms_chunk = np.linalg.norm(chunk_vecs, axis=1, keepdims=True)
-            norms_all = np.linalg.norm(vectors, axis=1, keepdims=True)
-            
-            # Cosine similarity via matrix multiplication
-            similarity_matrix = np.dot(chunk_vecs, vectors.T) / (norms_chunk @ norms_all.T + 1e-8)
-            
-            # For each track in chunk, count neighbors above threshold
-            for j, tid in enumerate(chunk_ids):
-                similarities = similarity_matrix[j]
-                # Exclude self (similarity = 1.0)
-                mask = (similarities >= self.neighborhood_threshold) & (similarities < 0.999)
-                neighbor_count = np.sum(mask)
-                avg_similarity = np.mean(similarities[mask]) if neighbor_count > 0 else 0.0
-                
-                self.neighborhood_cache[tid] = (int(neighbor_count), float(avg_similarity))
-            
-            # Progress indicator every 5 chunks
-            if (i // chunk_size) % 5 == 0:
-                progress = (chunk_end / total_tracks) * 100
-                print(f"[ALGO] Neighborhood pre-compute: {progress:.1f}% complete")
-        
-        elapsed = time.time() - start
-        print(f"[ALGO] ✅ Pre-computed neighborhoods for {total_tracks} tracks in {elapsed:.2f}s")
-        
-        # Log statistics
-        if self.neighborhood_cache:
-            densities = [count for count, _ in self.neighborhood_cache.values()]
-            avg_density = np.mean(densities)
-            max_density = np.max(densities)
-            min_density = np.min(densities)
-            print(f"[ALGO] Neighborhood statistics: avg={avg_density:.1f}, min={min_density}, max={max_density}")
         
     def get_cluster_tracks(self, cid):
         return self.clusters.get(cid, [])
@@ -667,40 +604,10 @@ class UserRecommender:
 
         return [c[0] for c in candidates[:limit]]
 
-    def _validate_neighborhood_density(self, track_id, min_neighbors=20, min_similarity=0.85, silent=False):
+    def _validate_neighborhood_density(self, track_id, min_neighbors=20, min_similarity=0.85):
         """
-        OPTIMIZED: Use pre-computed neighborhood cache instead of live scanning.
+        Verify a track has sufficient similar neighbors before using it as a probe anchor.
         Returns: (is_valid, neighbor_count, avg_similarity)
-        
-        Args:
-            silent: If True, only log validation failures (reduces log spam during batch operations)
-        """
-        if track_id not in self.track_map:
-            return False, 0, 0.0
-        
-        # Check cache first (O(1) lookup vs O(n) scan)
-        if track_id in self.cluster_manager.neighborhood_cache:
-            neighbor_count, avg_similarity = self.cluster_manager.neighborhood_cache[track_id]
-            
-            # Validate against thresholds
-            is_valid = neighbor_count >= min_neighbors and avg_similarity >= min_similarity
-            
-            # Only log if not silent or if validation fails
-            if not silent or not is_valid:
-                status = "✅" if is_valid else "❌"
-                descriptor = "Insufficient" if not is_valid else "Dense"
-                print(f"[ALGO] {status} {descriptor} Neighborhood: Track {track_id} has {neighbor_count} neighbors (avg sim: {avg_similarity:.3f})")
-            
-            return is_valid, neighbor_count, avg_similarity
-        
-        # Fallback to live scan if not in cache (shouldn't happen after initialization)
-        print(f"[ALGO] ⚠️ Track {track_id} not in neighborhood cache, performing live scan (slow)")
-        return self._validate_neighborhood_density_slow(track_id, min_neighbors, min_similarity)
-    
-    def _validate_neighborhood_density_slow(self, track_id, min_neighbors=20, min_similarity=0.85):
-        """
-        Fallback method for live neighborhood scanning (used only if cache misses).
-        This is the old slow method kept for compatibility.
         """
         if track_id not in self.track_map:
             return False, 0, 0.0
@@ -728,9 +635,10 @@ class UserRecommender:
         
         is_valid = neighbor_count >= min_neighbors
         
-        status = "✅" if is_valid else "❌"
-        descriptor = "Insufficient" if not is_valid else "Dense"
-        print(f"[ALGO] {status} {descriptor} Neighborhood (SLOW): Track {track_id} has {neighbor_count} neighbors (avg sim: {avg_similarity:.3f})")
+        if not is_valid:
+            print(f"[ALGO] ❌ Insufficient Neighborhood: Track {track_id} has only {neighbor_count}/{min_neighbors} neighbors at {min_similarity}+ similarity")
+        else:
+            print(f"[ALGO] ✅ Dense Neighborhood: Track {track_id} has {neighbor_count} neighbors (avg sim: {avg_similarity:.3f})")
         
         return is_valid, neighbor_count, avg_similarity
 
@@ -751,8 +659,8 @@ class UserRecommender:
 
     def _get_neighborhood_probe_candidates(self, anchor_track_id, limit=20):
         """
-        OPTIMIZED: Find tracks with vivid similarity to anchor that also have dense neighborhoods.
-        Only validates top 50 candidates to reduce computation time from 120s to ~20s.
+        ENHANCED: Find tracks with vivid similarity to anchor that also have dense neighborhoods.
+        This ensures probed tracks can support follow-up recommendations.
         """
         if anchor_track_id not in self.track_map:
             return []
@@ -775,33 +683,20 @@ class UserRecommender:
         
         print(f"[ALGO] Found {len(vivid_candidates)} vividly similar candidates (>0.85 sim)")
         
-        # OPTIMIZATION: Only validate top 50 candidates (sorted by similarity)
-        # Rationale: Higher similarity = higher likelihood of dense neighborhood
-        vivid_candidates.sort(key=lambda x: x[1], reverse=True)
-        candidates_to_validate = vivid_candidates[:50]  # Down from 298+
-        
-        print(f"[ALGO] Validating top {len(candidates_to_validate)} candidates (down from {len(vivid_candidates)})")
-        
-        # Step 2: Validate sampled candidates
+        # Step 2: Validate each candidate has its own dense neighborhood
         validated_probes = []
-        for cand_id, anchor_sim in candidates_to_validate:
+        for cand_id, anchor_sim in vivid_candidates:
             is_valid, neighbor_count, avg_sim = self._validate_neighborhood_density(
-                cand_id, min_neighbors=15, min_similarity=0.82, silent=True
+                cand_id, min_neighbors=15, min_similarity=0.82
             )
             
             if is_valid:
                 validated_probes.append((self.track_map[cand_id], anchor_sim, neighbor_count))
-            
-            # Early exit if we have enough valid probes
-            if len(validated_probes) >= limit:
-                break
         
         # Step 3: Sort by neighborhood quality (neighbor count * avg similarity)
         validated_probes.sort(key=lambda x: x[2], reverse=True)
         
-        # Summary logging instead of individual validations
-        avg_neighbors = np.mean([n for _, _, n in validated_probes]) if validated_probes else 0
-        print(f"[ALGO] Validated {len(validated_probes)}/{len(candidates_to_validate)} probes (avg neighbors: {avg_neighbors:.1f})")
+        print(f"[ALGO] Validated {len(validated_probes)}/{len(vivid_candidates)} probes with dense neighborhoods")
         
         if validated_probes:
             print(f"[ALGO] Top 5 Validated Probe Candidates:")
