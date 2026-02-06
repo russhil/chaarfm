@@ -408,7 +408,7 @@ async def auth_google_callback(request: Request):
         
         request.session["user_id"] = db_user["id"]
         request.session["is_guest"] = False
-        print(f"Session set with user_id: {db_user["id"]}, is_guest: False")
+        print(f"Session set with user_id: {db_user['id']}, is_guest: False")
         
         # Verify the session was properly set
         if "user_id" not in request.session:
