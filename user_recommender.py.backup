@@ -330,42 +330,6 @@ class UserRecommender:
         for cid in self.cluster_manager.clusters.keys():
             self.cluster_scores[cid] = {'alpha': BANDIT_ALPHA_PRIOR, 'beta': BANDIT_BETA_PRIOR}
 
-    def _optimize_for_user_vector(self, candidates, limit=20):
-        """
-        After skip sequences, re-score candidates against the updated user vector.
-        Ensures recommendations align with where the user vector has moved.
-        """
-        if self.user_vector is None or not candidates:
-            return candidates
-        
-        user_vec = np.array(self.user_vector)
-        rescored = []
-        
-        for track in candidates:
-            track_vec = np.array(track['vector'])
-            
-            # Calculate alignment with current user vector
-            alignment = np.dot(user_vec, track_vec) / (
-                np.linalg.norm(user_vec) * np.linalg.norm(track_vec) + 1e-8
-            )
-            
-            # Penalize tracks that conflict with user vector direction
-            if alignment < 0.70:  # User vector has moved significantly away
-                continue
-            
-            rescored.append((track, alignment))
-        
-        # Sort by alignment
-        rescored.sort(key=lambda x: x[1], reverse=True)
-        
-        print(f"[ALGO] User Vector Optimization: Filtered {len(candidates)} → {len(rescored)} aligned tracks")
-        if rescored:
-            print(f"[ALGO] Top 3 Aligned Candidates:")
-            for i, (t, align) in enumerate(rescored[:3]):
-                print(f"  {i+1}. {t['filename']} | Alignment: {align:.3f}")
-        
-        return [t for t, _ in rescored[:limit]]
-
     # Similarity Helper (Replaces recommend_tracks)
     def _recommend_similar(self, target_vecs, avoid_ids, limit=20, negative_vecs=None, whitelist_ids=None, force_target=False):
         if not target_vecs: return []
@@ -454,7 +418,7 @@ class UserRecommender:
         candidates = []
         
         # Optimization: Iterate only whitelist if provided and smaller than track_map
-        search_space = list(self.track_map.keys())
+        search_space = self.track_map.keys()
         if whitelist_ids is not None:
             search_space = [tid for tid in whitelist_ids if tid in self.track_map]
             print(f"[ALGO] Cluster Locking Active: Restricted to {len(search_space)} tracks")
@@ -480,36 +444,6 @@ class UserRecommender:
             # Add to effective list
             if self.active_cluster_negatives:
                 all_negatives.extend(self.active_cluster_negatives)
-
-        # ENHANCED: Hard filtering for persistent negatives BEFORE scoring
-        if all_negatives:
-            filtered_search_space = []
-            removed_count = 0
-            
-            for tid in search_space:
-                if tid not in self.track_map:
-                    continue
-                
-                v = np.array(self.track_map[tid]['vector'])
-                is_too_similar = False
-                
-                for neg_vec in all_negatives:
-                    neg_np = np.array(neg_vec)
-                    sim = np.dot(v, neg_np) / (np.linalg.norm(v) * np.linalg.norm(neg_np) + 1e-8)
-                    
-                    # HARD THRESHOLD: Exclude if >0.80 similar to any persistent negative
-                    if sim > 0.80:
-                        is_too_similar = True
-                        removed_count += 1
-                        break
-                
-                if not is_too_similar:
-                    filtered_search_space.append(tid)
-            
-            if removed_count > 0:
-                print(f"[ALGO] Hard Filtered: Removed {removed_count} tracks similar to persistent negatives (>0.80 similarity)")
-            
-            search_space = filtered_search_space
 
         for tid in search_space:
             t = self.track_map[tid]
@@ -603,107 +537,6 @@ class UserRecommender:
             print(f"  {i+1}. {t['filename']} | Score: {fs:.4f} (Sim: {ss:.4f} - Pen: {pen:.4f})")
 
         return [c[0] for c in candidates[:limit]]
-
-    def _validate_neighborhood_density(self, track_id, min_neighbors=20, min_similarity=0.85):
-        """
-        Verify a track has sufficient similar neighbors before using it as a probe anchor.
-        Returns: (is_valid, neighbor_count, avg_similarity)
-        """
-        if track_id not in self.track_map:
-            return False, 0, 0.0
-        
-        anchor_vec = np.array(self.track_map[track_id]['vector'])
-        neighbors = []
-        
-        # Fast neighborhood scan
-        for tid, t in self.track_map.items():
-            if tid == track_id or tid in self.played_ids or tid in self.global_dislikes:
-                continue
-            if not self._track_valid_for_mode(t):
-                continue
-            
-            candidate_vec = np.array(t['vector'])
-            sim = np.dot(anchor_vec, candidate_vec) / (
-                np.linalg.norm(anchor_vec) * np.linalg.norm(candidate_vec) + 1e-8
-            )
-            
-            if sim >= min_similarity:
-                neighbors.append((tid, sim))
-        
-        neighbor_count = len(neighbors)
-        avg_similarity = np.mean([s for _, s in neighbors]) if neighbors else 0.0
-        
-        is_valid = neighbor_count >= min_neighbors
-        
-        if not is_valid:
-            print(f"[ALGO] ❌ Insufficient Neighborhood: Track {track_id} has only {neighbor_count}/{min_neighbors} neighbors at {min_similarity}+ similarity")
-        else:
-            print(f"[ALGO] ✅ Dense Neighborhood: Track {track_id} has {neighbor_count} neighbors (avg sim: {avg_similarity:.3f})")
-        
-        return is_valid, neighbor_count, avg_similarity
-
-    def _find_track_by_vector(self, target_vector):
-        """Find track ID for a given vector (helper for neighborhood validation)"""
-        target_np = np.array(target_vector)
-        best_match = None
-        min_dist = float('inf')
-        
-        for tid, t in self.track_map.items():
-            vec = np.array(t['vector'])
-            dist = np.linalg.norm(vec - target_np)
-            if dist < min_dist and dist < 0.001:  # Very tight threshold for exact match
-                min_dist = dist
-                best_match = tid
-        
-        return best_match
-
-    def _get_neighborhood_probe_candidates(self, anchor_track_id, limit=20):
-        """
-        ENHANCED: Find tracks with vivid similarity to anchor that also have dense neighborhoods.
-        This ensures probed tracks can support follow-up recommendations.
-        """
-        if anchor_track_id not in self.track_map:
-            return []
-        
-        anchor_vec = np.array(self.track_map[anchor_track_id]['vector'])
-        
-        # Step 1: Find vividly similar tracks (>0.85 similarity)
-        vivid_candidates = []
-        for tid, t in self.track_map.items():
-            if tid == anchor_track_id or tid in self.played_ids or tid in self.global_dislikes:
-                continue
-            if not self._track_valid_for_mode(t):
-                continue
-            
-            vec = np.array(t['vector'])
-            sim = np.dot(anchor_vec, vec) / (np.linalg.norm(anchor_vec) * np.linalg.norm(vec) + 1e-8)
-            
-            if sim >= 0.85:
-                vivid_candidates.append((tid, sim))
-        
-        print(f"[ALGO] Found {len(vivid_candidates)} vividly similar candidates (>0.85 sim)")
-        
-        # Step 2: Validate each candidate has its own dense neighborhood
-        validated_probes = []
-        for cand_id, anchor_sim in vivid_candidates:
-            is_valid, neighbor_count, avg_sim = self._validate_neighborhood_density(
-                cand_id, min_neighbors=15, min_similarity=0.82
-            )
-            
-            if is_valid:
-                validated_probes.append((self.track_map[cand_id], anchor_sim, neighbor_count))
-        
-        # Step 3: Sort by neighborhood quality (neighbor count * avg similarity)
-        validated_probes.sort(key=lambda x: x[2], reverse=True)
-        
-        print(f"[ALGO] Validated {len(validated_probes)}/{len(vivid_candidates)} probes with dense neighborhoods")
-        
-        if validated_probes:
-            print(f"[ALGO] Top 5 Validated Probe Candidates:")
-            for i, (t, sim, neighbors) in enumerate(validated_probes[:5]):
-                print(f"  {i+1}. {t['filename']} | Sim: {sim:.3f}, Neighbors: {neighbors}")
-        
-        return [t for t, _, _ in validated_probes[:limit]]
 
     def _get_anchor_candidates(self, anchor_vector, variance=1.0, limit=20):
         """
@@ -865,35 +698,6 @@ class UserRecommender:
                 best = cid
         return best
 
-    def _find_best_aligned_cluster(self, skip_clusters=None):
-        """
-        Find cluster whose centroid is most aligned with current user vector.
-        Used after cluster exhaustion to ensure smooth transitions.
-        """
-        if self.user_vector is None or not self.cluster_manager.centroids:
-            return self._find_nearest_cluster(np.mean(self.session_likes, axis=0) if self.session_likes else np.zeros(200), skip_clusters or set())
-        
-        user_vec = np.array(self.user_vector)
-        best_cluster = None
-        best_alignment = -1.0
-        
-        skip_clusters = skip_clusters or set()
-        
-        for cid, centroid in self.cluster_manager.centroids.items():
-            if cid in skip_clusters:
-                continue
-            
-            alignment = np.dot(user_vec, centroid) / (
-                np.linalg.norm(user_vec) * np.linalg.norm(centroid) + 1e-8
-            )
-            
-            if alignment > best_alignment:
-                best_alignment = alignment
-                best_cluster = cid
-        
-        print(f"[ALGO] Cluster Switch: Selected Cluster {best_cluster} (alignment: {best_alignment:.3f} with user vector)")
-        return best_cluster
-
     def get_next_track(self):
         candidates = []
         FETCH_LIMIT = 20
@@ -950,46 +754,27 @@ class UserRecommender:
                 # The random.choice() below handles the ratio naturally.
 
                 if recent_likes:
-                    # ENHANCED: Validate anchor has dense neighborhood before using it
-                    valid_anchors = []
-                    for like_vec in recent_likes:
-                        # Find track ID for this vector
-                        track_id = self._find_track_by_vector(like_vec)
-                        if track_id:
-                            is_valid, neighbor_count, avg_sim = self._validate_neighborhood_density(
-                                track_id, min_neighbors=20, min_similarity=0.85
-                            )
-                            if is_valid:
-                                valid_anchors.append(like_vec)
+                    # MULTI-MODAL SAMPLING (The Ratio Rule)
+                    # "Respect the Ratio of your Reality"
+                    # We DO NOT filter "Black Sheep" (outliers). If the user liked it, it's part of the vibe.
+                    # 4 Punjabi + 1 Rap = 80% chance Punjabi, 20% chance Rap.
                     
-                    if valid_anchors:
-                        # MULTI-MODAL SAMPLING (The Ratio Rule) with validated anchors only
-                        # "Respect the Ratio of your Reality"
-                        # We DO NOT filter "Black Sheep" (outliers). If the user liked it, it's part of the vibe.
-                        # 4 Punjabi + 1 Rap = 80% chance Punjabi, 20% chance Rap.
-                        
-                        selected_anchor = random.choice(valid_anchors)
-                        target_vectors = [selected_anchor]
-                        
-                        justification = f"Vibe Lock: Anchoring to validated dense-neighborhood exemplar (Multi-Modal Ratio)"
-                        print(f"[ALGO] Vibe Lock Active: Selected anchor from {len(valid_anchors)}/{len(recent_likes)} validated dense-neighborhood tracks")
-                        
-                        # Force target to ensure we lock tight to this specific exemplar
-                        # This finds songs very similar to the exemplar (Punjabi -> Punjabi, Rap -> Rap)
-                        force_target_flag = True
-                    else:
-                        # FALLBACK: No valid anchors with dense neighborhoods
-                        print(f"[ALGO] ⚠️ No valid anchors with dense neighborhoods. Switching to EXPLORE.")
-                        mode = "EXPLORE"
-                        self.streak = 0
-                        self.exploration_drift = 1.0
+                    selected_anchor = random.choice(recent_likes)
+                    target_vectors = [selected_anchor]
+                    
+                    justification = f"Vibe Lock: Anchoring to specific recent like (Multi-Modal Ratio)"
+                    print(f"[ALGO] Vibe Lock Active: Anchoring to single exemplar (from {len(recent_likes)} recent likes)")
+                    
+                    # Force target to ensure we lock tight to this specific exemplar
+                    # This finds songs very similar to the exemplar (Punjabi -> Punjabi, Rap -> Rap)
+                    force_target_flag = True 
                 elif self.anchor_track:
                      # Fallback to single anchor if session_likes is empty (shouldn't happen if streak >= 1)
                      target_vectors = [self.anchor_track['vector']]
                      justification = f"Vibe Lock: Anchoring to '{self.anchor_track['filename']}'"
                      force_target_flag = True
 
-                if mode == "EXPLOIT" and self.current_cluster_id in self.cluster_manager.clusters:
+                if self.current_cluster_id in self.cluster_manager.clusters:
                     cluster_tracks = self.cluster_manager.clusters[self.current_cluster_id]
                     # REMOVED CLUSTER WHITELISTING per user feedback
                     # "vibe lock all play horrible songs" -> forcing selection from bad clusters
@@ -1002,48 +787,45 @@ class UserRecommender:
                     if self.cluster_fail_count >= 3:
                         print(f"[ALGO] Cluster {self.current_cluster_id} Failing ({self.cluster_fail_count} skips) -> Lifting Lock")
 
-            if mode == "EXPLOIT":  # Only proceed with exploit logic if we didn't switch to explore
-                # Strict uniqueness in candidates
-                candidates_centroid = self._recommend_similar(target_vectors, self.played_ids, limit=FETCH_LIMIT, negative_vecs=self.disliked_vectors, whitelist_ids=whitelist, force_target=force_target_flag)
-                
-                # ENHANCED: Neighborhood-validated radial probe injection
-                # "slips in a track that is... slightly outside the usual safe zone"
-                candidates_radial = []
-                if self.session_likes:
-                    last_like_track_id = self._find_track_by_vector(self.session_likes[-1])
-                    if last_like_track_id:
-                        candidates_radial = self._get_neighborhood_probe_candidates(last_like_track_id, limit=10)
-                        if candidates_radial:
-                            print(f"[ALGO] Neighborhood-Validated Probe Injection: {len(candidates_radial)} candidates")
-                        else:
-                            print(f"[ALGO] ⚠️ No valid probe candidates with dense neighborhoods. Staying tight to current vibe.")
+            # Strict uniqueness in candidates
+            candidates_centroid = self._recommend_similar(target_vectors, self.played_ids, limit=FETCH_LIMIT, negative_vecs=self.disliked_vectors, whitelist_ids=whitelist, force_target=force_target_flag)
+            
+            # RADIAL PROBE INJECTION (User Request)
+            # "slips in a track that is... slightly outside the usual safe zone"
+            # We use a slightly WIDER variance (0.25) to find "Neighbors" not just clones.
+            candidates_radial = []
+            if self.session_likes:
+                last_like = self.session_likes[-1]
+                # Variance 0.25 = "Slightly Outside" (Neighboring sub-genre)
+                candidates_radial = self._get_anchor_candidates(last_like, variance=0.25, limit=10)
+                print(f"[ALGO] Radial Probe Injection: Found {len(candidates_radial)} neighbor candidates (Var 0.25).")
 
-                # Merge Strategy: 
-                # User says: "slips in a track" -> We don't want ONLY probes.
-                # We want mostly "Ratio Rule" candidates (Vibe Lock), with 1-2 Probes mixed in.
-                
-                combined = []
-                seen_ids = set()
-                
-                # 1. Add ONE high-quality Probe first (to ensure exploration)
-                probes_added = 0
-                for c in candidates_radial:
-                    if c['id'] not in seen_ids and c['id'] not in self.played_ids and c['id'] not in self.global_dislikes:
-                        combined.append(c)
-                        seen_ids.add(c['id'])
-                        probes_added += 1
-                        if probes_added >= 2: break # Limit to 2 probes at top
-                
-                # 2. Add Centroid/Ratio Candidates (The Core Vibe)
-                for c in candidates_centroid:
-                    if c['id'] not in seen_ids:
-                        combined.append(c)
-                        seen_ids.add(c['id'])
-                
-                # 3. Add remaining Probes (if needed, at the bottom)
-                # ... actually, we don't need more probes at the bottom. The core vibe is better.
-                
-                candidates = combined
+            # Merge Strategy: 
+            # User says: "slips in a track" -> We don't want ONLY probes.
+            # We want mostly "Ratio Rule" candidates (Vibe Lock), with 1-2 Probes mixed in.
+            
+            combined = []
+            seen_ids = set()
+            
+            # 1. Add ONE high-quality Probe first (to ensure exploration)
+            probes_added = 0
+            for c in candidates_radial:
+                if c['id'] not in seen_ids and c['id'] not in self.played_ids and c['id'] not in self.global_dislikes:
+                    combined.append(c)
+                    seen_ids.add(c['id'])
+                    probes_added += 1
+                    if probes_added >= 2: break # Limit to 2 probes at top
+            
+            # 2. Add Centroid/Ratio Candidates (The Core Vibe)
+            for c in candidates_centroid:
+                if c['id'] not in seen_ids:
+                    combined.append(c)
+                    seen_ids.add(c['id'])
+            
+            # 3. Add remaining Probes (if needed, at the bottom)
+            # ... actually, we don't need more probes at the bottom. The core vibe is better.
+            
+            candidates = combined
             
             # Filter: played, outliers, dislikes, duplicates
             candidates = [
@@ -1068,34 +850,14 @@ class UserRecommender:
             anchor_vec = None
             probe_variance = 1.0
             
-            # ENHANCED: When switching clusters after exhaustion, use vector alignment
-            if self.cluster_fail_count >= 5 and self.user_vector is not None:
-                print(f"[ALGO] Previous cluster exhausted. Finding best-aligned cluster...")
-                
-                # Skip the exhausted cluster
-                exhausted_cluster = self.current_cluster_id
-                self.current_cluster_id = self._find_best_aligned_cluster(
-                    skip_clusters={exhausted_cluster} if exhausted_cluster is not None else set()
-                )
-                
-                # Reset fail count for new cluster
-                self.cluster_fail_count = 0
-                self.streak = 0
-                
-                # Use the new cluster's centroid as anchor
-                if self.current_cluster_id is not None:
-                    anchor_vec = self.cluster_manager.centroids[self.current_cluster_id]
-                    probe_variance = 0.8
-                    justification = f"Vector-Aligned Cluster Switch: Cluster {self.current_cluster_id}"
-            
-            if anchor_vec is None and self.session_likes:
+            if self.session_likes:
                 # 1. Flow Outwards: Use session mean as anchor
                 # "I might listen to some chil bollywood alongside chill hip hop and slowly flow outwards"
                 anchor_vec = np.mean(self.session_likes, axis=0)
                 probe_variance = 1.5 # Wide net for flow
                 justification = "Flowing outwards from session taste (Radial Probe)"
                 
-            elif anchor_vec is None and self.best_historical_cluster is not None and self.cluster_scores:
+            elif self.best_historical_cluster is not None and self.cluster_scores:
                 # 2. Smart Start: Randomized Probing of High-Affinity Clusters
                 # "everytime i open the app it probes me with the same tracks... has to be a better solution"
                 # Solution: Sample from Top N clusters instead of always taking the absolute best.
@@ -1133,7 +895,7 @@ class UserRecommender:
                     probe_variance = 1.0
                     justification = f"Smart Start: Probing Cluster {selected_cid} (Centroid)"
                 
-            elif anchor_vec is None:
+            else:
                 # 3. Cold Start: Pick a random HIGH DENSITY cluster (Safe bet)
                 # Avoid outliers/sparse clusters
                 dense_clusters = [cid for cid, dens in self.cluster_densities.items() if dens > 0.5]
@@ -1335,33 +1097,6 @@ class UserRecommender:
             self.global_dislikes.add(str(track_id))  # Immediate avoidance
             if len(self.disliked_vectors) > 50: self.disliked_vectors.pop(0)
             
-            # ENHANCED: After multiple skips, verify cluster still has viable candidates
-            if self.cluster_fail_count >= 3 and self.current_cluster_id is not None:
-                print(f"[ALGO] Skip Optimization: Checking cluster viability after {self.cluster_fail_count} skips")
-                
-                # Update user vector FIRST
-                if rl_dir != 0:
-                    self.update_user_vector(vector, rl_dir)
-                
-                # Then verify cluster has aligned candidates
-                cluster_tracks = self.cluster_manager.get_cluster_tracks(self.current_cluster_id)
-                cluster_candidates = [
-                    self.track_map[tid] for tid in cluster_tracks 
-                    if tid in self.track_map and tid not in self.played_ids and tid not in self.global_dislikes
-                ]
-                
-                # Apply user vector optimization
-                optimized = self._optimize_for_user_vector(cluster_candidates, limit=50)
-                
-                if len(optimized) < 10:
-                    print(f"[ALGO] ❌ Cluster exhausted after user vector optimization. Switching clusters.")
-                    self.streak = 0
-                    self.exploration_drift = 1.0
-                    # Force immediate cluster switch
-                    self.current_cluster_id = None
-                else:
-                    print(f"[ALGO] ✅ Found {len(optimized)} user-vector-aligned tracks in current cluster")
-            
         elif liked:
             alpha_boost = 1.0
             self.streak += 1
@@ -1401,33 +1136,6 @@ class UserRecommender:
                 self.session_dislikes.append(vector)
                 self.global_dislikes.add(str(track_id))
                 self.disliked_vectors.append(vector)
-                
-                # ENHANCED: After multiple quick skips, verify cluster viability
-                if self.cluster_fail_count >= 3 and self.current_cluster_id is not None:
-                    print(f"[ALGO] Skip Optimization: Checking cluster viability after {self.cluster_fail_count} quick skips")
-                    
-                    # Update user vector FIRST
-                    if rl_dir != 0:
-                        self.update_user_vector(vector, rl_dir)
-                    
-                    # Then verify cluster has aligned candidates
-                    cluster_tracks = self.cluster_manager.get_cluster_tracks(self.current_cluster_id)
-                    cluster_candidates = [
-                        self.track_map[tid] for tid in cluster_tracks 
-                        if tid in self.track_map and tid not in self.played_ids and tid not in self.global_dislikes
-                    ]
-                    
-                    # Apply user vector optimization
-                    optimized = self._optimize_for_user_vector(cluster_candidates, limit=50)
-                    
-                    if len(optimized) < 10:
-                        print(f"[ALGO] ❌ Cluster exhausted after user vector optimization. Switching clusters.")
-                        self.streak = 0
-                        self.exploration_drift = 1.0
-                        # Force immediate cluster switch
-                        self.current_cluster_id = None
-                    else:
-                        print(f"[ALGO] ✅ Found {len(optimized)} user-vector-aligned tracks in current cluster")
                 
             else: # is_green_signal (>=15s or >=10%)
                 # Treat as positive engagement, sufficient to trigger lock-in
