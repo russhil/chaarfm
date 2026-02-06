@@ -203,13 +203,28 @@
         let ytReady = false;
         let progressInterval = null;
 
+        // YouTube Player Initialization - Optimized for faster startup
         if (youtubeMode) {
             document.getElementById('album-icon').style.display = 'none';
+            document.getElementById('youtube-container').style.display = 'block'; // Show container immediately
+            
+            // Pre-initialize player as soon as possible
             window.onYouTubeIframeAPIReady = function() {
                 ytPlayer = new YT.Player('youtube-container', {
                     height: '100%', width: '100%',
-                    playerVars: { playsinline: 1, controls: 0, disablekb: 1 },
+                    playerVars: { 
+                        playsinline: 1, 
+                        controls: 0, 
+                        disablekb: 1,
+                        rel: 0, // Disable related videos to save bandwidth
+                        showinfo: 0, // Hide video info
+                        modestbranding: 1 // Hide YouTube logo
+                    },
                     events: {
+                        onReady: function() {
+                            ytReady = true;
+                            console.log('YouTube Player Ready');
+                        },
                         onStateChange: function(e) {
                             if (e.data === YT.PlayerState.ENDED) {
                                 stopYTProgressLoop();
@@ -224,8 +239,14 @@
                         }
                     }
                 });
-                ytReady = true;
             };
+            
+            // Fallback if API takes too long
+            setTimeout(() => {
+                if (!ytReady) {
+                    console.log('YouTube Player loading...');
+                }
+            }, 2000);
         }
 
         // Batch tracking

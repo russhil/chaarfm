@@ -24,11 +24,16 @@ if not DATABASE_URL:
 
 # Create Engine
 # Intelligent pooling config
-connect_args = {"connect_timeout": 10}
-pool_config = {
-    "pool_size": 10,
-    "max_overflow": 20
-}
+if DATABASE_URL.startswith("sqlite://"):
+    # SQLite doesn't support connect_timeout or pooling
+    connect_args = {}
+    pool_config = {}
+else:
+    connect_args = {"connect_timeout": 10}
+    pool_config = {
+        "pool_size": 10,
+        "max_overflow": 20
+    }
 
 # Check for NullPool need (Legacy Supabase 6543 port check removed as we are on Render)
 # from sqlalchemy import pool
@@ -405,13 +410,18 @@ def verify_user(user_id: str, password: str) -> Optional[Dict]:
 
 def get_or_create_google_user(user_info: Dict) -> Dict:
     """Get existing user by google_id or create new one."""
+    print(f"Debug: get_or_create_google_user called with user_info: {user_info}")
     email = user_info.get("email")
     google_id = user_info.get("sub")
     picture = user_info.get("picture")
     name = user_info.get("name")
     
+    if not email or not google_id:
+        print(f"Error: Missing required fields - email: {email}, google_id: {google_id}")
+        raise ValueError(f"Missing required user information (email or google_id)")
+    
     # Use email as the primary ID for now, or fallback to google_id if no email
-    # Ideally we'd use a UUID and link them, but to keep compat with existing "russhil" string IDs:
+    # Ideally wed use a UUID and link them, but to keep compat with existing "russhil" string IDs:
     user_id = email if email else f"google_{google_id}"
     
     with engine.connect() as conn:
@@ -422,18 +432,21 @@ def get_or_create_google_user(user_info: Dict) -> Dict:
         """), {"uid": user_id, "gid": google_id}).mappings().fetchone()
         
         if row:
+            print(f"Debug: User exists: {dict(row)}")
             # Update info if needed
-            if not row['google_id'] or row.get('name') != name:
+            if not row["google_id"] or row.get("name") != name or row.get("picture") != picture:
+                print(f"Debug: Updating user info")
                 conn.execute(text("""
                     UPDATE users SET google_id = :gid, picture = :pic, name = :name 
                     WHERE id = :uid
-                """), {"gid": google_id, "pic": picture, "name": name, "uid": row['id']})
+                """), {"gid": google_id, "pic": picture, "name": name, "uid": row["id"]})
                 conn.commit()
                 
                 # Refetch to get updated data
-                row = conn.execute(text("SELECT * FROM users WHERE id = :uid"), {"uid": row['id']}).mappings().fetchone()
+                row = conn.execute(text("SELECT * FROM users WHERE id = :uid"), {"uid": row["id"]}).mappings().fetchone()
             return dict(row)
         else:
+            print(f"Debug: Creating new user with user_id: {user_id}")
             # Create new user
             now = datetime.now().isoformat()
             conn.execute(text("""
@@ -448,7 +461,7 @@ def get_or_create_google_user(user_info: Dict) -> Dict:
                 "date": now
             })
             conn.commit()
-            return {
+            new_user = {
                 "id": user_id,
                 "email": email,
                 "google_id": google_id,
@@ -457,6 +470,8 @@ def get_or_create_google_user(user_info: Dict) -> Dict:
                 "created_at": now,
                 "is_guest": False
             }
+            print(f"Debug: New user created: {new_user}")
+            return new_user
 
 def get_user_profile(user_id: str, collection_name: str = "music_averaged") -> Dict:
     if user_id == 'guest': return {"user_id": "guest", "is_guest": True, "clusters": {}}

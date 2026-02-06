@@ -46,7 +46,8 @@ class ClusterManager:
         n = min(self.n_clusters, len(vecs))
         if n < 1: n = 1
         
-        km = KMeans(n_clusters=n, random_state=42, n_init=10)
+        # Optimized: Reduced n_init from 10 to 1 for much faster clustering
+        km = KMeans(n_clusters=n, random_state=42, n_init=1)
         labels = km.fit_predict(vecs)
         self.centroids = {i: km.cluster_centers_[i] for i in range(n)}
         
@@ -95,8 +96,8 @@ class UserRecommender:
         # For now, reduce n_clusters or n_init to speed up startup.
         # Or even better, just load centroids from DB if available.
         
-        self.cluster_manager = ClusterManager(self.track_map, n_clusters=20) # Reduced from 50 to 20 for speed
-        self.cluster_manager.fit() # This is the slow part (KMeans on 2500 vectors)
+        self.cluster_manager = ClusterManager(self.track_map, n_clusters=10) # Reduced from 20 to 10 for faster startup
+        self.cluster_manager.fit() # This is the slow part (KMeans on 2500 vectors) - further optimized with n_init=1
         self.cluster_scores = {}
         self.current_cluster_id = None
         
@@ -114,16 +115,17 @@ class UserRecommender:
         # Outlier detection
         self.outlier_tracks = set()
         self.cluster_densities = {}
-        self._compute_outliers()
+        # self._compute_outliers()  # DISABLED - expensive operation, only compute on demand if needed
         self.init_bandit()
         
         self.user_vector = None
         
-        # Load User History for Smart Start
+        # Load User History for Smart Start - Optimized: Skip if guest user
         self.best_historical_cluster = None
         self.global_dislikes = set()
-        self._load_user_history()
-        self._load_user_dislikes()
+        if self.user_id != "guest":  # Skip history loading for guest users to speed up
+            self._load_user_history()
+            self._load_user_dislikes()
         
         print(f"UserRecommender Initialized for {user_id} ({len(self.track_map)} tracks)")
 

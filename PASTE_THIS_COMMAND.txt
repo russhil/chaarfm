@@ -1,0 +1,27 @@
+================================================================================
+COPY AND PASTE THIS COMMAND
+================================================================================
+
+Replace YOUR_PAIRING_CODE with your actual pairing code from /ingest page:
+
+git clone https://github.com/russhil/chaarfm.git chaarfm_worker && cd chaarfm_worker && pip3 install websockets requests certifi yt-dlp tensorflow tf-keras mutagen numpy librosa python-dotenv psycopg2-binary && pip3 install essentia --no-compile && python3 remote_worker.py --url https://chaarfm.onrender.com --code YOUR_PAIRING_CODE
+
+
+EXAMPLE (if pairing code is ABC123):
+--------------------------------------
+git clone https://github.com/russhil/chaarfm.git chaarfm_worker && cd chaarfm_worker && pip3 install websockets requests certifi yt-dlp tensorflow tf-keras mutagen numpy librosa python-dotenv psycopg2-binary && pip3 install essentia --no-compile && python3 remote_worker.py --url https://chaarfm.onrender.com --code ABC123
+
+
+FOR MULTIPLE WORKERS:
+---------------------
+Run the same command in multiple terminals (same or different machines).
+All workers with the same pairing code will automatically share the workload!
+
+
+GET PAIRING CODE:
+-----------------
+1. Go to: https://chaarfm.onrender.com/ingest
+2. Generate pairing code
+3. Replace YOUR_PAIRING_CODE in the command above
+
+================================================================================

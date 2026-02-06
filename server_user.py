@@ -140,9 +140,10 @@ def create_session(user_id: str, collection_name: str = "music_averaged", youtub
         "youtube_mode": youtube_mode
     }
     
-    # Pre-load first batch
-    batch = recommender.get_next_batch()
-    sessions[session_id]["queue"] = batch.copy()
+    # Optimized: Skip pre-loading first batch to speed up session creation
+    # Batch will be loaded on first request to /api/next
+    # batch = recommender.get_next_batch()
+    # sessions[session_id]["queue"] = batch.copy()
     
     mode_label = "YOUTUBE" if youtube_mode else "CLASSIC"
     print(f"Created session {session_id[:8]}... for user {user_id} (collection: {collection_name}, mode: {mode_label})")
@@ -283,8 +284,12 @@ async def login_page(request: Request):
 async def pick_mode_page(request: Request):
     """After login: choose Classic vs YouTube and collection, then start session."""
     user_id = request.session.get("user_id")
+    print(f"Debug: pick_mode_page called with user_id from session: {user_id}")
+    print(f"Debug: Session contents: {request.session}")
     if not user_id:
+        print("Debug: No user_id in session, redirecting to login")
         return RedirectResponse(url="/login", status_code=302)
+    print(f"Debug: Rendering pick_mode.html for user: {user_id}")
     return templates.TemplateResponse("pick_mode.html", {"request": request, "user_id": user_id})
 
 @app.get("/youtube-mode", response_class=HTMLResponse)
@@ -375,18 +380,41 @@ async def auth_google_callback(request: Request):
     """Handle Google Auth Callback."""
     try:
         token = await oauth.google.authorize_access_token(request)
-        user_info = token.get('userinfo')
+        user_info = token.get("userinfo")
         
         if not user_info:
-            # Sometimes userinfo is inside the id_token claim
-            # But authlib usually handles this. Let's try to fetch if missing.
-            # user_info = await oauth.google.userinfo(token=token)
-            pass
-            
+            # Try to extract from id_token if userinfo is missing
+            print("Warning: userinfo not directly available in token, trying id_token")
+            # Check if id_token is present and decode it
+            from jose import jwt
+            id_token = token.get("id_token")
+            if id_token:
+                try:
+                    # Decode the id_token to get user info
+                    user_info = jwt.decode(id_token, options={"verify_signature": False})
+                    print("Successfully extracted user info from id_token")
+                except Exception as e:
+                    print(f"Failed to decode id_token: {e}")
+        
+        if not user_info:
+            print("Error: No user information available from Google")
+            return RedirectResponse(url="/login?error=oauth_no_user_info")
+        
+        print(f"Google User Info received: {user_info}")
+        
         # Get or Create User in DB
         db_user = user_db.get_or_create_google_user(user_info)
+        print(f"DB User created/fetched: {db_user}")
+        
         request.session["user_id"] = db_user["id"]
         request.session["is_guest"] = False
+        print(f"Session set with user_id: {db_user["id"]}, is_guest: False")
+        
+        # Verify the session was properly set
+        if "user_id" not in request.session:
+            print("Error: Failed to set session user_id")
+            return RedirectResponse(url="/login?error=session_failed")
+        
         return RedirectResponse(url="/pick-mode")
     except Exception as e:
         print(f"OAuth Error: {e}")

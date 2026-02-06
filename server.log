@@ -1,0 +1,101 @@
+/Users/russhil/cursor/chaarfm/server_user.py:80: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Will watch for changes in these directories: ['/Users/russhil/cursor/chaarfm']
+INFO:     Uvicorn running on http://0.0.0.0:5001 (Press CTRL+C to quit)
+INFO:     Started reloader process [74277] using StatReload
+WARNING: DATABASE_URL not found in .env, persistent storage may fail.
+Initializing User DB at sqlite:///users_backup.db
+Warning: Some environment variables are missing. Check .env file.
+🚀 Starting User Server on port 5001...
+INFO:     Started server process [74283]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING: DATABASE_URL not found in .env, persistent storage may fail.
+Initializing User DB at sqlite:///users_backup.db
+Warning: Some environment variables are missing. Check .env file.
+Initializing User DB at sqlite:///users_backup.db
+🚀 Application starting up...
+Initializing User DB at sqlite:///users_backup.db
+✅ Database initialized successfully
+INFO:     127.0.0.1:52722 - "GET /login HTTP/1.1" 200 OK
+Debug: pick_mode_page called with user_id from session: None
+Debug: Session contents: {}
+Debug: No user_id in session, redirecting to login
+INFO:     127.0.0.1:52745 - "GET /pick-mode HTTP/1.1" 302 Found
+INFO:     127.0.0.1:52745 - "GET /login HTTP/1.1" 200 OK
+WARNING:  StatReload detected changes in 'test_google_login.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [74283]
+INFO:     Started server process [74717]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING: DATABASE_URL not found in .env, persistent storage may fail.
+Initializing User DB at sqlite:///users_backup.db
+Warning: Some environment variables are missing. Check .env file.
+Initializing User DB at sqlite:///users_backup.db
+🚀 Application starting up...
+Initializing User DB at sqlite:///users_backup.db
+✅ Database initialized successfully
+INFO:     127.0.0.1:52853 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52855 - "GET /login HTTP/1.1" 200 OK
+Debug: pick_mode_page called with user_id from session: None
+Debug: Session contents: {}
+Debug: No user_id in session, redirecting to login
+INFO:     127.0.0.1:52857 - "GET /pick-mode HTTP/1.1" 302 Found
+INFO:     127.0.0.1:52857 - "GET /login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52860 - "GET /api/auth/google HTTP/1.1" 302 Found
+WARNING:  StatReload detected changes in 'server_user.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [74717]
+INFO:     Started server process [79566]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in 'user_recommender.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [79566]
+INFO:     Started server process [79676]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in 'test_optimization.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [79676]
+INFO:     Started server process [79727]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING: DATABASE_URL not found in .env, persistent storage may fail.
+Initializing User DB at sqlite:///users_backup.db
+Warning: Some environment variables are missing. Check .env file.
+Initializing User DB at sqlite:///users_backup.db
+🚀 Application starting up...
+Initializing User DB at sqlite:///users_backup.db
+✅ Database initialized successfully
+INFO:     127.0.0.1:53563 - "GET / HTTP/1.1" 200 OK
+WARNING:  StatReload detected changes in 'test_optimization_realistic.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [79727]
+INFO:     Started server process [80349]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  StatReload detected changes in 'test_optimization_realistic.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [80349]
+INFO:     Started server process [80522]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
