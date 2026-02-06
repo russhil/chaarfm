@@ -77,16 +77,57 @@ oauth.register(
     }
 )
 
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
+# Background task for session cleanup
+cleanup_executor = ThreadPoolExecutor(max_workers=1)
+
 @app.on_event("startup")
 async def startup_event():
     print("🚀 Application starting up...")
     try:
         user_db.init_db()
         print("✅ Database initialized successfully")
+        
+        # Start background cleanup task
+        asyncio.create_task(periodic_cleanup())
+        print("✅ Background cleanup task started")
+        
     except Exception as e:
         print(f"❌ Database initialization failed: {e}")
         # We might want to exit here if DB is critical, but logging it explicitly helps debugging.
         # In production, this will still likely cause the app to be unhealthy, which is correct.
+
+async def periodic_cleanup():
+    """Periodically clean up old sessions."""
+    while True:
+        try:
+            await asyncio.sleep(3600)  # Run every hour
+            cleaned = await asyncio.get_event_loop().run_in_executor(
+                cleanup_executor, cleanup_old_sessions
+            )
+            if cleaned > 0:
+                print(f"🧹 Cleaned up {cleaned} old sessions")
+        except Exception as e:
+            print(f"❌ Cleanup task error: {e}")
+
+@app.get("/api/session-stats")
+async def get_session_stats():
+    """Get current session statistics."""
+    with sessions_lock:
+        total_sessions = len(sessions)
+        users = {}
+        for session_data in sessions.values():
+            user_id = session_data["user_id"]
+            users[user_id] = users.get(user_id, 0) + 1
+        
+        return {
+            "total_sessions": total_sessions,
+            "unique_users": len(users),
+            "users": users,
+            "timestamp": datetime.datetime.now().isoformat()
+        }
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -113,50 +154,77 @@ COLLECTION_R2_PREFIXES = {
     "music_russhil": "russhil",
 }
 
+import threading
+
 # Session management (in-memory for simplicity)
 # In production, use Redis or JWT
 sessions = {}  # session_id -> {"user_id": str, "recommender": UserRecommender, "queue": [], "music_root": str, "youtube_mode": bool}
+sessions_lock = threading.RLock()  # Thread-safe session access
 
 def get_session(session_id: str) -> dict:
-    """Get or create session."""
-    if session_id and session_id in sessions:
-        return sessions[session_id]
-    return None
+    """Get session thread-safely."""
+    if not session_id:
+        return None
+    with sessions_lock:
+        return sessions.get(session_id)
 
 def create_session(user_id: str, collection_name: str = "music_averaged", youtube_mode: bool = False) -> str:
-    """Create new session for user."""
+    """Create new session for user with thread safety."""
     session_id = str(uuid.uuid4())
+    
+    # Create fresh recommender instance for this session
     recommender = UserRecommender(user_id, collection_name=collection_name, youtube_mode=youtube_mode)
     
     # Get music root for this collection
     music_root = COLLECTION_MUSIC_ROOTS.get(collection_name, MUSIC_ROOT)
     
-    sessions[session_id] = {
+    session_data = {
         "user_id": user_id,
         "recommender": recommender,
         "collection": collection_name,
         "music_root": music_root,
         "queue": [],
-        "youtube_mode": youtube_mode
+        "youtube_mode": youtube_mode,
+        "created_at": datetime.datetime.now(),
+        "last_activity": datetime.datetime.now()
     }
+    
+    with sessions_lock:
+        sessions[session_id] = session_data
     
     # Optimized: Skip pre-loading first batch to speed up session creation
     # Batch will be loaded on first request to /api/next
-    # batch = recommender.get_next_batch()
-    # sessions[session_id]["queue"] = batch.copy()
     
     mode_label = "YOUTUBE" if youtube_mode else "CLASSIC"
-    print(f"Created session {session_id[:8]}... for user {user_id} (collection: {collection_name}, mode: {mode_label})")
+    print(f"✅ Created session {session_id[:8]}... for user {user_id} (collection: {collection_name}, mode: {mode_label})")
     return session_id
 
+def update_session_activity(session_id: str):
+    """Update last activity timestamp for session."""
+    with sessions_lock:
+        if session_id in sessions:
+            sessions[session_id]["last_activity"] = datetime.datetime.now()
+
+def cleanup_old_sessions():
+    """Remove sessions older than 24 hours."""
+    cutoff = datetime.datetime.now() - datetime.timedelta(hours=24)
+    with sessions_lock:
+        old_sessions = [sid for sid, session in sessions.items() 
+                       if session.get("last_activity", session.get("created_at")) < cutoff]
+        for sid in old_sessions:
+            del sessions[sid]
+            print(f"🧹 Cleaned up old session {sid[:8]}...")
+    return len(old_sessions)
+
 def ensure_queue(session):
-    """Ensure the session queue has enough tracks."""
+    """Ensure the session queue has enough tracks with thread safety."""
     QUEUE_SIZE = 5
-    if len(session["queue"]) < 1: # Refill only when empty to ensure batch processing
-        print(f"Refilling queue for user {session['user_id']}")
-        batch = session["recommender"].get_next_batch()
-        session["queue"].extend(batch)
-        print(f"Added {len(batch)} tracks to queue")
+    with sessions_lock:
+        if len(session["queue"]) < 1: # Refill only when empty to ensure batch processing
+            print(f"🔄 Refilling queue for user {session['user_id']}")
+            batch = session["recommender"].get_next_batch()
+            session["queue"].extend(batch)
+            print(f"✅ Added {len(batch)} tracks to queue")
 
 # Cache for file paths to avoid repeated os.walk
 file_path_cache = {}
@@ -439,19 +507,26 @@ async def login(data: LoginRequest, request: Request):
 
 @app.get("/api/next")
 async def next_track(session_id: str = Query(...)):
-    """Get next track from queue."""
+    """Get next track from queue with thread safety."""
     session = get_session(session_id)
     if not session:
         raise HTTPException(status_code=401, detail="Invalid session")
     
-    # Ensure queue has items
+    # Update activity and ensure queue has items
+    update_session_activity(session_id)
+    
     if not session["queue"]:
          ensure_queue(session)
     
     if not session["queue"]:
         raise HTTPException(status_code=500, detail="Queue empty and refill failed")
     
-    track = session["queue"].pop(0)
+    # Thread-safe queue pop
+    with sessions_lock:
+        if session["queue"]:  # Double-check after acquiring lock
+            track = session["queue"].pop(0)
+        else:
+            raise HTTPException(status_code=500, detail="Queue became empty")
     
     queue_remaining = len(session["queue"])
     response = {
@@ -473,15 +548,19 @@ async def next_track(session_id: str = Query(...)):
 
 @app.post("/api/feedback")
 async def feedback(data: FeedbackRequest, session_id: str = Query(...)):
-    """Record feedback."""
+    """Record feedback with thread safety."""
     session = get_session(session_id)
     if not session:
         raise HTTPException(status_code=401, detail="Invalid session")
     
-    session["recommender"].record_feedback(
-        track_id=data.id,
-        duration=data.duration
-    )
+    update_session_activity(session_id)
+    
+    # Record feedback thread-safely (UserRecommender methods are not thread-safe)
+    with sessions_lock:
+        session["recommender"].record_feedback(
+            track_id=data.id,
+            duration=data.duration
+        )
     
     # LOGGING
     track = session["recommender"].track_map.get(data.id)
@@ -490,17 +569,9 @@ async def feedback(data: FeedbackRequest, session_id: str = Query(...)):
     
     # If queue empty, finalize and load next
     if len(session["queue"]) == 0:
-        print("Queue empty - finalizing batch and loading next")
-        session["recommender"].finalize_batch()
-        # Do NOT refill here automatically.
-        # Let next_track trigger the refill to ensure the feedback is fully processed 
-        # before the new batch is generated.
-        # But wait, next_track is called by the frontend.
-        # If the frontend asks for next track, it hits next_track.
-        # If the queue is empty, next_track calls ensure_queue.
-        # ensure_queue generates the new batch.
-        # So we are good. We just need to ensure finalize_batch is called.
-        pass
+        print("🔄 Queue empty - finalizing batch")
+        with sessions_lock:
+            session["recommender"].finalize_batch()
     
     return {"status": "ok"}
 
@@ -567,10 +638,145 @@ async def get_profile(session_id: str = Query(...)):
     if user_id == "guest":
         return {"user": "guest", "message": "Guest mode has no persistent profile"}
     
-    ranked = user_db.get_ranked_clusters(user_id)
+    profile = user_db.get_user_profile(user_id, session["collection"])
     return {
         "user": user_id,
-        "top_clusters": ranked[:10]
+        "clusters": profile.get("clusters", {}),
+        "is_guest": profile.get("is_guest", False)
+    }
+
+@app.get("/api/cluster-ratios")
+async def get_cluster_ratios(session_id: str = Query(...)):
+    """Get current session cluster engagement ratios with detailed information."""
+    session = get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=401, detail="Invalid session")
+    
+    # Get cluster ratios from recommender
+    cluster_info = session["recommender"].get_cluster_info()
+    
+    # Add current recommendation state
+    recommender = session["recommender"]
+    state_info = {
+        "session_likes_count": len(recommender.session_likes),
+        "session_dislikes_count": len(recommender.session_dislikes), 
+        "current_streak": recommender.streak,
+        "exploration_drift": recommender.exploration_drift,
+        "current_cluster": recommender.current_cluster_id,
+        "user_vector_initialized": recommender.user_vector is not None
+    }
+    
+    # Add convergence metrics if available (requires enhancement integration)
+    convergence_metrics = {}
+    if hasattr(recommender, 'get_convergence_metrics'):
+        convergence_metrics = recommender.get_convergence_metrics()
+    
+    # Add optimal next cluster suggestion if available
+    next_cluster_suggestion = None
+    if hasattr(recommender, 'suggest_optimal_next_cluster'):
+        cluster_id, justification = recommender.suggest_optimal_next_cluster()
+        if cluster_id is not None:
+            next_cluster_suggestion = {
+                "cluster_id": cluster_id,
+                "justification": justification
+            }
+    
+    return {
+        "cluster_ratios": cluster_info,
+        "session_state": state_info,
+        "convergence_metrics": convergence_metrics,
+        "next_cluster_suggestion": next_cluster_suggestion,
+        "user_id": session["user_id"],
+        "timestamp": datetime.datetime.now().isoformat()
+    }
+
+@app.get("/api/cluster-analysis")
+async def get_cluster_analysis(session_id: str = Query(...)):
+    """Get detailed cluster analysis including mathematical insights."""
+    session = get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=401, detail="Invalid session")
+    
+    recommender = session["recommender"]
+    
+    # Basic cluster information
+    cluster_info = recommender.get_cluster_info()
+    current_ratios = recommender.get_current_cluster_ratios()
+    
+    # Mathematical analysis
+    analysis = {
+        "total_clusters_in_library": len(recommender.cluster_manager.clusters) if recommender.cluster_manager.initialized else 0,
+        "engaged_clusters": len(current_ratios),
+        "total_interactions": len(recommender.session_likes),
+        "current_ratios": current_ratios,
+        "bandit_scores": {}
+    }
+    
+    # Add bandit algorithm state
+    for cluster_id, scores in recommender.cluster_scores.items():
+        alpha = scores['alpha']
+        beta = scores['beta']
+        expected_reward = alpha / (alpha + beta) if (alpha + beta) > 0 else 0
+        confidence = alpha + beta  # Higher total = more confident estimate
+        
+        analysis["bandit_scores"][cluster_id] = {
+            "alpha": alpha,
+            "beta": beta,
+            "expected_reward": expected_reward,
+            "confidence": confidence
+        }
+    
+    # Recent interaction patterns
+    if len(recommender.session_likes) >= 2:
+        # Calculate trajectory: which clusters are trending up/down
+        recent_window = min(len(recommender.session_likes), 5)
+        recent_likes = recommender.session_likes[-recent_window:]
+        
+        cluster_trajectory = {}
+        for i, like_vector in enumerate(recent_likes):
+            cluster_id = recommender._find_vector_cluster(like_vector)
+            if cluster_id not in cluster_trajectory:
+                cluster_trajectory[cluster_id] = []
+            cluster_trajectory[cluster_id].append(i)  # Position in recent sequence
+        
+        # Calculate trend (positive = increasing engagement, negative = decreasing)
+        cluster_trends = {}
+        for cluster_id, positions in cluster_trajectory.items():
+            if len(positions) >= 2:
+                # Simple linear trend: later positions get higher weight
+                weights = [(pos + 1) for pos in positions]
+                trend = (sum(weights) / len(weights)) - (recent_window / 2)  # Centered around 0
+                cluster_trends[cluster_id] = trend
+            else:
+                cluster_trends[cluster_id] = positions[0] - (recent_window / 2) if positions else 0
+        
+        analysis["cluster_trends"] = cluster_trends
+    
+    # Prediction: what's the system likely to recommend next?
+    if recommender.session_likes:
+        # Simulate the recommendation selection process
+        prediction_samples = 100
+        cluster_predictions = {}
+        
+        for _ in range(prediction_samples):
+            # Simulate random.choice(session_likes)
+            selected_idx = np.random.choice(len(recommender.session_likes))
+            anchor_vector = recommender.session_likes[selected_idx]
+            predicted_cluster = recommender._find_vector_cluster(anchor_vector)
+            
+            cluster_predictions[predicted_cluster] = cluster_predictions.get(predicted_cluster, 0) + 1
+        
+        # Convert to percentages
+        prediction_probabilities = {}
+        for cluster_id, count in cluster_predictions.items():
+            prediction_probabilities[cluster_id] = (count / prediction_samples) * 100
+        
+        analysis["next_recommendation_probabilities"] = prediction_probabilities
+    
+    return {
+        "analysis": analysis,
+        "timestamp": datetime.datetime.now().isoformat(),
+        "user_id": session["user_id"]
     }
 
 @app.get("/stream/{filename}")
@@ -663,10 +869,13 @@ async def logout_get(request: Request):
 
 @app.post("/api/logout")
 async def logout(session_id: str = Query(None)):
-    """End playback session (pass session_id from player)."""
-    if session_id and session_id in sessions:
-        del sessions[session_id]
-        print(f"Session {session_id[:8]}... ended")
+    """End playback session with thread safety."""
+    if session_id:
+        with sessions_lock:
+            if session_id in sessions:
+                user_id = sessions[session_id].get("user_id", "unknown")
+                del sessions[session_id]
+                print(f"🔚 Session {session_id[:8]}... ended for user {user_id}")
     return {"status": "ok"}
 
 @app.post("/api/waitlist")

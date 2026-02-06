@@ -54,17 +54,21 @@
                 <div class="track-status">
                     <div class="status-indicator" id="status-dot"></div>
                     <span id="track-status">Initialize playback</span>
+                    <div class="seeking-indicator" id="seeking-indicator" style="display: none;">
+                        <i class="fas fa-fast-forward" style="color: var(--accent); margin-left: 8px;"></i>
+                    </div>
                 </div>
                 <div id="track-reasoning" class="reasoning-badge">WAITING_FOR_INPUT</div>
             </div>
 
-            <!-- Waveform Progress -->
-            <div class="progress-container">
+        <!-- Waveform Progress with Seeking Support -->
+            <div class="progress-container" title="Click or drag to seek through track">
                 <div class="progress-track">
                     <div class="progress-fill" id="progress"></div>
                 </div>
                 <div class="time-labels">
                     <span id="current-time">0:00</span>
+                    <span class="seeking-hint" style="font-size: 0.65rem; color: var(--secondary); opacity: 0.7;">DRAG TO SEEK</span>
                     <span id="total-time">--:--</span>
                 </div>
             </div>
@@ -203,7 +207,7 @@
         let ytReady = false;
         let progressInterval = null;
 
-        // YouTube Player Initialization - Optimized for faster startup
+        // YouTube Player Initialization with Enhanced Seeking Support
         if (youtubeMode) {
             document.getElementById('album-icon').style.display = 'none';
             document.getElementById('youtube-container').style.display = 'block'; // Show container immediately
@@ -218,14 +222,23 @@
                         disablekb: 1,
                         rel: 0, // Disable related videos to save bandwidth
                         showinfo: 0, // Hide video info
-                        modestbranding: 1 // Hide YouTube logo
+                        modestbranding: 1, // Hide YouTube logo
+                        fs: 0, // Disable fullscreen
+                        iv_load_policy: 3 // Hide annotations
                     },
                     events: {
-                        onReady: function() {
+                        onReady: function(event) {
                             ytReady = true;
-                            console.log('YouTube Player Ready');
+                            console.log('🎬 YouTube Player Ready with seeking support');
+                            
+                            // Set quality to auto for better performance
+                            if (ytPlayer.setPlaybackQuality) {
+                                ytPlayer.setPlaybackQuality('auto');
+                            }
                         },
                         onStateChange: function(e) {
+                            console.log('YouTube state change:', e.data);
+                            
                             if (e.data === YT.PlayerState.ENDED) {
                                 stopYTProgressLoop();
                                 nextTrack();
@@ -235,7 +248,21 @@
                             } else if (e.data === YT.PlayerState.PAUSED) {
                                 updatePlayButton(false);
                                 stopYTProgressLoop();
+                            } else if (e.data === YT.PlayerState.BUFFERING) {
+                                statusEl.innerText = 'Buffering...';
+                            } else if (e.data === YT.PlayerState.CUED) {
+                                console.log('YouTube video cued and ready');
                             }
+                        },
+                        onError: function(e) {
+                            console.error('YouTube player error:', e.data);
+                            statusEl.innerText = 'Video unavailable';
+                            statusEl.style.color = 'var(--error)';
+                            
+                            // Auto-skip on error after 3 seconds
+                            setTimeout(() => {
+                                if (currentTrackId) nextTrack();
+                            }, 3000);
                         }
                     }
                 });
@@ -244,9 +271,18 @@
             // Fallback if API takes too long
             setTimeout(() => {
                 if (!ytReady) {
-                    console.log('YouTube Player loading...');
+                    console.log('⏳ YouTube Player still loading...');
                 }
             }, 2000);
+            
+            // Extended timeout for error handling
+            setTimeout(() => {
+                if (!ytReady) {
+                    console.error('❌ YouTube Player failed to load after 10s');
+                    statusEl.innerText = 'YouTube Player Error';
+                    statusEl.style.color = 'var(--error)';
+                }
+            }, 10000);
         }
 
         // Batch tracking
@@ -471,55 +507,142 @@
             }, 2000);
         });
 
-        // Scrubbing
+        // Enhanced Scrubbing with YouTube Support
         const progressBar = document.querySelector('.progress-container');
         let isScrubbing = false;
+        let scrubStartTime = 0;
+
+        function getCurrentDuration() {
+            if (youtubeMode && ytPlayer && ytPlayer.getDuration) {
+                return ytPlayer.getDuration();
+            }
+            return audio.duration || 0;
+        }
+
+        function getCurrentTime() {
+            if (youtubeMode && ytPlayer && ytPlayer.getCurrentTime) {
+                return ytPlayer.getCurrentTime();
+            }
+            return audio.currentTime || 0;
+        }
+
+        function seekTo(time) {
+            if (youtubeMode && ytPlayer && ytPlayer.seekTo) {
+                ytPlayer.seekTo(time, true);
+            } else if (audio) {
+                audio.currentTime = time;
+            }
+        }
 
         function getScrubTime(clientX) {
             const rect = progressBar.getBoundingClientRect();
             let pct = (clientX - rect.left) / rect.width;
             pct = Math.max(0, Math.min(1, pct));
-            return pct * audio.duration;
+            const duration = getCurrentDuration();
+            return pct * duration;
         }
 
         function updateScrubVisual(clientX) {
             const rect = progressBar.getBoundingClientRect();
             let pct = (clientX - rect.left) / rect.width;
             pct = Math.max(0, Math.min(1, pct));
+            
+            // Update progress fill
             progressFill.style.width = (pct * 100) + '%';
+            
+            // Update time display while scrubbing
+            const duration = getCurrentDuration();
+            const scrubTime = pct * duration;
+            if (isFinite(scrubTime) && isFinite(duration)) {
+                currentTimeEl.innerText = formatTime(scrubTime);
+                totalTimeEl.innerText = formatTime(duration);
+            }
         }
 
         function startScrub(e) {
-            if (!audio.duration) return;
+            const duration = getCurrentDuration();
+            if (!duration) return;
+            
+            // Prevent text selection and scrolling
+            e.preventDefault();
+            
             isScrubbing = true;
+            scrubStartTime = getCurrentTime();
+            
             const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
             updateScrubVisual(clientX);
+            
+            // Add visual feedback
+            progressBar.style.cursor = 'grabbing';
+            document.body.style.userSelect = 'none';
+            
+            console.log('Started scrubbing from time:', scrubStartTime);
         }
 
         function moveScrub(e) {
             if (!isScrubbing) return;
+            
+            // Prevent scrolling and other default behaviors
             if (e.cancelable) e.preventDefault();
+            
             const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
             updateScrubVisual(clientX);
         }
 
         function endScrub(e) {
             if (!isScrubbing) return;
+            
             isScrubbing = false;
+            progressBar.style.cursor = 'pointer';
+            document.body.style.userSelect = '';
+            
             const clientX = e.type.includes('touch') ? e.changedTouches[0].clientX : e.clientX;
             const newTime = getScrubTime(clientX);
+            
             if (isFinite(newTime)) {
-                audio.currentTime = newTime;
+                console.log('Seeking to time:', newTime);
+                seekTo(newTime);
+                
+                // Visual confirmation
+                statusEl.innerText = `Seeked to ${formatTime(newTime)}`;
+                setTimeout(() => {
+                    if (isPlaying) statusEl.innerText = 'Playing';
+                    else statusEl.innerText = 'Paused';
+                }, 1000);
             }
         }
 
+        // Mouse events
         progressBar.addEventListener('mousedown', startScrub);
         document.addEventListener('mousemove', moveScrub);
         document.addEventListener('mouseup', endScrub);
         
+        // Touch events with better mobile support
         progressBar.addEventListener('touchstart', startScrub, {passive: false});
         document.addEventListener('touchmove', moveScrub, {passive: false});
-        document.addEventListener('touchend', endScrub);
+        document.addEventListener('touchend', endScrub, {passive: false});
+        
+        // Click-to-seek (for quick jumps)
+        progressBar.addEventListener('click', (e) => {
+            if (isScrubbing) return; // Don't interfere with drag
+            
+            const duration = getCurrentDuration();
+            if (!duration) return;
+            
+            const clientX = e.clientX;
+            const newTime = getScrubTime(clientX);
+            
+            if (isFinite(newTime)) {
+                console.log('Click seeking to time:', newTime);
+                seekTo(newTime);
+                
+                statusEl.innerText = `Jumped to ${formatTime(newTime)}`;
+                setTimeout(() => {
+                    if (isPlaying) statusEl.innerText = 'Playing';
+                    else statusEl.innerText = 'Paused';
+                }, 1000);
+            }
+        });
 
         function formatTime(seconds) {
             const m = Math.floor(seconds / 60);
@@ -530,14 +653,39 @@
         audio.addEventListener('timeupdate', () => {
             if (!currentTrackId) return;
 
-            if (audio.duration) {
+            if (audio.duration && isFinite(audio.currentTime) && isFinite(audio.duration)) {
+                // Don't update visuals while user is scrubbing
                 if (!isScrubbing) {
                     const pct = (audio.currentTime / audio.duration) * 100;
                     progressFill.style.width = pct + '%';
+                    currentTimeEl.innerText = formatTime(audio.currentTime);
+                    totalTimeEl.innerText = formatTime(audio.duration);
                 }
-                currentTimeEl.innerText = formatTime(audio.currentTime);
-                totalTimeEl.innerText = formatTime(audio.duration);
             }
+        });
+
+        // Enhanced audio loaded metadata handler for better seeking support
+        audio.addEventListener('loadedmetadata', () => {
+            if (audio.duration && isFinite(audio.duration)) {
+                totalTimeEl.innerText = formatTime(audio.duration);
+                currentTimeEl.innerText = formatTime(0);
+                progressFill.style.width = '0%';
+                console.log('Audio loaded, duration:', audio.duration);
+            }
+        });
+
+        // Handle audio seeking events
+        audio.addEventListener('seeking', () => {
+            console.log('Audio seeking to:', audio.currentTime);
+            statusEl.innerText = 'Seeking...';
+        });
+
+        audio.addEventListener('seeked', () => {
+            console.log('Audio seeked to:', audio.currentTime);
+            setTimeout(() => {
+                if (isPlaying) statusEl.innerText = 'Playing';
+                else statusEl.innerText = 'Paused';
+            }, 500);
         });
 
         function togglePlay() {
@@ -569,17 +717,26 @@
             if (progressInterval) clearInterval(progressInterval);
             progressInterval = setInterval(() => {
                 if (!ytPlayer || !ytPlayer.getCurrentTime) return;
+                
+                // Don't update visuals while user is scrubbing
+                if (isScrubbing) return;
+                
                 const ct = ytPlayer.getCurrentTime();
                 const tot = ytPlayer.getDuration();
-                if (tot > 0) {
-                    progressFill.style.width = (ct / tot * 100) + '%';
+                if (tot > 0 && isFinite(ct) && isFinite(tot)) {
+                    const pct = (ct / tot) * 100;
+                    progressFill.style.width = pct + '%';
                     currentTimeEl.innerText = formatTime(ct);
                     totalTimeEl.innerText = formatTime(tot);
                 }
-            }, 500);
+            }, 250); // Increased frequency for smoother updates
         }
+        
         function stopYTProgressLoop() {
-            if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
+            if (progressInterval) { 
+                clearInterval(progressInterval); 
+                progressInterval = null; 
+            }
         }
 
         function setupMediaSession() {
@@ -712,8 +869,121 @@
             }
         }
 
+        // Keyboard shortcuts for seeking and controls
+        document.addEventListener('keydown', (e) => {
+            // Only handle shortcuts if not typing in an input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            const duration = getCurrentDuration();
+            const currentTime = getCurrentTime();
+            
+            switch(e.key) {
+                case ' ': // Space for play/pause
+                    e.preventDefault();
+                    togglePlay();
+                    break;
+                    
+                case 'ArrowLeft': // Left arrow for -10s
+                    e.preventDefault();
+                    if (duration && currentTime >= 10) {
+                        seekTo(currentTime - 10);
+                        statusEl.innerText = 'Rewind 10s';
+                        setTimeout(() => {
+                            statusEl.innerText = isPlaying ? 'Playing' : 'Paused';
+                        }, 1000);
+                    }
+                    break;
+                    
+                case 'ArrowRight': // Right arrow for +10s
+                    e.preventDefault();
+                    if (duration && currentTime <= duration - 10) {
+                        seekTo(currentTime + 10);
+                        statusEl.innerText = 'Forward 10s';
+                        setTimeout(() => {
+                            statusEl.innerText = isPlaying ? 'Playing' : 'Paused';
+                        }, 1000);
+                    }
+                    break;
+                    
+                case 'ArrowUp': // Up arrow for +30s
+                    e.preventDefault();
+                    if (duration && currentTime <= duration - 30) {
+                        seekTo(currentTime + 30);
+                        statusEl.innerText = 'Forward 30s';
+                        setTimeout(() => {
+                            statusEl.innerText = isPlaying ? 'Playing' : 'Paused';
+                        }, 1000);
+                    }
+                    break;
+                    
+                case 'ArrowDown': // Down arrow for -30s
+                    e.preventDefault();
+                    if (duration && currentTime >= 30) {
+                        seekTo(currentTime - 30);
+                        statusEl.innerText = 'Rewind 30s';
+                        setTimeout(() => {
+                            statusEl.innerText = isPlaying ? 'Playing' : 'Paused';
+                        }, 1000);
+                    }
+                    break;
+                    
+                case 'n': // N for next track
+                    e.preventDefault();
+                    nextTrack();
+                    break;
+                    
+                case 'p': // P for previous track
+                    e.preventDefault();
+                    previousTrack();
+                    break;
+                    
+                case '/': // / for search
+                    e.preventDefault();
+                    document.getElementById('btn-search').click();
+                    break;
+            }
+        });
+
         titleEl.innerText = "System Ready.";
         statusEl.innerText = "Awaiting Input";
+        
+        console.log('🎵 ChaarFM Player initialized with enhanced seeking support');
+        console.log('🎹 Keyboard shortcuts: Space (play/pause), ←/→ (±10s), ↑/↓ (±30s), N (next), P (prev), / (search)');
+        
+        // Debug function for testing seeking
+        window.testSeeking = function() {
+            console.log('🧪 Testing seeking functionality...');
+            const duration = getCurrentDuration();
+            const currentTime = getCurrentTime();
+            
+            console.log(`Current: ${formatTime(currentTime)} / ${formatTime(duration)}`);
+            
+            if (duration > 30) {
+                // Test seek to 25% position
+                const testTime = duration * 0.25;
+                console.log(`Seeking to 25% position: ${formatTime(testTime)}`);
+                seekTo(testTime);
+                
+                setTimeout(() => {
+                    const newTime = getCurrentTime();
+                    console.log(`After seek: ${formatTime(newTime)}`);
+                    console.log(`Seek accuracy: ${Math.abs(newTime - testTime) < 2 ? '✅ GOOD' : '⚠️ POOR'}`);
+                }, 1000);
+            } else {
+                console.log('⚠️ Track too short for seeking test');
+            }
+        };
+        
+        // Debug function for testing multiple user scenarios
+        window.debugSession = function() {
+            console.log('🔍 Session Debug Info:');
+            console.log('Session ID:', sessionId);
+            console.log('User:', userName);
+            console.log('YouTube Mode:', youtubeMode);
+            console.log('Current Track:', currentTrackId);
+            console.log('Queue Remaining:', queueRemaining);
+            console.log('Batch Index:', currentBatchIndex);
+        };
     </script>
 </body>
 </html>

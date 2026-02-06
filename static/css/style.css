@@ -264,18 +264,26 @@ h1, h2, h3, h4 {
     border-radius: 4px;
 }
 
-/* Waveform Progress */
+/* Enhanced Waveform Progress with Dragging Support */
 .progress-container {
     margin-bottom: 40px;
     cursor: pointer;
-    padding: 10px 0; /* Hit area */
+    padding: 10px 0; /* Hit area for easier touch/click */
+    user-select: none; /* Prevent text selection */
 }
 
 .progress-track {
-    height: 2px;
+    height: 3px; /* Slightly thicker for easier dragging */
     background: var(--surface-border);
     position: relative;
     width: 100%;
+    border-radius: 2px;
+    transition: height 0.15s ease;
+}
+
+.progress-container:hover .progress-track,
+.progress-container:active .progress-track {
+    height: 4px; /* Expand when hovering/active */
 }
 
 .progress-fill {
@@ -283,23 +291,46 @@ h1, h2, h3, h4 {
     background: var(--primary);
     width: 0%;
     position: relative;
+    border-radius: 2px;
+    transition: background-color 0.15s ease;
 }
 
 .progress-fill::after {
     content: '';
     position: absolute;
-    right: -4px;
-    top: -3px;
-    width: 8px;
-    height: 8px;
+    right: -5px;
+    top: -4px;
+    width: 10px;
+    height: 10px;
     background: var(--primary);
     border-radius: 50%;
     opacity: 0;
-    transition: opacity 0.1s;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .progress-container:hover .progress-fill::after {
     opacity: 1;
+    transform: scale(1);
+}
+
+.progress-container:active .progress-fill::after {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+/* Active dragging state */
+.progress-container:active {
+    cursor: grabbing;
+}
+
+.progress-container:active .progress-fill {
+    background: var(--accent);
+}
+
+.progress-container:active .progress-fill::after {
+    background: var(--accent);
+    box-shadow: 0 0 15px var(--accent-glow);
 }
 
 .time-labels {

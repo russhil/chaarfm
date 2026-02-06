@@ -8,6 +8,7 @@ import json
 import random
 import datetime
 import csv
+from typing import Dict
 from sklearn.cluster import KMeans
 from sqlalchemy import text
 import user_db
@@ -1198,3 +1199,119 @@ class UserRecommender:
                 res.append(t)
                 if len(res) >= 20: break
         return res
+    
+    def get_current_cluster_ratios(self) -> Dict:
+        """
+        Calculate current session cluster engagement ratios.
+        Returns a dictionary mapping cluster_id to percentage.
+        """
+        if not self.session_likes:
+            return {}
+        
+        cluster_counts = {}
+        total_interactions = len(self.session_likes)
+        
+        for liked_vector in self.session_likes:
+            # Find which cluster this vector belongs to
+            closest_cluster = self._find_vector_cluster(liked_vector)
+            cluster_counts[closest_cluster] = cluster_counts.get(closest_cluster, 0) + 1
+        
+        # Convert to percentages
+        cluster_ratios = {}
+        for cluster_id, count in cluster_counts.items():
+            cluster_ratios[cluster_id] = (count / total_interactions) * 100
+        
+        return cluster_ratios
+    
+    def _find_vector_cluster(self, vector):
+        """
+        Find which cluster a given vector belongs to by finding the nearest centroid.
+        Returns the cluster_id of the closest cluster.
+        """
+        if not self.cluster_manager.initialized or not self.cluster_manager.centroids:
+            return 0  # Default to cluster 0 if not initialized
+        
+        min_distance = float('inf')
+        closest_cluster = None
+        
+        vector_np = np.array(vector)
+        for cluster_id, centroid in self.cluster_manager.centroids.items():
+            distance = np.linalg.norm(vector_np - centroid)
+            if distance < min_distance:
+                min_distance = distance
+                closest_cluster = cluster_id
+        
+        return closest_cluster if closest_cluster is not None else 0
+    
+    def get_cluster_info(self) -> Dict:
+        """
+        Get detailed information about current cluster engagement including 
+        sample tracks for each engaged cluster.
+        """
+        ratios = self.get_current_cluster_ratios()
+        cluster_info = {}
+        
+        for cluster_id, percentage in ratios.items():
+            # Get sample tracks from this cluster for description
+            sample_tracks = []
+            if cluster_id in self.cluster_manager.clusters:
+                track_ids = self.cluster_manager.clusters[cluster_id][:5]  # Get up to 5 samples
+                for track_id in track_ids:
+                    if track_id in self.track_map:
+                        sample_tracks.append({
+                            "id": track_id,
+                            "filename": self.track_map[track_id]["filename"]
+                        })
+            
+            cluster_info[cluster_id] = {
+                "percentage": percentage,
+                "sample_tracks": sample_tracks,
+                "track_count": len(self.cluster_manager.clusters.get(cluster_id, []))
+            }
+        
+        return cluster_info
+    
+    def log_current_state(self):
+        """
+        Log detailed information about the current recommendation state
+        for debugging and verification purposes.
+        """
+        print(f"\n{'='*60}")
+        print(f"CURRENT RECOMMENDATION STATE - User: {self.user_id}")
+        print(f"{'='*60}")
+        
+        # Basic session info
+        print(f"Session Likes: {len(self.session_likes)}")
+        print(f"Session Dislikes: {len(self.session_dislikes)}")
+        print(f"Streak: {self.streak}")
+        print(f"Exploration Drift: {self.exploration_drift:.3f}")
+        print(f"Current Cluster: {self.current_cluster_id}")
+        
+        # Cluster ratios
+        ratios = self.get_current_cluster_ratios()
+        if ratios:
+            print(f"\nCURRENT CLUSTER RATIOS:")
+            for cluster_id, percentage in sorted(ratios.items()):
+                print(f"  Cluster {cluster_id}: {percentage:.1f}%")
+        else:
+            print(f"\nNo positive interactions yet")
+        
+        # User vector info
+        if self.user_vector:
+            user_vec_norm = np.linalg.norm(self.user_vector)
+            print(f"\nUser Vector: Initialized (norm: {user_vec_norm:.3f})")
+        else:
+            print(f"\nUser Vector: Not initialized")
+        
+        # Bandit scores for top clusters
+        if self.cluster_scores:
+            print(f"\nTOP CLUSTER BANDIT SCORES:")
+            sorted_clusters = sorted(self.cluster_scores.items(), 
+                                   key=lambda x: x[1]['alpha'], reverse=True)[:5]
+            for cluster_id, scores in sorted_clusters:
+                alpha = scores['alpha']
+                beta = scores['beta']
+                expected = alpha / (alpha + beta)
+                print(f"  Cluster {cluster_id}: α={alpha:.1f}, β={beta:.1f}, E[θ]={expected:.3f}")
+        
+        print(f"{'='*60}\n")
