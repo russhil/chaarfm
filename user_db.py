@@ -50,7 +50,10 @@ def hash_password(password: str) -> str:
 def init_db():
     """Initialize database schema in Render if not exists."""
     print(f"Initializing User DB at {DATABASE_URL.split('@')[-1]}")
+    
+    # Use a single connection and transaction for all table creation
     with engine.connect() as conn:
+        # Create all tables with IF NOT EXISTS to avoid errors
         conn.execute(text('''
             CREATE TABLE IF NOT EXISTS users (
                 id TEXT PRIMARY KEY,
@@ -64,32 +67,6 @@ def init_db():
                 name TEXT
             )
         '''))
-        
-        # Schema Migration for OAuth
-        try:
-            conn.execute(text("ALTER TABLE users ADD COLUMN email TEXT"))
-        except Exception:
-            pass
-            
-        try:
-            conn.execute(text("ALTER TABLE users ADD COLUMN provider TEXT DEFAULT 'local'"))
-        except Exception:
-            pass
-
-        try:
-            conn.execute(text("ALTER TABLE users ADD COLUMN google_id TEXT"))
-        except Exception:
-            pass
-
-        try:
-            conn.execute(text("ALTER TABLE users ADD COLUMN picture TEXT"))
-        except Exception:
-            pass
-
-        try:
-            conn.execute(text("ALTER TABLE users ADD COLUMN name TEXT"))
-        except Exception:
-            pass
         
         conn.execute(text('''
             CREATE TABLE IF NOT EXISTS cluster_affinity (
@@ -150,6 +127,35 @@ def init_db():
                 created_at TEXT
             )
         '''))
+        
+        # Handle schema migrations for OAuth columns with try-except blocks
+        # This prevents the entire transaction from failing if a column already exists
+        for column_name, column_def in [
+            ("email", "TEXT"),
+            ("provider", "TEXT DEFAULT 'local'"),
+            ("google_id", "TEXT"),
+            ("picture", "TEXT"),
+            ("name", "TEXT")
+        ]:
+            try:
+                # Check if column exists first (handle SQLite differently)
+                if DATABASE_URL.startswith("sqlite://"):
+                    # For SQLite, use PRAGMA table_info
+                    result = conn.execute(text("PRAGMA table_info(users)"))
+                    columns = [row[1] for row in result]
+                else:
+                    # For Postgres, use information_schema
+                    result = conn.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name = 'users' AND column_name = :col"), 
+                                         {"col": column_name})
+                    columns = [row[0] for row in result]
+                
+                if column_name not in columns:
+                    conn.execute(text(f"ALTER TABLE users ADD COLUMN {column_name} {column_def}"))
+                    print(f"Added column {column_name} to users table")
+            except Exception as e:
+                print(f"Warning: Failed to add column {column_name}: {e}")
+        
+
         
         # Seed users
         res = conn.execute(text("SELECT id FROM users WHERE id = 'russhil'")).fetchone()
