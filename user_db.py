@@ -520,22 +520,72 @@ def get_cluster_centroid(user_id: str, cluster_id: int, collection_name: str = "
 
 def update_cluster_affinity(user_id: str, cluster_id: int, listen_seconds: float, is_positive: bool, collection_name: str = "music_averaged"):
     if user_id == 'guest': return
+    
+    date_str = datetime.now().isoformat()
+    is_pos_val = 1 if is_positive else 0
+    
     with engine.connect() as conn:
-        conn.execute(text('''
-            INSERT INTO cluster_affinity (user_id, cluster_id, collection_name, positive_signals, total_listen_seconds, track_count, last_positive_date)
-            VALUES (:uid, :cid, :col, :is_pos, :sec, 1, :date)
-            ON CONFLICT(user_id, cluster_id, collection_name) DO UPDATE SET
-                positive_signals = cluster_affinity.positive_signals + :is_pos,
-                total_listen_seconds = cluster_affinity.total_listen_seconds + :sec,
-                track_count = cluster_affinity.track_count + 1,
-                last_positive_date = CASE WHEN :is_pos > 0 THEN :date ELSE cluster_affinity.last_positive_date END
-        '''), {
-            "uid": user_id, "cid": cluster_id, "col": collection_name,
-            "is_pos": 1 if is_positive else 0,
-            "sec": listen_seconds,
-            "date": datetime.now().isoformat()
-        })
-        conn.commit()
+        try:
+            # Try the optimized ON CONFLICT approach (requires constraint)
+            conn.execute(text('''
+                INSERT INTO cluster_affinity (user_id, cluster_id, collection_name, positive_signals, total_listen_seconds, track_count, last_positive_date)
+                VALUES (:uid, :cid, :col, :is_pos, :sec, 1, :date)
+                ON CONFLICT(user_id, cluster_id, collection_name) DO UPDATE SET
+                    positive_signals = cluster_affinity.positive_signals + :is_pos,
+                    total_listen_seconds = cluster_affinity.total_listen_seconds + :sec,
+                    track_count = cluster_affinity.track_count + 1,
+                    last_positive_date = CASE WHEN :is_pos > 0 THEN :date ELSE cluster_affinity.last_positive_date END
+            '''), {
+                "uid": user_id, "cid": cluster_id, "col": collection_name,
+                "is_pos": is_pos_val,
+                "sec": listen_seconds,
+                "date": date_str
+            })
+            conn.commit()
+        except Exception as e:
+            # Fallback: manual upsert if constraint doesn't exist
+            if "no unique or exclusion constraint" in str(e).lower():
+                print(f"⚠️  DB constraint missing. Using fallback upsert. Run fix_cluster_affinity_constraint.py to fix!")
+                conn.rollback()
+                
+                # Check if row exists
+                row = conn.execute(text('''
+                    SELECT positive_signals, total_listen_seconds, track_count, last_positive_date
+                    FROM cluster_affinity
+                    WHERE user_id = :uid AND cluster_id = :cid AND collection_name = :col
+                '''), {"uid": user_id, "cid": cluster_id, "col": collection_name}).mappings().fetchone()
+                
+                if row:
+                    # Update existing row
+                    new_last_date = date_str if is_pos_val > 0 else row['last_positive_date']
+                    conn.execute(text('''
+                        UPDATE cluster_affinity SET
+                            positive_signals = positive_signals + :is_pos,
+                            total_listen_seconds = total_listen_seconds + :sec,
+                            track_count = track_count + 1,
+                            last_positive_date = :date
+                        WHERE user_id = :uid AND cluster_id = :cid AND collection_name = :col
+                    '''), {
+                        "uid": user_id, "cid": cluster_id, "col": collection_name,
+                        "is_pos": is_pos_val,
+                        "sec": listen_seconds,
+                        "date": new_last_date
+                    })
+                else:
+                    # Insert new row
+                    conn.execute(text('''
+                        INSERT INTO cluster_affinity (user_id, cluster_id, collection_name, positive_signals, total_listen_seconds, track_count, last_positive_date, session_rejections)
+                        VALUES (:uid, :cid, :col, :is_pos, :sec, 1, :date, 0)
+                    '''), {
+                        "uid": user_id, "cid": cluster_id, "col": collection_name,
+                        "is_pos": is_pos_val,
+                        "sec": listen_seconds,
+                        "date": date_str
+                    })
+                conn.commit()
+            else:
+                # Re-raise if it's a different error
+                raise
 
 def update_cluster_centroid(user_id: str, cluster_id: int, new_vector: np.ndarray, weight: float, collection_name: str = "music_averaged"):
     if user_id == 'guest': return
@@ -553,17 +603,55 @@ def update_cluster_centroid(user_id: str, cluster_id: int, new_vector: np.ndarra
         alpha = max(0.3, weight)
         updated = (1 - alpha) * current + alpha * new_vector
         
+    vec_json = json.dumps(updated.tolist())
+    
     with engine.connect() as conn:
-        conn.execute(text('''
-            INSERT INTO cluster_centroids (user_id, cluster_id, collection_name, centroid, sample_count)
-            VALUES (:uid, :cid, :col, :vec, :cnt)
-            ON CONFLICT(user_id, cluster_id, collection_name) DO UPDATE SET
-                centroid = :vec, sample_count = :cnt
-        '''), {
-            "uid": user_id, "cid": cluster_id, "col": collection_name,
-            "vec": json.dumps(updated.tolist()), "cnt": sample_count
-        })
-        conn.commit()
+        try:
+            # Try the optimized ON CONFLICT approach (requires constraint)
+            conn.execute(text('''
+                INSERT INTO cluster_centroids (user_id, cluster_id, collection_name, centroid, sample_count)
+                VALUES (:uid, :cid, :col, :vec, :cnt)
+                ON CONFLICT(user_id, cluster_id, collection_name) DO UPDATE SET
+                    centroid = :vec, sample_count = :cnt
+            '''), {
+                "uid": user_id, "cid": cluster_id, "col": collection_name,
+                "vec": vec_json, "cnt": sample_count
+            })
+            conn.commit()
+        except Exception as e:
+            # Fallback: manual upsert if constraint doesn't exist
+            if "no unique or exclusion constraint" in str(e).lower():
+                conn.rollback()
+                
+                # Check if row exists
+                row = conn.execute(text('''
+                    SELECT centroid FROM cluster_centroids
+                    WHERE user_id = :uid AND cluster_id = :cid AND collection_name = :col
+                '''), {"uid": user_id, "cid": cluster_id, "col": collection_name}).mappings().fetchone()
+                
+                if row:
+                    # Update existing row
+                    conn.execute(text('''
+                        UPDATE cluster_centroids SET
+                            centroid = :vec, sample_count = :cnt
+                        WHERE user_id = :uid AND cluster_id = :cid AND collection_name = :col
+                    '''), {
+                        "uid": user_id, "cid": cluster_id, "col": collection_name,
+                        "vec": vec_json, "cnt": sample_count
+                    })
+                else:
+                    # Insert new row
+                    conn.execute(text('''
+                        INSERT INTO cluster_centroids (user_id, cluster_id, collection_name, centroid, sample_count)
+                        VALUES (:uid, :cid, :col, :vec, :cnt)
+                    '''), {
+                        "uid": user_id, "cid": cluster_id, "col": collection_name,
+                        "vec": vec_json, "cnt": sample_count
+                    })
+                conn.commit()
+            else:
+                # Re-raise if it's a different error
+                raise
 
 def increment_session_rejection(user_id: str, cluster_id: int, collection_name: str = "music_averaged"):
     if user_id == 'guest': return
