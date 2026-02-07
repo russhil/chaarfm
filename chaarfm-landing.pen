@@ -1,0 +1,20 @@
+{
+  "version": "0.0.1",
+  "fonts": [
+    { "name": "Inter", "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" }
+  ],
+  "variables": {
+    "bg-primary": { "type": "color", "value": "#0A0A0A" },
+    "bg-secondary": { "type": "color", "value": "#111111" },
+    "bg-tertiary": { "type": "color", "value": "#1A1A1A" },
+    "bg-card": { "type": "color", "value": "#141414" },
+    "accent": { "type": "color", "value": "#39FF14" },
+    "accent-dim": { "type": "color", "value": "#39FF1433" },
+    "text-primary": { "type": "color", "value": "#FFFFFF" },
+    "text-secondary": { "type": "color", "value": "#A0A0A0" },
+    "text-tertiary": { "type": "color", "value": "#666666" },
+    "border": { "type": "color", "value": "#2A2A2A" },
+    "border-accent": { "type": "color", "value": "#39FF1466" }
+  },
+  "children": []
+}

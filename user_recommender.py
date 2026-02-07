@@ -663,7 +663,14 @@ class UserRecommender:
                 all_negatives.extend(self.active_cluster_negatives)
 
         # ENHANCED: Hard filtering for persistent negatives BEFORE scoring
+        # FIX: Reduce threshold from 0.80 to 0.88 and cap negative count to prevent death spiral
         if all_negatives:
+            # CAP NEGATIVES: Only use the 20 most recent negatives to prevent search space collapse
+            capped_negatives = all_negatives[-20:] if len(all_negatives) > 20 else all_negatives
+            
+            if len(all_negatives) > len(capped_negatives):
+                print(f"[ALGO] Capped persistent negatives: {len(all_negatives)} → {len(capped_negatives)} (using most recent)")
+            
             filtered_search_space = []
             removed_count = 0
             
@@ -674,12 +681,13 @@ class UserRecommender:
                 v = np.array(self.track_map[tid]['vector'])
                 is_too_similar = False
                 
-                for neg_vec in all_negatives:
+                for neg_vec in capped_negatives:
                     neg_np = np.array(neg_vec)
                     sim = np.dot(v, neg_np) / (np.linalg.norm(v) * np.linalg.norm(neg_np) + 1e-8)
                     
-                    # HARD THRESHOLD: Exclude if >0.80 similar to any persistent negative
-                    if sim > 0.80:
+                    # HARD THRESHOLD: Tightened from 0.80 to 0.88 to reduce collateral damage
+                    # Only excludes VERY similar tracks to preserve search space
+                    if sim > 0.88:
                         is_too_similar = True
                         removed_count += 1
                         break
@@ -688,7 +696,7 @@ class UserRecommender:
                     filtered_search_space.append(tid)
             
             if removed_count > 0:
-                print(f"[ALGO] Hard Filtered: Removed {removed_count} tracks similar to persistent negatives (>0.80 similarity)")
+                print(f"[ALGO] Hard Filtered: Removed {removed_count} tracks similar to {len(capped_negatives)} persistent negatives (>0.88 similarity)")
             
             search_space = filtered_search_space
 
@@ -880,13 +888,30 @@ class UserRecommender:
         
         return best_match
 
-    def _get_neighborhood_probe_candidates(self, anchor_track_id, limit=20):
+    def _get_neighborhood_probe_candidates(self, anchor_track_id, limit=20, batch_slot=0):
         """
         OPTIMIZED: Find tracks with vivid similarity to anchor that also have dense neighborhoods.
         Only validates top 50 candidates to reduce computation time from 120s to ~20s.
+        
+        FIX: Added batch_slot parameter to diversify probe candidates across batch.
+        Each slot uses a different anchor from session_likes to avoid identical probes.
         """
         if anchor_track_id not in self.track_map:
             return []
+        
+        # FIX: Rotate anchors based on batch slot to diversify probes
+        # Instead of always using the last like, cycle through recent likes
+        if self.session_likes and batch_slot > 0:
+            # Calculate which session_like to use based on batch slot
+            anchor_index = min(batch_slot, len(self.session_likes) - 1)
+            # Use reverse index to get recent likes (0 = most recent, 1 = second most recent, etc.)
+            alternate_anchor_vec = self.session_likes[-(anchor_index + 1)]
+            
+            # Find the track that matches this vector
+            alternate_anchor_id = self._find_track_by_vector(alternate_anchor_vec)
+            if alternate_anchor_id and alternate_anchor_id != anchor_track_id:
+                anchor_track_id = alternate_anchor_id
+                print(f"[ALGO] Batch Slot {batch_slot}: Using alternate anchor (session_like index -{anchor_index + 1})")
         
         anchor_vec = np.array(self.track_map[anchor_track_id]['vector'])
         
@@ -909,9 +934,17 @@ class UserRecommender:
         # OPTIMIZATION: Only validate top 50 candidates (sorted by similarity)
         # Rationale: Higher similarity = higher likelihood of dense neighborhood
         vivid_candidates.sort(key=lambda x: x[1], reverse=True)
-        candidates_to_validate = vivid_candidates[:50]  # Down from 298+
         
-        print(f"[ALGO] Validating top {len(candidates_to_validate)} candidates (down from {len(vivid_candidates)})")
+        # FIX: Offset candidate selection based on batch slot to get different tracks
+        start_offset = batch_slot * 10  # Each slot starts 10 positions later
+        end_offset = start_offset + 50
+        candidates_to_validate = vivid_candidates[start_offset:end_offset]
+        
+        if not candidates_to_validate and vivid_candidates:
+            # Fallback if offset goes beyond available candidates
+            candidates_to_validate = vivid_candidates[:50]
+        
+        print(f"[ALGO] Batch Slot {batch_slot}: Validating candidates {start_offset}-{end_offset} (down from {len(vivid_candidates)})")
         
         # Step 2: Validate sampled candidates
         validated_probes = []
@@ -982,19 +1015,21 @@ class UserRecommender:
             
         return [c[0] for c in candidates[:limit]]
 
-    def update_user_vector(self, track_vector, direction):
+    def update_user_vector(self, track_vector, direction, engagement_duration=None):
         """
         Reinforcement Learning Update:
         Moves the user_vector towards or away from the track_vector.
         direction: +1 for Like/Finish (towards), -1 for Dislike/Skip (away)
+        engagement_duration: Time spent on track (in seconds) - used to weight updates
         """
         # Boost initial learning rates for first few interactions to lock in faster
         is_early = (len(self.session_likes) + len(self.session_dislikes)) < 5
 
         # FIX: Balance learning rates to allow recovery after skips
-        # Previously negative was 2x positive, causing drift too far on skips
-        LEARNING_RATE_POS = 0.2 if is_early else 0.15  # Increased positive rate
-        LEARNING_RATE_NEG = 0.2 if is_early else 0.15  # Balanced with positive
+        # Weight positive signals MORE than negative to prevent oscillation
+        # Strong likes (114s) should move vector MORE than quick skips (1s)
+        LEARNING_RATE_POS = 0.25 if is_early else 0.20  # Strong positive movement
+        LEARNING_RATE_NEG = 0.15 if is_early else 0.10  # Gentler negative movement
         
         if self.user_vector is None:
             if direction > 0:
@@ -1005,8 +1040,24 @@ class UserRecommender:
         u_vec = np.array(self.user_vector)
         t_vec = np.array(track_vector)
         
-        # Use magnitude of direction to scale the update
+        # FIX: Weight updates by engagement duration
+        # 114s like should have much stronger effect than 1s skip
         scale = abs(direction)
+        
+        if engagement_duration is not None:
+            if direction > 0:
+                # Positive: Scale by duration (cap at 120s for normalization)
+                duration_weight = min(engagement_duration / 60.0, 2.0)  # 0-2x multiplier
+                scale *= duration_weight
+                print(f"RL Update: Duration weighting {engagement_duration}s → {duration_weight:.2f}x multiplier")
+            else:
+                # Negative: Inverse scale - quick skips (<3s) have less impact than longer ones
+                # This prevents instant skips from over-penalizing
+                if engagement_duration < 3.0:
+                    scale *= 0.5  # Reduce impact of instant skips
+                    print(f"RL Update: Quick skip penalty reduced by 50%")
+                elif engagement_duration < 10.0:
+                    scale *= 0.8  # Moderate reduction for partial listens
         
         if direction > 0:
             # Move towards: New = Old + LR * (Target - Old)
@@ -1134,7 +1185,11 @@ class UserRecommender:
         print(f"[ALGO] Cluster Switch: Selected Cluster {best_cluster} (alignment: {best_alignment:.3f} with user vector)")
         return best_cluster
 
-    def get_next_track(self):
+    def get_next_track(self, batch_slot=0):
+        """
+        FIX: Added batch_slot parameter to enable probe diversification.
+        Each slot in a batch can use different anchors for probe generation.
+        """
         candidates = []
         FETCH_LIMIT = 20
         mode = "EXPLORE"
@@ -1273,11 +1328,12 @@ class UserRecommender:
                 
                 # ENHANCED: Neighborhood-validated radial probe injection
                 # "slips in a track that is... slightly outside the usual safe zone"
+                # FIX: Pass batch_slot to diversify probe candidates
                 candidates_radial = []
                 if self.session_likes:
                     last_like_track_id = self._find_track_by_vector(self.session_likes[-1])
                     if last_like_track_id:
-                        candidates_radial = self._get_neighborhood_probe_candidates(last_like_track_id, limit=10)
+                        candidates_radial = self._get_neighborhood_probe_candidates(last_like_track_id, limit=10, batch_slot=batch_slot)
                         if candidates_radial:
                             print(f"[ALGO] Neighborhood-Validated Probe Injection: {len(candidates_radial)} candidates")
                         else:
@@ -1467,13 +1523,14 @@ class UserRecommender:
         """
         Generate a cohesive batch of tracks.
         ENHANCED: Ensures all tracks in batch are similar to each other, not just the anchor.
+        FIX: Pass batch slot index to diversify probe candidates across batch.
         """
         size = 5
         batch = []
         batch_vectors = []
 
         for i in range(size):
-            t, reason = self.get_next_track()
+            t, reason = self.get_next_track(batch_slot=i)
             if t:
                 vec = t.get('vector')
 
@@ -1571,7 +1628,7 @@ class UserRecommender:
         
         t = self.track_map.get(track_id)
         total_duration = t.get('duration', 0) if t else 0
-        if total_duration == 0: total_duration = 200 # Default assumption if missing
+        if total_duration == 0: total_duration = 180  # FIX: More realistic default (3 minutes)
         
         pct_listened = duration / total_duration if total_duration > 0 else 0
         
@@ -1605,8 +1662,9 @@ class UserRecommender:
         if not t: return
         vector = t.get('vector')
         
-        # Dynamic skip check
-        if total_duration == 0: total_duration = 200
+        # FIX: Better duration estimation - use metadata if available, else 180s (more realistic default)
+        if total_duration == 0:
+            total_duration = t.get('duration', 180)  # Changed from 200 to 180 (3 minutes)
         pct_listened = duration / total_duration
         
         # User defined "Green Signal": At least 15-20s OR 10-20%
@@ -1691,7 +1749,17 @@ class UserRecommender:
             self.cluster_fail_count = 0  # Reset fail count
             self.cluster_consecutive_fails = 0  # Reset consecutive fails on success
             rl_dir = 1.0
-            drift_delta = -0.5  # STRONG DECREASE to fix "Boredom" bug
+            
+            # FIX: Reset drift to 0.0 on strong likes instead of just -0.5 delta
+            # A 114s listen should COMPLETELY reset exploration drift
+            if duration >= 60:  # Strong engagement
+                self.exploration_drift = 0.0  # Complete reset
+                print(f"[ALGO] Strong Like ({duration}s) - DRIFT RESET TO 0.0")
+            else:
+                drift_delta = -0.5  # Moderate decrease for shorter likes
+                self.exploration_drift = max(0.0, self.exploration_drift + drift_delta)
+                print(f"[ALGO] Like - Drift reduced by 0.5 → {self.exploration_drift:.2f}")
+            
             self.session_likes.append(vector)  # Add to session history
             # Limit session_likes to prevent memory issues
             if len(self.session_likes) > 50:
@@ -1764,25 +1832,28 @@ class UserRecommender:
                 self.cluster_fail_count = 0  # Reset fail count
                 self.cluster_consecutive_fails = 0  # Reset consecutive fails on success
                 rl_dir = 0.3
-                drift_delta = -0.05
+                
+                # FIX: Scale drift reduction by engagement strength
+                if duration >= 30:  # Moderate-strong engagement
+                    self.exploration_drift = max(0.0, self.exploration_drift - 0.3)
+                    print(f"[ALGO] Strong Green Signal ({duration}s) - Drift reduced to {self.exploration_drift:.2f}")
+                else:
+                    drift_delta = -0.1
+                    self.exploration_drift = max(0.0, self.exploration_drift + drift_delta)
+                    print(f"[ALGO] Green Signal - Drift reduced to {self.exploration_drift:.2f}")
+                
                 self.session_likes.append(vector)  # Add to session history
                 # Limit session_likes to prevent memory issues
                 if len(self.session_likes) > 50:
                     self.session_likes.pop(0)
 
-        # Apply drift change
-        # User Instruction: "why did it say boredom detected after giving me 3 punjabi pop songs that i listened fully"
-        # If we had 3 successes, drift should be 0.
-        # If we then have 1 skip (disliked=True), drift_delta was +0.0 or +0.2
-        # If exploration_drift was 0, it becomes 0.2.
-        # Threshold is > 0.6 (or 0.7 now).
-        # So it shouldn't have triggered boredom unless drift wasn't reset properly.
-        # Check update_state drift reset logic.
-        # It resets drift on LIKE. 
-        # But wait, feedback_internal is called AFTER update_state in record_feedback?
-        # Let's check record_feedback.
+        # FIX: Drift is now managed directly in the condition blocks above
+        # This ensures strong likes immediately reset drift instead of accumulating delta
+        # Only apply drift_delta if it wasn't already handled above
+        if not (liked and duration >= 60) and not ('drift_delta' not in locals() and duration >= 30):
+            if 'drift_delta' in locals():
+                self.exploration_drift = max(0.0, min(1.0, self.exploration_drift + drift_delta))
         
-        self.exploration_drift = max(0.0, min(1.0, self.exploration_drift + drift_delta))
         print(f"Feedback {duration}s -> Drift {self.exploration_drift:.2f}, RL {rl_dir}")
         
         # Session Centroid
@@ -1791,8 +1862,9 @@ class UserRecommender:
             if self.session_centroid is None: self.session_centroid = v
             else: self.session_centroid = 0.7 * self.session_centroid + 0.3 * v
             
-        # RL
-        if rl_dir != 0: self.update_user_vector(vector, rl_dir)
+        # RL with duration weighting
+        if rl_dir != 0: 
+            self.update_user_vector(vector, rl_dir, engagement_duration=duration)
         
         # Bandit - Minimal Cluster Penalization
         # We only boost alpha (positive), we don't heavily boost beta (negative) 
