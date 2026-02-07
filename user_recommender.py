@@ -174,12 +174,13 @@ class UserRecommender:
         self.active_cluster_negatives = []
         self.loaded_cluster_id = None
         self.cluster_consecutive_success = 0  # Track consecutive >60s plays in same cluster
-        self.cluster_fail_count = 0 # Track consecutive skips in cluster to detect exhaustion
+        self.cluster_fail_count = 0  # Track skips in cluster to detect exhaustion
+        self.cluster_consecutive_fails = 0  # NEW: Track CONSECUTIVE fails (reset on any success)
         
-        # Outlier detection
+        # Outlier detection - use lightweight version based on neighborhood cache
         self.outlier_tracks = set()
         self.cluster_densities = {}
-        # self._compute_outliers()  # DISABLED - expensive operation, only compute on demand if needed
+        self._compute_outliers_lightweight()  # ENABLED - uses pre-computed neighborhood data
         self.init_bandit()
         
         self.user_vector = None
@@ -190,7 +191,8 @@ class UserRecommender:
         if self.user_id != "guest":  # Skip history loading for guest users to speed up
             self._load_user_history()
             self._load_user_dislikes()
-        
+            self._load_session_priming()  # NEW: Prime session with recent likes
+
         print(f"UserRecommender Initialized for {user_id} ({len(self.track_map)} tracks)")
 
     def _load_user_dislikes(self):
@@ -227,15 +229,15 @@ class UserRecommender:
         try:
             print(f"Loading user history for {self.user_id}...")
             query = text(f"""
-                SELECT cluster_id, total_listen_seconds as score 
-                FROM cluster_affinity 
+                SELECT cluster_id, total_listen_seconds as score
+                FROM cluster_affinity
                 WHERE user_id = :uid AND collection_name = :coll
                 ORDER BY total_listen_seconds DESC LIMIT 5
             """)
-            
+
             with user_db.engine.connect() as conn:
                 result = conn.execute(query, {"uid": self.user_id, "coll": self.collection_name}).fetchall()
-            
+
             if result:
                 print(f"Found {len(result)} historical top clusters.")
                 best_score = -1
@@ -247,16 +249,83 @@ class UserRecommender:
                         boost = min(score * 5.0, 25.0)
                         self.cluster_scores[cid]['alpha'] += boost
                         print(f"Boosted Cluster {cid} alpha to {self.cluster_scores[cid]['alpha']}")
-                        
+
                         if score > best_score:
                             best_score = score
                             self.best_historical_cluster = cid
-            
+
             if self.best_historical_cluster is not None:
                 print(f"Best Historical Cluster Identified: {self.best_historical_cluster}")
-                
+
         except Exception as e:
             print(f"Could not load user history (First run?): {e}")
+
+    def _load_session_priming(self):
+        """
+        NEW: Prime session_likes and user_vector with recent positive interactions.
+        This ensures preferences persist across sessions instead of starting cold.
+        """
+        try:
+            print(f"Priming session with recent likes for {self.user_id}...")
+
+            # Fetch recent positive interactions (likes/finishes from last 7 days)
+            query = text("""
+                SELECT DISTINCT track_id, listen_duration, created_at
+                FROM user_logs
+                WHERE user_id = :uid
+                AND action IN ('like', 'finish', 'play')
+                AND listen_duration >= 30
+                AND created_at > NOW() - INTERVAL '7 days'
+                ORDER BY created_at DESC
+                LIMIT 20
+            """)
+
+            with user_db.engine.connect() as conn:
+                result = conn.execute(query, {"uid": self.user_id}).fetchall()
+
+            if not result:
+                print("No recent positive interactions found for session priming.")
+                return
+
+            # Load vectors for these tracks
+            primed_vectors = []
+            for row in result:
+                track_id = str(row.track_id)
+                if track_id in self.track_map:
+                    vec = self.track_map[track_id].get('vector')
+                    if vec:
+                        primed_vectors.append(vec)
+
+            if primed_vectors:
+                # Prime session_likes with recent likes (limit to 10 most recent)
+                self.session_likes = primed_vectors[:10]
+
+                # Initialize user_vector as weighted average of recent likes
+                # More recent = higher weight
+                weights = np.array([0.9 ** i for i in range(len(self.session_likes))])
+                weights = weights / np.sum(weights)
+
+                weighted_sum = np.zeros(len(self.session_likes[0]))
+                for i, vec in enumerate(self.session_likes):
+                    weighted_sum += weights[i] * np.array(vec)
+
+                # Normalize the user vector
+                norm = np.linalg.norm(weighted_sum)
+                if norm > 0:
+                    self.user_vector = (weighted_sum / norm).tolist()
+                else:
+                    self.user_vector = weighted_sum.tolist()
+
+                # Set initial streak to indicate we have preference context
+                self.streak = 1
+
+                print(f"Session primed with {len(self.session_likes)} historical likes. User vector initialized.")
+                print(f"[ALGO] User vector norm: {np.linalg.norm(self.user_vector):.3f}")
+            else:
+                print("No matching tracks found in current collection for session priming.")
+
+        except Exception as e:
+            print(f"Could not prime session (table may not exist): {e}")
 
     def _load_vector_data(self):
         print(f"Loading tracks from {self.collection_name} (Render)...")
@@ -363,11 +432,13 @@ class UserRecommender:
         """Identify outlier tracks that shouldn't be used for probing."""
         self.outlier_tracks = set()
         self.cluster_densities = {}
-        
-        if not self.cluster_manager.initialized: return
-        
+
+        if not self.cluster_manager.initialized:
+            return
+
         for cid, tids in self.cluster_manager.clusters.items():
-            if len(tids) < 3: continue
+            if len(tids) < 3:
+                continue
             cent = self.cluster_manager.centroids[cid]
             dists = []
             for tid in tids:
@@ -375,17 +446,59 @@ class UserRecommender:
                     v = np.array(self.track_map[tid]['vector'])
                     d = np.linalg.norm(v - cent)
                     dists.append((tid, d))
-            
+
             if dists:
-                mean = np.mean([d for _,d in dists])
-                std = np.std([d for _,d in dists])
-                thresh = mean + 2*std
+                mean = np.mean([d for _, d in dists])
+                std = np.std([d for _, d in dists])
+                thresh = mean + 2 * std
                 for tid, d in dists:
-                    if d > thresh: self.outlier_tracks.add(tid)
-                
+                    if d > thresh:
+                        self.outlier_tracks.add(tid)
+
                 self.cluster_densities[cid] = 1.0 / (mean + 0.01)
-                
+
         print(f"Identified {len(self.outlier_tracks)} outliers")
+
+    def _compute_outliers_lightweight(self):
+        """
+        Lightweight outlier detection using pre-computed neighborhood cache.
+        Tracks with very few neighbors are considered outliers.
+        This is O(n) vs O(n²) for full outlier computation.
+        """
+        self.outlier_tracks = set()
+        self.cluster_densities = {}
+
+        if not self.cluster_manager.initialized:
+            return
+
+        # Use neighborhood cache to identify outliers
+        # Tracks with < 5 neighbors at 0.85 similarity are outliers
+        MIN_NEIGHBORS_FOR_VALID = 5
+
+        for tid in self.track_map.keys():
+            if tid in self.cluster_manager.neighborhood_cache:
+                neighbor_count, _ = self.cluster_manager.neighborhood_cache[tid]
+                if neighbor_count < MIN_NEIGHBORS_FOR_VALID:
+                    self.outlier_tracks.add(tid)
+
+        # Compute cluster densities from neighborhood data
+        for cid, tids in self.cluster_manager.clusters.items():
+            if len(tids) < 3:
+                continue
+
+            # Average neighbor count in cluster = density proxy
+            neighbor_counts = []
+            for tid in tids:
+                if tid in self.cluster_manager.neighborhood_cache:
+                    count, _ = self.cluster_manager.neighborhood_cache[tid]
+                    neighbor_counts.append(count)
+
+            if neighbor_counts:
+                avg_neighbors = np.mean(neighbor_counts)
+                # Normalize to 0-1 range (assume max ~100 neighbors)
+                self.cluster_densities[cid] = min(1.0, avg_neighbors / 100.0)
+
+        print(f"[ALGO] Lightweight outlier detection: {len(self.outlier_tracks)} outliers identified")
 
     def init_bandit(self):
         if not self.cluster_manager.initialized or not self.cluster_manager.clusters:
@@ -413,7 +526,8 @@ class UserRecommender:
             )
             
             # Penalize tracks that conflict with user vector direction
-            if alignment < 0.70:  # User vector has moved significantly away
+            # FIX: Softer threshold to prevent over-filtering after skips
+            if alignment < 0.55:  # Only filter truly misaligned tracks
                 continue
             
             rescored.append((track, alignment))
@@ -467,8 +581,12 @@ class UserRecommender:
                 # 2. Feature Weighting (New Logic)
                 # "prioritise that similar dimension and demote other meaningless dimensions"
                 std_per_dim = np.std(likes_matrix, axis=0)
+                # FIX: Add minimum variance floor to prevent extreme weights
+                std_per_dim = np.maximum(std_per_dim, 0.1)
                 # Inverse variance weighting: High variance -> Low weight
                 raw_weights = 1.0 / (std_per_dim + 1e-6)
+                # FIX: Cap maximum weight to prevent single dimension dominance
+                raw_weights = np.minimum(raw_weights, 5.0)
                 # Normalize so mean weight is 1.0 (Preserve overall magnitude)
                 feature_weights = raw_weights / np.mean(raw_weights)
                 
@@ -625,34 +743,47 @@ class UserRecommender:
                     if d_sim > 0.65:
                         # ZONE REFINEMENT (Hole Punching)
                         # User Request: "marks that specific 'Sad Song' spot as a Negative Zone"
-                        # We use a TIGHT sigma to punch a sharp hole without killing the genre.
+                        # FIX: Use adaptive sigma based on user's preference variance
+                        # If user has broad preferences, use wider penalty zone
                         d_dist = 1.0 - d_sim
-                        # Sigma 0.08 = Very sharp hole. 
-                        # Penalty 3.0 = Absolute rejection at center.
-                        d_penalty_score = np.exp( - (d_dist**2) / (2 * (0.08**2)) ) 
-                        p_val = d_penalty_score * 3.0
+                        # Adaptive sigma: scales with positive variance (min 0.06, max 0.15)
+                        neg_sigma = max(0.06, min(0.15, np.sqrt(variance_target) * 0.5))
+                        d_penalty_score = np.exp(-(d_dist ** 2) / (2 * (neg_sigma ** 2)))
+                        p_val = d_penalty_score * 2.5  # Reduced from 3.0 for less aggressive penalty
                         penalty += p_val
-                        # penalty_breakdown.append(f"{p_val:.2f}") # Too verbose for inner loop
             
             final_score = sim_score - penalty
             
-            # MULTI-TARGET OVERLAP BOOST (New Logic)
+            # COHESIVE BATCH SCORING (Enhanced Logic)
             # "if a song is close to 4 out of 5 songs that ive liked then play it"
-            # If we have multiple target vectors (overlap mode), boost score if close to MANY of them
-            if len(target_vecs) > 1 and not force_target:
-                close_count = 0
-                for t_vec in target_vecs:
-                    # Check individual closeness to each liked song
-                    sub_sim = np.dot(t_vec, v) / (np.linalg.norm(t_vec)*np.linalg.norm(v) + 1e-8)
-                    if sub_sim > 0.85: # Threshold for "close"
-                        close_count += 1
-                
-                # Boost based on coverage ratio
-                coverage_ratio = close_count / len(target_vecs)
-                if coverage_ratio > 0.5:
-                     boost = coverage_ratio * 0.2 # Up to 20% boost for perfect overlap
-                     final_score += boost
-                     # print(f"  -> Boosted {t['filename']} by {boost:.2f} (Overlap {close_count}/{len(target_vecs)})")
+            # Songs must be similar to ALL/MOST liked songs, not just the centroid
+            # This ensures cohesive batches where every song fits the user's taste
+
+            if self.session_likes and len(self.session_likes) > 1:
+                # Calculate similarity to each individual liked song
+                individual_sims = []
+                for liked_vec in self.session_likes[-10:]:  # Use last 10 likes for relevance
+                    liked_np = np.array(liked_vec)
+                    sub_sim = np.dot(liked_np, v) / (np.linalg.norm(liked_np) * np.linalg.norm(v) + 1e-8)
+                    individual_sims.append(sub_sim)
+
+                # Count how many liked songs this track is close to
+                close_count = sum(1 for s in individual_sims if s > 0.80)
+                coverage_ratio = close_count / len(individual_sims)
+
+                # Calculate minimum similarity (weakest link)
+                min_sim = min(individual_sims)
+                avg_sim = np.mean(individual_sims)
+
+                # COHESION SCORE: Reward tracks that are consistently similar to ALL likes
+                # Penalize tracks that are only similar to some likes (outlier anchoring)
+                if coverage_ratio >= 0.6:  # Must be close to at least 60% of liked songs
+                    # Boost based on consistency (min similarity matters more than avg)
+                    cohesion_boost = (min_sim * 0.3) + (avg_sim * 0.2) + (coverage_ratio * 0.3)
+                    final_score += cohesion_boost
+                elif coverage_ratio < 0.3:
+                    # PENALTY: Track only matches a few likes - likely anchored to outlier
+                    final_score -= 0.3 * (1 - coverage_ratio)
 
             candidates.append((t, final_score, sim_score, penalty))
 
@@ -859,9 +990,11 @@ class UserRecommender:
         """
         # Boost initial learning rates for first few interactions to lock in faster
         is_early = (len(self.session_likes) + len(self.session_dislikes)) < 5
-        
-        LEARNING_RATE_POS = 0.2 if is_early else 0.1
-        LEARNING_RATE_NEG = 0.25 if is_early else 0.2 # Significantly increased per user request
+
+        # FIX: Balance learning rates to allow recovery after skips
+        # Previously negative was 2x positive, causing drift too far on skips
+        LEARNING_RATE_POS = 0.2 if is_early else 0.15  # Increased positive rate
+        LEARNING_RATE_NEG = 0.2 if is_early else 0.15  # Balanced with positive
         
         if self.user_vector is None:
             if direction > 0:
@@ -886,7 +1019,9 @@ class UserRecommender:
             u_vec = u_vec - (LEARNING_RATE_NEG * scale) * delta
             print(f"RL Update: Moved User Vector AWAY from track (Scale {scale:.2f})")
             
-        if np.linalg.norm(u_vec) > 0: u_vec /= np.linalg.norm(u_vec)
+        # NOTE: We keep user_vector unnormalized to preserve magnitude information
+        # This matches track vectors which are also not normalized
+        # Similarity calculations normalize on-the-fly for cosine similarity
         self.user_vector = u_vec.tolist()
 
     def set_seed(self, track_id):
@@ -1056,38 +1191,63 @@ class UserRecommender:
 
                 if recent_likes:
                     # ENHANCED: Validate anchor has dense neighborhood before using it
+                    # Use GRADUATED FALLBACK: try strict thresholds first, then relax
                     valid_anchors = []
-                    for like_vec in recent_likes:
-                        # Find track ID for this vector
+                    anchor_quality = []  # Track (vector, neighbor_count, recency_weight)
+
+                    # Try strict validation first (20 neighbors at 0.85)
+                    for i, like_vec in enumerate(recent_likes):
                         track_id = self._find_track_by_vector(like_vec)
                         if track_id:
                             is_valid, neighbor_count, avg_sim = self._validate_neighborhood_density(
-                                track_id, min_neighbors=20, min_similarity=0.85
+                                track_id, min_neighbors=20, min_similarity=0.85, silent=True
                             )
                             if is_valid:
+                                # Weight by recency: most recent = highest weight
+                                recency_weight = 1.0 / (i + 1)
                                 valid_anchors.append(like_vec)
-                    
+                                anchor_quality.append((like_vec, neighbor_count, recency_weight))
+
+                    # GRADUATED FALLBACK: If strict fails, try relaxed thresholds
+                    if not valid_anchors:
+                        print(f"[ALGO] No anchors passed strict validation. Trying relaxed thresholds...")
+                        for i, like_vec in enumerate(recent_likes):
+                            track_id = self._find_track_by_vector(like_vec)
+                            if track_id:
+                                # Relaxed: 10 neighbors at 0.80
+                                is_valid, neighbor_count, avg_sim = self._validate_neighborhood_density(
+                                    track_id, min_neighbors=10, min_similarity=0.80, silent=True
+                                )
+                                if is_valid:
+                                    recency_weight = 1.0 / (i + 1)
+                                    valid_anchors.append(like_vec)
+                                    anchor_quality.append((like_vec, neighbor_count, recency_weight))
+
+                    # FINAL FALLBACK: Use all recent likes if no anchors validate
+                    if not valid_anchors:
+                        print(f"[ALGO] No anchors passed relaxed validation. Using all recent likes as anchors.")
+                        valid_anchors = recent_likes
+                        anchor_quality = [(v, 1, 1.0 / (i + 1)) for i, v in enumerate(recent_likes)]
+
                     if valid_anchors:
-                        # MULTI-MODAL SAMPLING (The Ratio Rule) with validated anchors only
-                        # "Respect the Ratio of your Reality"
-                        # We DO NOT filter "Black Sheep" (outliers). If the user liked it, it's part of the vibe.
-                        # 4 Punjabi + 1 Rap = 80% chance Punjabi, 20% chance Rap.
-                        
-                        selected_anchor = random.choice(valid_anchors)
+                        # RECENCY-WEIGHTED SAMPLING (Enhanced Ratio Rule)
+                        # More recent likes have higher probability of being selected
+                        if anchor_quality:
+                            weights = [q[2] for q in anchor_quality]  # recency weights
+                            total_weight = sum(weights)
+                            probs = [w / total_weight for w in weights]
+                            selected_idx = np.random.choice(len(valid_anchors), p=probs)
+                            selected_anchor = valid_anchors[selected_idx]
+                        else:
+                            selected_anchor = random.choice(valid_anchors)
+
                         target_vectors = [selected_anchor]
-                        
-                        justification = f"Vibe Lock: Anchoring to validated dense-neighborhood exemplar (Multi-Modal Ratio)"
-                        print(f"[ALGO] Vibe Lock Active: Selected anchor from {len(valid_anchors)}/{len(recent_likes)} validated dense-neighborhood tracks")
-                        
+
+                        justification = f"Vibe Lock: Recency-weighted anchor selection (Multi-Modal Ratio)"
+                        print(f"[ALGO] Vibe Lock Active: Selected anchor from {len(valid_anchors)}/{len(recent_likes)} tracks (recency-weighted)")
+
                         # Force target to ensure we lock tight to this specific exemplar
-                        # This finds songs very similar to the exemplar (Punjabi -> Punjabi, Rap -> Rap)
                         force_target_flag = True
-                    else:
-                        # FALLBACK: No valid anchors with dense neighborhoods
-                        print(f"[ALGO] ⚠️ No valid anchors with dense neighborhoods. Switching to EXPLORE.")
-                        mode = "EXPLORE"
-                        self.streak = 0
-                        self.exploration_drift = 1.0
                 elif self.anchor_track:
                      # Fallback to single anchor if session_likes is empty (shouldn't happen if streak >= 1)
                      target_vectors = [self.anchor_track['vector']]
@@ -1304,16 +1464,68 @@ class UserRecommender:
         return selected_track, justification
 
     def get_next_batch(self):
-        # Wrapper for server_user
+        """
+        Generate a cohesive batch of tracks.
+        ENHANCED: Ensures all tracks in batch are similar to each other, not just the anchor.
+        """
         size = 5
         batch = []
-        for _ in range(size):
+        batch_vectors = []
+
+        for i in range(size):
             t, reason = self.get_next_track()
-            if t: 
+            if t:
+                vec = t.get('vector')
+
+                # COHESION CHECK: Ensure new track fits with existing batch
+                if batch_vectors and vec:
+                    # Calculate average similarity to existing batch
+                    batch_sims = []
+                    for bv in batch_vectors:
+                        sim = np.dot(np.array(bv), np.array(vec)) / (
+                            np.linalg.norm(bv) * np.linalg.norm(vec) + 1e-8
+                        )
+                        batch_sims.append(sim)
+
+                    avg_batch_sim = np.mean(batch_sims)
+
+                    # If track doesn't fit batch well, try to get another one
+                    # But only retry once to avoid infinite loops
+                    if avg_batch_sim < 0.70 and i < size - 1:
+                        print(f"[ALGO] Batch cohesion check: {t['filename']} has low batch similarity ({avg_batch_sim:.2f}), trying another...")
+                        # Mark this as played but don't add to batch
+                        alt_t, alt_reason = self.get_next_track()
+                        if alt_t:
+                            alt_vec = alt_t.get('vector')
+                            if alt_vec:
+                                alt_sims = [np.dot(np.array(bv), np.array(alt_vec)) / (
+                                    np.linalg.norm(bv) * np.linalg.norm(alt_vec) + 1e-8
+                                ) for bv in batch_vectors]
+                                if np.mean(alt_sims) > avg_batch_sim:
+                                    t, reason, vec = alt_t, alt_reason, alt_vec
+                                    print(f"[ALGO] Replaced with better fit: {t['filename']} (sim: {np.mean(alt_sims):.2f})")
+
                 item = {"id": t['id'], "filename": t['filename'], "justification": reason}
                 if self.youtube_mode and t.get('youtube_id'):
                     item["youtube_id"] = t['youtube_id']
                 batch.append(item)
+
+                if vec:
+                    batch_vectors.append(vec)
+
+        # Log batch cohesion stats
+        if len(batch_vectors) > 1:
+            all_sims = []
+            for i in range(len(batch_vectors)):
+                for j in range(i + 1, len(batch_vectors)):
+                    sim = np.dot(np.array(batch_vectors[i]), np.array(batch_vectors[j])) / (
+                        np.linalg.norm(batch_vectors[i]) * np.linalg.norm(batch_vectors[j]) + 1e-8
+                    )
+                    all_sims.append(sim)
+            avg_cohesion = np.mean(all_sims)
+            min_cohesion = np.min(all_sims)
+            print(f"[ALGO] Batch cohesion: avg={avg_cohesion:.3f}, min={min_cohesion:.3f}")
+
         return batch
 
     def finalize_batch(self):
@@ -1415,15 +1627,19 @@ class UserRecommender:
             # User said: "reset only when the behaviour is unpredictable"
             
             self.cluster_fail_count += 1
-            print(f"Cluster Fail Count: {self.cluster_fail_count}/5")
-            
-            if self.cluster_fail_count > 5:
+            self.cluster_consecutive_fails += 1  # Track consecutive fails
+            print(f"Cluster Fail Count: {self.cluster_fail_count}/8, Consecutive: {self.cluster_consecutive_fails}/5")
+
+            # Only break out if we have CONSECUTIVE fails (not total)
+            # This prevents random single skips from triggering exploration
+            if self.cluster_consecutive_fails >= 5 or self.cluster_fail_count > 8:
                 # Unpredictable behavior / Exhaustion
                 self.streak = 0
                 self.cluster_consecutive_success = 0
                 self.cluster_fail_count = 0
+                self.cluster_consecutive_fails = 0
                 rl_dir = -1.0
-                drift_delta = 1.0 # FORCE EXPLORATION
+                drift_delta = 1.0  # FORCE EXPLORATION
                 print("Cluster Exhausted/Unpredictable - Breaking Out!")
             else:
                 # Just refining
@@ -1471,11 +1687,15 @@ class UserRecommender:
             alpha_boost = 1.0
             self.streak += 1
             self.cluster_consecutive_success += 1
-            self.anchor_track = t # Update anchor to the successful track
-            self.cluster_fail_count = 0 # Reset fail count
+            self.anchor_track = t  # Update anchor to the successful track
+            self.cluster_fail_count = 0  # Reset fail count
+            self.cluster_consecutive_fails = 0  # Reset consecutive fails on success
             rl_dir = 1.0
-            drift_delta = -0.5 # STRONG DECREASE to fix "Boredom" bug
-            self.session_likes.append(vector) # Add to session history
+            drift_delta = -0.5  # STRONG DECREASE to fix "Boredom" bug
+            self.session_likes.append(vector)  # Add to session history
+            # Limit session_likes to prevent memory issues
+            if len(self.session_likes) > 50:
+                self.session_likes.pop(0)
             
         else: # Time based / Green Signal check
             if not is_green_signal: # Replaces duration < QUICK_SKIP_SEC
@@ -1484,14 +1704,16 @@ class UserRecommender:
                 # "incorporate this free flowing behaviour where my interaction keeps shaping the flow"
                 
                 self.cluster_fail_count += 1
-                print(f"Cluster Fail Count (Skip): {self.cluster_fail_count}/5")
-                
-                if self.cluster_fail_count > 5:
+                self.cluster_consecutive_fails += 1  # Track consecutive fails
+                print(f"Cluster Fail Count (Skip): {self.cluster_fail_count}/8, Consecutive: {self.cluster_consecutive_fails}/5")
+
+                if self.cluster_consecutive_fails >= 5 or self.cluster_fail_count > 8:
                     self.streak = 0
                     self.cluster_consecutive_success = 0
                     self.cluster_fail_count = 0
+                    self.cluster_consecutive_fails = 0
                     rl_dir = -0.8
-                    drift_delta = 1.0 # FORCE EXPLORATION
+                    drift_delta = 1.0  # FORCE EXPLORATION
                     print("Cluster Exhausted (Skips) - Breaking Out!")
                 else:
                     # Refine but Allow Drift
@@ -1534,15 +1756,19 @@ class UserRecommender:
                     else:
                         print(f"[ALGO] ✅ Found {len(optimized)} user-vector-aligned tracks in current cluster")
                 
-            else: # is_green_signal (>=15s or >=10%)
+            else:  # is_green_signal (>=15s or >=10%)
                 # Treat as positive engagement, sufficient to trigger lock-in
                 alpha_boost = 0.2
-                self.streak += 1 
-                self.anchor_track = t # Update anchor to the successful track
-                self.cluster_fail_count = 0 # Reset fail count
+                self.streak += 1
+                self.anchor_track = t  # Update anchor to the successful track
+                self.cluster_fail_count = 0  # Reset fail count
+                self.cluster_consecutive_fails = 0  # Reset consecutive fails on success
                 rl_dir = 0.3
                 drift_delta = -0.05
-                self.session_likes.append(vector) # Add to session history
+                self.session_likes.append(vector)  # Add to session history
+                # Limit session_likes to prevent memory issues
+                if len(self.session_likes) > 50:
+                    self.session_likes.pop(0)
 
         # Apply drift change
         # User Instruction: "why did it say boredom detected after giving me 3 punjabi pop songs that i listened fully"
