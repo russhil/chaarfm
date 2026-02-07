@@ -185,6 +185,10 @@ class UserRecommender:
         
         self.user_vector = None
         
+        # Strong like tracking for anchor priority
+        self.last_strong_like = None  # Vector of last strong engagement (>=60s)
+        self.last_strong_like_duration = None  # Duration of last strong engagement
+        
         # Load User History for Smart Start - Optimized: Skip if guest user
         self.best_historical_cluster = None
         self.global_dislikes = set()
@@ -1285,24 +1289,35 @@ class UserRecommender:
                         anchor_quality = [(v, 1, 1.0 / (i + 1)) for i, v in enumerate(recent_likes)]
 
                     if valid_anchors:
-                        # RECENCY-WEIGHTED SAMPLING (Enhanced Ratio Rule)
-                        # More recent likes have higher probability of being selected
-                        if anchor_quality:
-                            weights = [q[2] for q in anchor_quality]  # recency weights
-                            total_weight = sum(weights)
-                            probs = [w / total_weight for w in weights]
-                            selected_idx = np.random.choice(len(valid_anchors), p=probs)
-                            selected_anchor = valid_anchors[selected_idx]
+                        # FIX: Prioritize strong likes for anchor selection
+                        # If we have a recent strong engagement (>=60s), use it deterministically
+                        if self.last_strong_like is not None:
+                            target_vectors = [self.last_strong_like]
+                            print(f"[ALGO] Vibe Lock: Using Strong Like as deterministic anchor (duration: {self.last_strong_like_duration}s)")
+                            # Reset after use to allow normal selection next time
+                            self.last_strong_like = None
+                            self.last_strong_like_duration = None
+                            justification = f"Vibe Lock: Strong Like Anchor (Deterministic)"
+                            force_target_flag = True
                         else:
-                            selected_anchor = random.choice(valid_anchors)
+                            # RECENCY-WEIGHTED SAMPLING (Enhanced Ratio Rule)
+                            # More recent likes have higher probability of being selected
+                            if anchor_quality:
+                                weights = [q[2] for q in anchor_quality]  # recency weights
+                                total_weight = sum(weights)
+                                probs = [w / total_weight for w in weights]
+                                selected_idx = np.random.choice(len(valid_anchors), p=probs)
+                                selected_anchor = valid_anchors[selected_idx]
+                            else:
+                                selected_anchor = random.choice(valid_anchors)
 
-                        target_vectors = [selected_anchor]
+                            target_vectors = [selected_anchor]
 
-                        justification = f"Vibe Lock: Recency-weighted anchor selection (Multi-Modal Ratio)"
-                        print(f"[ALGO] Vibe Lock Active: Selected anchor from {len(valid_anchors)}/{len(recent_likes)} tracks (recency-weighted)")
+                            justification = f"Vibe Lock: Recency-weighted anchor selection (Multi-Modal Ratio)"
+                            print(f"[ALGO] Vibe Lock Active: Selected anchor from {len(valid_anchors)}/{len(recent_likes)} tracks (recency-weighted)")
 
-                        # Force target to ensure we lock tight to this specific exemplar
-                        force_target_flag = True
+                            # Force target to ensure we lock tight to this specific exemplar
+                            force_target_flag = True
                 elif self.anchor_track:
                      # Fallback to single anchor if session_likes is empty (shouldn't happen if streak >= 1)
                      target_vectors = [self.anchor_track['vector']]
@@ -1668,7 +1683,9 @@ class UserRecommender:
         pct_listened = duration / total_duration
         
         # User defined "Green Signal": At least 15-20s OR 10-20%
-        is_green_signal = (duration >= 15) or (pct_listened >= 0.10)
+        # FIX: Require BOTH minimum time AND meaningful percentage to avoid false positives
+        # A "green signal" should show genuine interest, not accidental plays
+        is_green_signal = (duration >= 15 and pct_listened >= 0.05) or (pct_listened >= 0.15)
         
         print(f"[ALGO] Feedback: Dur={duration}s ({pct_listened*100:.1f}%) | GreenSignal={is_green_signal} | Liked={liked} | Disliked={disliked}")
 
@@ -1754,7 +1771,10 @@ class UserRecommender:
             # A 114s listen should COMPLETELY reset exploration drift
             if duration >= 60:  # Strong engagement
                 self.exploration_drift = 0.0  # Complete reset
-                print(f"[ALGO] Strong Like ({duration}s) - DRIFT RESET TO 0.0")
+                # FIX: Track strong like for deterministic anchor selection
+                self.last_strong_like = vector
+                self.last_strong_like_duration = duration
+                print(f"[ALGO] Strong Like ({duration}s) - DRIFT RESET TO 0.0, Anchor Saved")
             else:
                 drift_delta = -0.5  # Moderate decrease for shorter likes
                 self.exploration_drift = max(0.0, self.exploration_drift + drift_delta)

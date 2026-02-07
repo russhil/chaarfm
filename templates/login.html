@@ -122,8 +122,17 @@
 
             <div class="divider"><span>OR</span></div>
 
+<<<<<<< HEAD
             <button class="btn btn-ghost" onclick="window.location.href='/api/auth/google'" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;">
                 <i class="fab fa-google"></i> SIGN IN WITH GOOGLE
+=======
+            <button class="btn btn-ghost" onclick="googleLogin()" style="width: 100%; border: 1px solid var(--surface-border); margin-bottom: 10px;">
+                <i class="fab fa-google" style="margin-right: 8px;"></i> LOGIN WITH GOOGLE
+            </button>
+
+            <button class="btn btn-ghost" onclick="guestLogin()" style="width: 100%; border: 1px solid var(--surface-border);">
+                GUEST ACCESS
+>>>>>>> df78e04 (Implement Google OAuth login and account creation)
             </button>
         </div>
 
@@ -152,6 +161,11 @@
 
         async function guestLogin() {
             await doLogin('guest', '');
+        }
+
+        function googleLogin() {
+            const vectormap = document.getElementById('vectormap').value;
+            window.location.href = `/api/login/google?vectormap=${vectormap}`;
         }
 
         async function doLogin(username, password) {
