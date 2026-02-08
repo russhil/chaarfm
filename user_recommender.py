@@ -510,7 +510,134 @@ class UserRecommender:
         for cid in self.cluster_manager.clusters.keys():
             self.cluster_scores[cid] = {'alpha': BANDIT_ALPHA_PRIOR, 'beta': BANDIT_BETA_PRIOR}
 
+    def _get_batch_candidates_vectorized(self, limit=25):
+        """
+        OPTIMIZED: Pre-compute all candidate scores using vectorized matrix operations.
+        This replaces per-track O(n) loops with a single batch matrix multiplication.
+        
+        Returns a list of scored candidates that can be used across the entire batch.
+        """
+        import time
+        start_time = time.time()
+        
+        # 1. Build search space (filter once)
+        avoid_ids = self.played_ids.union(self.global_dislikes).union(self.outlier_tracks)
+        search_ids = [tid for tid in self.track_map.keys() 
+                      if tid not in avoid_ids and self._track_valid_for_mode(self.track_map[tid])]
+        
+        if not search_ids:
+            return []
+        
+        # 2. Build track matrix (vectorized)
+        track_matrix = np.array([self.track_map[tid]['vector'] for tid in search_ids])
+        track_norms = np.linalg.norm(track_matrix, axis=1, keepdims=True) + 1e-8
+        track_matrix_normalized = track_matrix / track_norms
+        
+        # 3. Build target vector (user preference center)
+        if self.session_likes:
+            likes_matrix = np.array(self.session_likes[-10:])  # Use last 10 likes
+            mean_target = np.mean(likes_matrix, axis=0)
+            if self.user_vector is not None:
+                mean_target = 0.8 * mean_target + 0.2 * np.array(self.user_vector)
+        elif self.user_vector is not None:
+            mean_target = np.array(self.user_vector)
+        else:
+            # Cold start: use random cluster centroid
+            if self.cluster_manager.initialized and self.cluster_manager.centroids:
+                cid = list(self.cluster_manager.centroids.keys())[0]
+                mean_target = self.cluster_manager.centroids[cid]
+            else:
+                return []  # Can't proceed without any target
+        
+        mean_target_norm = np.linalg.norm(mean_target) + 1e-8
+        mean_target_normalized = mean_target / mean_target_norm
+        
+        # 4. VECTORIZED similarity to target (single matrix multiply)
+        target_sims = np.dot(track_matrix_normalized, mean_target_normalized)
+        
+        # 5. VECTORIZED negative filtering (if we have negatives)
+        negative_penalty = np.zeros(len(search_ids))
+        all_negatives = list(self.disliked_vectors[-20:])  # Cap at 20 most recent
+        
+        if self.current_cluster_id is not None and self.active_cluster_negatives:
+            all_negatives.extend(self.active_cluster_negatives[-10:])
+        
+        hard_filter_mask = np.zeros(len(search_ids), dtype=bool)
+        if all_negatives:
+            neg_matrix = np.array(all_negatives)
+            neg_norms = np.linalg.norm(neg_matrix, axis=1, keepdims=True) + 1e-8
+            neg_matrix_normalized = neg_matrix / neg_norms
+            
+            # Compute all negative similarities at once: (n_tracks, n_negatives)
+            neg_sims = np.dot(track_matrix_normalized, neg_matrix_normalized.T)
+            
+            # Hard filter: exclude tracks with >0.88 similarity to any negative
+            hard_filter_mask = (neg_sims > 0.88).any(axis=1)
+            
+            # Soft penalty: penalize tracks similar to negatives
+            penalty_mask = neg_sims > 0.65
+            neg_penalty_scores = np.where(penalty_mask, np.exp(-(1 - neg_sims)**2 / 0.02) * 2.5, 0)
+            negative_penalty = np.sum(neg_penalty_scores, axis=1)
+        
+        # 6. VECTORIZED cohesive batch scoring (similarity to ALL session likes)
+        cohesion_boost = np.zeros(len(search_ids))
+        if self.session_likes and len(self.session_likes) > 1:
+            likes_matrix = np.array(self.session_likes[-10:])
+            likes_norms = np.linalg.norm(likes_matrix, axis=1, keepdims=True) + 1e-8
+            likes_normalized = likes_matrix / likes_norms
+            
+            # All similarities at once: (n_tracks, n_likes)
+            all_like_sims = np.dot(track_matrix_normalized, likes_normalized.T)
+            
+            # Count tracks close to >= 60% of likes (threshold 0.80)
+            close_count = (all_like_sims > 0.80).sum(axis=1)
+            coverage_ratio = close_count / all_like_sims.shape[1]
+            
+            min_sim = all_like_sims.min(axis=1)
+            avg_sim = all_like_sims.mean(axis=1)
+            
+            # Boost for high coverage, penalty for low coverage
+            high_coverage = coverage_ratio >= 0.6
+            low_coverage = coverage_ratio < 0.3
+            cohesion_boost = np.where(high_coverage, 
+                                      (min_sim * 0.3) + (avg_sim * 0.2) + (coverage_ratio * 0.3),
+                                      0)
+            cohesion_boost = np.where(low_coverage, -0.3 * (1 - coverage_ratio), cohesion_boost)
+        
+        # 7. Compute final scores
+        sigma = 0.3  # Moderate spread
+        sim_scores = np.exp(-((1 - target_sims)**2) / (2 * sigma**2))
+        
+        final_scores = sim_scores - negative_penalty + cohesion_boost
+        
+        # Apply hard filter
+        final_scores[hard_filter_mask] = -999
+        
+        # 8. Sort and return top candidates
+        sorted_indices = np.argsort(final_scores)[::-1]  # Descending
+        
+        results = []
+        for idx in sorted_indices[:limit * 2]:  # Get extra for filtering
+            if final_scores[idx] <= -999:
+                continue
+            tid = search_ids[idx]
+            track = self.track_map[tid]
+            results.append({
+                'track': track,
+                'score': float(final_scores[idx]),
+                'target_sim': float(target_sims[idx]),
+                'cohesion': float(cohesion_boost[idx])
+            })
+            if len(results) >= limit:
+                break
+        
+        elapsed = time.time() - start_time
+        print(f"[ALGO] Batch candidates computed in {elapsed:.3f}s ({len(results)} candidates from {len(search_ids)} tracks)")
+        
+        return results
+
     def _optimize_for_user_vector(self, candidates, limit=20):
+
         """
         After skip sequences, re-score candidates against the updated user vector.
         Ensures recommendations align with where the user vector has moved.
@@ -797,6 +924,11 @@ class UserRecommender:
                     # PENALTY: Track only matches a few likes - likely anchored to outlier
                     final_score -= 0.3 * (1 - coverage_ratio)
 
+            # FIX: Minimum similarity floor - reject tracks too far from anchor
+            # This prevents genre mismatches that have moderate scores but wrong language/style
+            if cosine_sim < 0.75:
+                continue
+
             candidates.append((t, final_score, sim_score, penalty))
 
             
@@ -904,9 +1036,9 @@ class UserRecommender:
             return []
         
         # FIX: Rotate anchors based on batch slot to diversify probes
-        # Instead of always using the last like, cycle through recent likes
-        if self.session_likes and batch_slot > 0:
-            # Calculate which session_like to use based on batch slot
+        # BUT: Only rotate during exploration (streak < 2). In vibe lock, use consistent anchor.
+        if self.session_likes and batch_slot > 0 and self.streak < 2:
+            # Only rotate anchors when NOT locked in (allows variety during exploration)
             anchor_index = min(batch_slot, len(self.session_likes) - 1)
             # Use reverse index to get recent likes (0 = most recent, 1 = second most recent, etc.)
             alternate_anchor_vec = self.session_likes[-(anchor_index + 1)]
@@ -1344,40 +1476,81 @@ class UserRecommender:
                 # ENHANCED: Neighborhood-validated radial probe injection
                 # "slips in a track that is... slightly outside the usual safe zone"
                 # FIX: Pass batch_slot to diversify probe candidates
+                # FIX 2: When in vibe lock (force_target_flag), use the SAME anchor as target_vectors
+                #        to ensure probes come from the same cluster as the centroid candidates.
                 candidates_radial = []
                 if self.session_likes:
-                    last_like_track_id = self._find_track_by_vector(self.session_likes[-1])
-                    if last_like_track_id:
-                        candidates_radial = self._get_neighborhood_probe_candidates(last_like_track_id, limit=10, batch_slot=batch_slot)
+                    # FIX: Use target_vectors anchor when in vibe lock, not always session_likes[-1]
+                    if force_target_flag and target_vectors:
+                        # In vibe lock: use the validated anchor from target_vectors
+                        probe_anchor_id = self._find_track_by_vector(target_vectors[0])
+                        print(f"[ALGO] Vibe Lock: Using validated anchor for probes (same as target)")
+                    else:
+                        # Normal mode: use most recent like
+                        probe_anchor_id = self._find_track_by_vector(self.session_likes[-1])
+                    
+                    if probe_anchor_id:
+                        candidates_radial = self._get_neighborhood_probe_candidates(probe_anchor_id, limit=10, batch_slot=batch_slot)
                         if candidates_radial:
                             print(f"[ALGO] Neighborhood-Validated Probe Injection: {len(candidates_radial)} candidates")
                         else:
                             print(f"[ALGO] ⚠️ No valid probe candidates with dense neighborhoods. Staying tight to current vibe.")
 
-                # Merge Strategy: 
-                # User says: "slips in a track" -> We don't want ONLY probes.
-                # We want mostly "Ratio Rule" candidates (Vibe Lock), with 1-2 Probes mixed in.
+                # Merge Strategy:
+                # FIX: In vibe lock mode, probes ARE the recommendations (validated to be in anchor's neighborhood)
+                # Centroid candidates often drift to different clusters, causing irrelevant songs
                 
                 combined = []
                 seen_ids = set()
                 
-                # 1. Add ONE high-quality Probe first (to ensure exploration)
-                probes_added = 0
-                for c in candidates_radial:
-                    if c['id'] not in seen_ids and c['id'] not in self.played_ids and c['id'] not in self.global_dislikes:
-                        combined.append(c)
-                        seen_ids.add(c['id'])
-                        probes_added += 1
-                        if probes_added >= 2: break # Limit to 2 probes at top
+                # FIX: Get anchor vector for coherence validation
+                anchor_vec = None
+                if target_vectors:
+                    anchor_vec = np.array(target_vectors[0])
                 
-                # 2. Add Centroid/Ratio Candidates (The Core Vibe)
-                for c in candidates_centroid:
-                    if c['id'] not in seen_ids:
-                        combined.append(c)
-                        seen_ids.add(c['id'])
-                
-                # 3. Add remaining Probes (if needed, at the bottom)
-                # ... actually, we don't need more probes at the bottom. The core vibe is better.
+                # FIX: When force_target (vibe lock), prioritize probes heavily
+                # Probes are validated to have dense neighborhoods around the liked anchor
+                if force_target_flag and candidates_radial:
+                    # Probes fill most slots (4/5) when locked in
+                    probes_added = 0
+                    for c in candidates_radial:
+                        if c['id'] not in seen_ids and c['id'] not in self.played_ids and c['id'] not in self.global_dislikes:
+                            # FIX: Validate probe coherence with anchor before adding
+                            if anchor_vec is not None:
+                                probe_vec = np.array(c.get('vector', []))
+                                if len(probe_vec) > 0:
+                                    anchor_sim = np.dot(anchor_vec, probe_vec) / (
+                                        np.linalg.norm(anchor_vec) * np.linalg.norm(probe_vec) + 1e-8
+                                    )
+                                    if anchor_sim < 0.85:
+                                        print(f"[ALGO] Probe Coherence REJECT: {c['filename']} (anchor_sim: {anchor_sim:.3f} < 0.85)")
+                                        continue
+                            
+                            combined.append(c)
+                            seen_ids.add(c['id'])
+                            probes_added += 1
+                            if probes_added >= 4: break  # Probes fill 4/5 slots
+                    
+                    # Fill remaining from centroid (1 slot for variety)
+                    for c in candidates_centroid:
+                        if c['id'] not in seen_ids:
+                            combined.append(c)
+                            seen_ids.add(c['id'])
+                            break  # Only 1 centroid candidate
+                else:
+                    # Not in vibe lock - use original ratio (2 probes + centroid)
+                    probes_added = 0
+                    for c in candidates_radial:
+                        if c['id'] not in seen_ids and c['id'] not in self.played_ids and c['id'] not in self.global_dislikes:
+                            combined.append(c)
+                            seen_ids.add(c['id'])
+                            probes_added += 1
+                            if probes_added >= 2: break
+                    
+                    for c in candidates_centroid:
+                        if c['id'] not in seen_ids:
+                            combined.append(c)
+                            seen_ids.add(c['id'])
                 
                 candidates = combined
             
@@ -1563,7 +1736,8 @@ class UserRecommender:
 
                     # If track doesn't fit batch well, try to get another one
                     # But only retry once to avoid infinite loops
-                    if avg_batch_sim < 0.70 and i < size - 1:
+                    # FIX: Raised threshold from 0.70 to 0.82 to prevent genre mismatches
+                    if avg_batch_sim < 0.82 and i < size - 1:
                         print(f"[ALGO] Batch cohesion check: {t['filename']} has low batch similarity ({avg_batch_sim:.2f}), trying another...")
                         # Mark this as played but don't add to batch
                         alt_t, alt_reason = self.get_next_track()
